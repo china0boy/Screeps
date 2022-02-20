@@ -28,11 +28,11 @@ export default class CreepFunctionExtension extends Creep {
 
     }
 
-    public transfer_(distination: Structure, rType: ResourceConstant = RESOURCE_ENERGY): void {
-        if (this.transfer(distination, rType) == ERR_NOT_IN_RANGE) {
-            this.goTo(distination.pos, 1)
-        }
+    public transfer_(distination: Structure, rType: ResourceConstant = RESOURCE_ENERGY): ScreepsReturnCode {
+        let a = this.transfer(distination, rType);
+        if (a == ERR_NOT_IN_RANGE) this.goTo(distination.pos, 1);
         this.memory.standed = false
+        return a;
     }
 
     public upgrade_(): void {
@@ -64,11 +64,11 @@ export default class CreepFunctionExtension extends Creep {
             this.memory.standed = true
     }
 
-    public withdraw_(distination: Structure, rType: ResourceConstant = RESOURCE_ENERGY): void {
-        if (this.withdraw(distination, rType) == ERR_NOT_IN_RANGE) {
-            this.goTo(distination.pos, 1)
-        }
+    public withdraw_(distination: Structure | Ruin, rType: ResourceConstant = RESOURCE_ENERGY): ScreepsReturnCode {
+        let a = this.withdraw(distination, rType);
+        if (a == ERR_NOT_IN_RANGE) this.goTo(distination.pos, 1);
         this.memory.standed = false
+        return a;
     }
 
     // 确认是否boost了,并进行相应Boost

@@ -11,4 +11,5 @@ interface Room {
     Public_control(disRoom:string,shard:shardName,interval:number):MissionModel
     Public_helpBuild(disRoom:string,num:number,shard?:string,time?:number):MissionModel
     Public_sig(disRoom: string, text: string, shard?: string): MissionModel
+    Public_loot(sourceFlagName: string, targetStructureId: string): MissionModel 
 }

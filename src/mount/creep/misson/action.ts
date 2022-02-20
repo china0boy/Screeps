@@ -524,4 +524,83 @@ export default class CreepMissonActionExtension extends Creep {
         }
 
     }
+
+    //掠夺者
+    public handle_loot(): void {
+        let missionData = this.memory.MissionData;
+        if (!missionData) return;
+        let id = missionData.id;
+        let data = missionData.Data;
+        let myRoom = Game.rooms[data.myroomname];//我的房间
+        let target = Game.getObjectById(data.targetStructureId) as any;//要放入建筑的id
+        let Flags = Game.flags[data.sourceFlagName];//要掠夺的旗子
+        if (this.store.getUsedCapacity() == 0) data.storedeta = 0;//0为空，1为满
+        if (this.store.getFreeCapacity() == 0) data.storedeta = 1;
+        if (data.creeptime == undefined) data.creeptime = 0;
+        if (data.Gametime == undefined) data.Gametime = 0
+        if (this.ticksToLive <= data.creeptime && !this.store.getUsedCapacity()) { this.suicide(); return; }
+        if (Flags) {
+            if (data.storedeta) {
+                if (target && target.store.getFreeCapacity()) {
+                    if (this.transfer_(target, Object.keys(this.store)[0] as ResourceConstant) == OK && data.Gametime) {
+                        data.creeptime = Game.time - data.Gametime;
+                    }
+                }
+            }
+            else {
+                if (this.room != Flags.room) this.goTo(Flags.pos, 1);
+                else {//到房间后
+                    if (data.sourceId) {
+                        let source = Game.getObjectById(data.sourceId) as Ruin | StructureWithStore;
+                        if (source && source.store && source.store.getUsedCapacity()) {
+                            if (this.withdraw_(source, Object.keys(source.store)[0] as ResourceConstant) == OK) data.Gametime = Game.time;
+                            if (!source.store.getUsedCapacity()) delete data.sourceId;
+                        }
+                        else delete data.sourceId;
+                    }
+                    else {
+                        var targetStructure: StructureWithStore | Ruin = Flags.pos.lookFor(LOOK_STRUCTURES).find(s => 'store' in s) as StructureWithStore
+                        if (targetStructure && !targetStructure.store.getUsedCapacity()) targetStructure = null;
+                        if (!targetStructure) {
+                            // 查找废墟，如果有包含 store 的废墟就设为目标
+                            const ruins = Flags.pos.lookFor(LOOK_RUINS)
+                            if (ruins) {
+                                for (const ruin of ruins) {
+                                    if ('store' in ruin && ruin.store.getUsedCapacity() > 0) {
+                                        targetStructure = ruin
+                                        break
+                                    }
+                                }
+                            }
+                            if (!targetStructure) {//找不到旗子下的废墟就搜地图上最近的建筑
+                                targetStructure = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
+                                    filter: (structure: StructureWithStore) => {
+                                        return filter_structure(structure, [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_LAB, STRUCTURE_TERMINAL, STRUCTURE_TOWER, STRUCTURE_STORAGE, STRUCTURE_FACTORY, STRUCTURE_CONTAINER, STRUCTURE_POWER_SPAWN]) && (structure.store.getUsedCapacity('energy') || structure.store.getUsedCapacity())
+                                    }
+                                }) as StructureWithStore
+                                if (!targetStructure) {
+                                    targetStructure = this.pos.findClosestByPath(FIND_RUINS, {
+                                        filter: (structure: Ruin) => {
+                                            return (structure.store.getUsedCapacity('energy') || structure.store.getUsedCapacity())
+                                        }
+                                    }) as Ruin
+                                }
+                            }
+                        }
+                        if (targetStructure) {//有就存id，没有就找这个房间的容器
+                            this.withdraw_(targetStructure, Object.keys(targetStructure.store)[0] as ResourceConstant)
+                            this.memory.MissionData.Data.sourceId = targetStructure.id
+                        }
+                        else {
+                            this.say('没找到建筑啊');
+                            //没写完
+                        }
+                    }
+                }
+            }
+        }
+        else {//没有旗子就删除任务
+            myRoom.DeleteMission(id);
+        }
+    }
 }

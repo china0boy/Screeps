@@ -285,4 +285,19 @@ export default class RoomMissonPublish extends Room {
         return thisTask;
     }
 
+    public Public_loot(sourceFlagName: string, targetStructureId: string): MissionModel {
+        var thisTask: MissionModel = {
+            name: '掠夺者',
+            range: 'Creep',
+            delayTick: 99999,
+            level: 11,
+            Data: {
+                sourceFlagName: sourceFlagName,
+                targetStructureId: targetStructureId,
+                myroomname: this.name,
+            }
+        }
+        thisTask.CreepBind = { 'loot': { num: 1, bind: [] } };
+        return thisTask;
+    }
 }

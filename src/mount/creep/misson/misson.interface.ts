@@ -16,7 +16,7 @@ interface Creep{
     handle_control():void
     handle_helpBuild():void
     handle_sig():void
-    
+    handle_loot():void
 }
 
 interface CreepMemory{
@@ -25,3 +25,8 @@ interface CreepMemory{
     captain?:boolean
     swith?:boolean
 }
+
+/**
+ * 包含 store 属性的建筑
+ */
+type StructureWithStore = StructureStorage | StructureContainer | StructureExtension | StructureFactory | StructureSpawn | StructurePowerSpawn | StructureLink | StructureTerminal | StructureNuker
