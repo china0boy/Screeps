@@ -6,18 +6,31 @@ export default class CreepMissonBaseExtension extends Creep {
     public ManageMisson(): void {
         if (this.spawning) return
         if (!this.memory.MissionData) this.memory.MissionData = {}
-        /* 生命低于10就将资源上交 */
-        if (this.ticksToLive < 10 && (isInArray(['transport', 'manage'], this.memory.role))) {
+        /* 中央爬的无缝衔接 */
+        if (this.memory.role == 'manage' && this.room.controller.my && this.room.controller.level == 8) {
+            if (this.ticksToLive <= 190) this.room.memory.SpawnConfig.manage.num = 2;
+            else this.room.memory.SpawnConfig.manage.num = 1;
+        }
+        /* 生命低于50就将资源上交 */
+        if (this.ticksToLive < 50 && (isInArray(['transport', 'manage'], this.memory.role))) {
             let storage_ = Game.getObjectById(Game.rooms[this.memory.belong].memory.StructureIdData.storageID) as StructureStorage
             if (!storage_) return
             if (this.store.getUsedCapacity() > 0) {
                 for (let i in this.store) {
-                    this.transfer_(storage_, i as ResourceConstant)
+                    if (this.transfer_(storage_, i as ResourceConstant) == OK) {
+                        if (this.memory.role == 'manage') this.room.memory.SpawnConfig.manage.num = 1;
+                        this.suicide();
+                    }
                     return
                 }
             }
+            else {
+                if (this.memory.role == 'manage') this.room.memory.SpawnConfig.manage.num = 1;
+                this.suicide();
+            }
             return
         }
+
         if (Object.keys(this.memory.MissionData).length <= 0) {
             if (this.memory.taskRB) {
                 let task_ = Game.rooms[this.memory.belong].GainMission(this.memory.taskRB)
@@ -29,7 +42,7 @@ export default class CreepMissonBaseExtension extends Creep {
                     return
                 }
             }
-            /* 每任务的情况下考虑领任务 */
+            /* 没任务的情况下考虑领任务 */
             if (!Game.rooms[this.memory.belong].memory.Misson['Creep'])
                 Game.rooms[this.memory.belong].memory.Misson['Creep'] = []
             let taskList = Game.rooms[this.memory.belong].memory.Misson['Creep']
@@ -44,7 +57,7 @@ export default class CreepMissonBaseExtension extends Creep {
                 let st = this.store
                 if (!st) return
                 for (let i of Object.keys(st)) {
-                    let storage_ = Game.getObjectById(Game.rooms[this.memory.belong].memory.StructureIdData.storageID) as StructureStorage
+                    let storage_ = Game.rooms[this.memory.belong].storage ? Game.rooms[this.memory.belong].storage : Game.rooms[this.memory.belong].terminal;
                     if (!storage_) return
                     this.say("🛒")
                     if (this.transfer(storage_, i as ResourceConstant) == ERR_NOT_IN_RANGE) this.goTo(storage_.pos, 1)
@@ -84,6 +97,17 @@ export default class CreepMissonBaseExtension extends Creep {
                 case '控制攻击': { this.handle_control(); break }
                 case '紧急援建': { this.handle_helpBuild(); break }
                 case '签名': { this.handle_sig(); break }
+                case '掠夺者': { this.handle_loot(); break }
+                case '一体机': { this.handle_AIO(); break }
+                case '双人攻击': { this.handle_doubleDismantle(); break }
+                case 'dp_harvest': { this.handle_dp(); break }
+                case 'dp_transfer': { this.handle_dp(); break }
+                case 'pb': { this.handle_pb(); break }
+                case '红球防御': { this.handle_defend_attack(); break }
+                case '蓝球防御': { this.handle_defend_range(); break }
+                case '双人防御': { this.handle_defend_double(); break }
+                case '外矿开采': { this.handle_outmine(); break }
+                case '四人小队': { this.handle_task_squard(); break }
             }
         }
     }

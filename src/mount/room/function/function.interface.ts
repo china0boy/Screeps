@@ -7,6 +7,7 @@ interface Room {
     structureMission(strus:StructureConstant[]):void
     StructureMission():void
     LevelMessageUpdate():void
+    LevelUpgradeCreep(): void 
     // tower
     TowerWork():void
 }

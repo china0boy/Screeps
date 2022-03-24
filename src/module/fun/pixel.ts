@@ -8,7 +8,7 @@ export function pixel():void{
         else
         {
             let cpuUsed = Game.cpu.getUsed()
-            if (cpuUsed <= 14) Game.cpu.generatePixel()
+            if (cpuUsed <= 18) Game.cpu.generatePixel()
         }
     }
 }

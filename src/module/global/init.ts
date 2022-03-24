@@ -15,4 +15,7 @@ export function MemoryInit():void {
     for (let i in global.intervalData) if (!global.intervalData[i])global.intervalData[i]={}
     if (!global.Stru)global.Stru = {}
     if (!Memory.marketAdjust)Memory.marketAdjust = {}
+    if (!Memory.ResourceDispatchData)Memory.ResourceDispatchData = []
+    if (!global.ResourceLimit)global.ResourceLimit = {}
+    if (!Memory.outMineData) Memory.outMineData = {}
 }

@@ -1,8 +1,9 @@
-import { Colorful, compare } from "@/utils"
-
+import { closestPotalRoom, Colorful, compare, isInArray } from "@/utils"
+import { avePrice, haveOrder, highestPrice } from "@/module/fun/funtion"
 export default {
+    get(id: string) { return Game.getObjectById(id) },
     repair: {
-        set(roomName: string, rtype: 'global' | 'special' | 'nuker', num: number, boost: null | ResourceConstant, vindicate: boolean): string {
+        set(roomName: string, rtype: 'global' | 'special' | 'nuker', num: number = 1, boost: null | ResourceConstant = null, vindicate: boolean = false): string {
             let thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[repair] 不存在房间${roomName}`
             for (var i of thisRoom.memory.Misson['Creep'])
@@ -26,7 +27,7 @@ export default {
         },
     },
     plan: {
-        C(roomName: string, disRoom: string, Cnum: number, Unum: number, shard: shardName = Game.shard.name as shardName): string {
+        C(roomName: string, disRoom: string, Cnum: number = 1, Unum: number = 2, shard: shardName = Game.shard.name as shardName): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[plan] 不存在房间${roomName}`
             let task = thisRoom.public_planC(disRoom, Cnum, Unum, shard)
@@ -46,7 +47,7 @@ export default {
         }
     },
     expand: {
-        set(roomName: string, disRoom: string, num: number, Cnum: number = 1): string {
+        set(roomName: string, disRoom: string, num: number = 1, Cnum: number = 1): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[expand] 不存在房间${roomName}`
             let task = thisRoom.Public_expand(disRoom, num, Cnum)
@@ -66,11 +67,60 @@ export default {
         },
     },
     war: {
-        dismantle(roomName: string, disRoom: string, num: number, boost?: boolean, interval?: number): string {
+        /**
+         * 
+         * @param roomName 发布房间名字
+         * @param FlagName 旗子名字
+         * @param num 发布爬数量
+         * @param shard shard
+         * @param time 间隔
+         * @returns 
+         */
+        disaio(roomName: string, FlagName: string, num: number = 1, level: number = 2, shard?: string, time?: number): string {
+            var thisRoom = Game.rooms[roomName]
+            if (!thisRoom) return `[war] 不存在房间${roomName}`
+            if (level != 1 && level != 2 && level != 10) return `level 只限  1 或者 2`
+            let task = thisRoom.Public_AIO(FlagName, num, level, shard, time)
+            if (thisRoom.AddMission(task))
+                return Colorful(`[war] 房间${roomName}挂载一体机任务成功 -> ${FlagName}`, 'green')
+            return Colorful(`[war] 房间${roomName}挂载一体机任务失败 -> ${FlagName}`, 'red')
+        },
+        Cdisaio(roomName: string, FlagName: string): string {
+            var thisRoom = Game.rooms[roomName]
+            if (!thisRoom) return `[war] 不存在房间${roomName}`
+            for (var i of thisRoom.memory.Misson['Creep']) {
+                if (i.name == '一体机' && i.Data.FlagName == FlagName) {
+                    if (thisRoom.DeleteMission(i.id))
+                        return Colorful(`[plan] 房间${roomName}删除一体机任务成功`, 'green')
+                }
+            }
+            return Colorful(`[war] 房间${roomName}删除一体机任务失败`, 'red')
+        },
+        double(roomName: string, FlagName: string, type: string = 'attack', num: number = 1, shard?: string, time?: number) {
+            var thisRoom = Game.rooms[roomName]
+            if (!thisRoom) return `[war] 不存在房间${roomName}`
+            if (type != 'attack' && type != 'work') return `type 只限 attack 或者 work`
+            let task = thisRoom.Public_doubleDismantle(FlagName, type, num, shard, time)
+            if (thisRoom.AddMission(task))
+                return Colorful(`[war] 房间${roomName}挂载双人攻击任务成功 -> ${FlagName}`, 'green')
+            return Colorful(`[war] 房间${roomName}挂载双人攻击任务失败 -> ${FlagName}`, 'red')
+        },
+        Cdouble(roomName: string, FlagName: string): string {
+            var thisRoom = Game.rooms[roomName]
+            if (!thisRoom) return `[war] 不存在房间${roomName}`
+            for (var i of thisRoom.memory.Misson['Creep']) {
+                if (i.name == '双人攻击' && i.Data.FlagName == FlagName) {
+                    if (thisRoom.DeleteMission(i.id))
+                        return Colorful(`[plan] 房间${roomName}删除双人攻击任务成功`, 'green')
+                }
+            }
+            return Colorful(`[war] 房间${roomName}删除双人攻击任务失败`, 'red')
+        },
+        dismantle(roomName: string, disRoom: string, num: number = 1, boost?: boolean, interval?: number, shard: shardName = Game.shard.name as shardName): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[war] 不存在房间${roomName}`
             let interval_ = interval ? interval : 1000
-            let task = thisRoom.Public_dismantle(disRoom, num, interval_, boost)
+            let task = thisRoom.Public_dismantle(disRoom, num, interval_, boost,shard)
             if (thisRoom.AddMission(task))
                 return Colorful(`[war] 房间${roomName}挂载拆迁任务成功 -> ${disRoom}`, 'green')
             return Colorful(`[war] 房间${roomName}挂载拆迁任务失败 -> ${disRoom}`, 'red')
@@ -105,10 +155,10 @@ export default {
             }
             return Colorful(`[war] 房间${roomName}紧急支援任务失败`, 'red')
         },
-        control(roomName: string, disRoom: string, interval: number, shard: shardName = Game.shard.name as shardName): string {
+        control(roomName: string, disRoom: string,body:number=1 ,interval: number = 800, shard: shardName = Game.shard.name as shardName): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[war] 不存在房间${roomName}`
-            let task = thisRoom.Public_control(disRoom, shard, interval)
+            let task = thisRoom.Public_control(disRoom,body, interval,shard)
             if (thisRoom.AddMission(task))
                 return Colorful(`[war] 房间${roomName}挂载控制攻击任务成功 -> ${disRoom}`, 'green')
             return Colorful(`[war] 房间${roomName}挂载控制攻击任务失败 -> ${disRoom}`, 'red')
@@ -119,14 +169,63 @@ export default {
             for (var i of thisRoom.memory.Misson['Creep']) {
                 if (i.name == '控制攻击' && i.Data.disRoom == disRoom && i.Data.shard == shard) {
                     if (thisRoom.DeleteMission(i.id))
-                        return Colorful(`[war] 房间${roomName}控制攻击任务成功`, 'green')
+                        return Colorful(`[war] 房间${roomName}取消控制攻击任务成功`, 'green')
                 }
             }
             return Colorful(`[war] 房间${roomName}控制攻击任务失败`, 'red')
+        },
+        squad(roomName:string,disRoom:string,shard:shardName,mtype:'R'|'A'|'D'|'Aio'|'RA'|'DA'|'DR',time:number= 1000):string{
+            var myRoom = Game.rooms[roomName]
+            if (!myRoom) return `[war] 未找到房间${roomName},请确认房间!`
+            let thisTask:MissionModel
+            if (mtype == 'R')
+            {
+                thisTask = myRoom.public_squad(disRoom,shard,time,2,0,0,2,0,mtype)
+            }
+            else if (mtype == 'A')
+            {
+                thisTask = myRoom.public_squad(disRoom,shard,time,0,2,0,2,0,mtype)
+            }
+            else if (mtype == 'D')
+            {
+                thisTask = myRoom.public_squad(disRoom,shard,time,0,0,2,2,0,mtype)
+            }
+            else if (mtype == 'Aio')
+            {
+                thisTask = myRoom.public_squad(disRoom,shard,time,0,0,0,0,4,mtype)
+            }
+            else if (mtype == 'RA')
+            {
+                thisTask = myRoom.public_squad(disRoom,shard,time,1,1,0,2,0,mtype)
+            }
+            else if (mtype == 'DA')
+            {
+                thisTask = myRoom.public_squad(disRoom,shard,time,0,1,1,2,0,mtype)
+            }
+            else if (mtype == 'DR')
+            {
+                thisTask = myRoom.public_squad(disRoom,shard,time,1,0,1,2,0,mtype)
+            }
+            if (myRoom.AddMission(thisTask))
+            return `[war] 四人小队任务挂载成功! ${Game.shard.name}/${roomName} -> ${shard}/${disRoom}`
+            return `[war] 四人小队挂载失败!`
+        },
+        Csquad(roomName:string,disRoom:string,shard:shardName,mtype:'R'|'A'|'D'|'Aio'|'RA'|'DA'|'DR'):string{
+            var myRoom = Game.rooms[roomName]
+            if (!myRoom) return `[war] 未找到房间${roomName},请确认房间!`
+            for (var i of myRoom.memory.Misson['Creep'])
+            {
+                if (i.name == '四人小队' && i.Data.disRoom == disRoom && i.Data.shard == shard && i.Data.flag == mtype)
+                {
+                    if (myRoom.DeleteMission(i.id))
+                    return `[war] 删除去往${shard}/${disRoom}的四人小队任务成功!`
+                }
+            }
+            return `[war] 删除去往${shard}/${disRoom}的四人小队任务失败!`
         }
     },
     upgrade: {
-        quick(roomName: string, num: number, boostType: null | ResourceConstant): string {
+        quick(roomName: string, num: number, boostType: null | ResourceConstant = null): string {
             let thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[upgrade] 不存在房间${roomName}`
             var thisTask = thisRoom.Public_quick(num, boostType)
@@ -176,86 +275,6 @@ export default {
             return `[carry] 房间${roomName}删除special搬运任务失败`
         },
     },
-    market: {
-        // 交易订单
-        deal(roomName: string, id: string, amount: number): number {
-            return Game.market.deal(id, amount, roomName);
-        },
-        // 查询订单
-        look(rType: ResourceConstant, marType: "buy" | "sell"): string {
-            var HistoryList = Game.market.getHistory(rType)
-            var allNum: number = 0
-            for (var ii of HistoryList) {
-                allNum += ii.avgPrice
-            }
-            var avePrice = allNum / HistoryList.length
-            var list = Game.market.getAllOrders({ type: marType, resourceType: rType });
-            /* 按照价格从上到下 */
-            var newList = list.sort(compare('price'))
-            var result = `当前市场上资源${rType}的${marType}订单如下:\n`
-            if (rType == 'pixel' as ResourceConstant) {
-                for (var i of list) {
-                    result += `\tID:${i.id} 数量:${i.amount} 价格:${i.price} 坐标:${i.roomName} \n`
-                }
-                return result
-            }
-            for (var i of newList) {
-                var priceColor = 'green'
-                var roomColor = 'green'
-                if (i.price > avePrice && i.price - avePrice > 10) priceColor = 'red'
-                if (i.price > avePrice && i.price - avePrice <= 10) priceColor = 'yellow'
-                if (i.price <= avePrice) priceColor = 'green'
-                LoopB:
-                for (var roomName in Memory.RoomControlData) {
-                    var cost = Game.market.calcTransactionCost(1000, roomName as string, i.roomName)
-                    if (cost >= 7000) { roomColor = 'red'; break LoopB }
-                    else if (cost < 700 && cost >= 500) { roomColor = 'yellow'; break LoopB }
-                    roomColor = 'green'
-                }
-                result += `\tID:${i.id} ` + `数量:${i.amount} 价格:` + Colorful(`${i.price}`, priceColor ? priceColor : 'blue', true) + ` 坐标: ` + Colorful(`${i.roomName}`, roomColor ? roomColor : 'blue', true) + ' \n'
-            }
-            return result
-        },
-        // 下买订单
-        buy(roomName: string, rType: ResourceConstant, price: number, amount: number): string {
-            var result = Game.market.createOrder({
-                type: 'buy',
-                resourceType: rType,
-                price: price,
-                totalAmount: amount,
-                roomName: roomName
-            });
-            if (result == OK) return `[market] ` + Colorful(`买资源${rType}的订单下达成功！ 数量为${amount},价格为${price}`, 'blue', true)
-            else return `[market] ` + Colorful(`买资源${rType}的订单出现错误，不能下达！`, 'red', true)
-        },
-    },
-    /* 绕过房间api */
-    bypass: {
-
-        /* 添加要绕过的房间 */
-        add(roomNames: string): string {
-            if (!Memory.bypassRooms) Memory.bypassRooms = []
-
-            // 确保新增的房间名不会重复
-            Memory.bypassRooms = _.uniq([...Memory.bypassRooms, roomNames])
-            return `[bypass]已添加绕过房间 \n ${this.show()}`
-        },
-
-        show(): string {
-            if (!Memory.bypassRooms || Memory.bypassRooms.length <= 0) return '[bypass]当前无绕过房间'
-            return `[bypass]当前绕过房间列表：${Memory.bypassRooms.join(' ')}`
-        },
-        clean(): string {
-            Memory.bypassRooms = []
-            return `[bypass]已清空绕过房间列表，当前列表：${Memory.bypassRooms.join(' ')}`
-        },
-        remove(roomNames: string): string {
-            if (!Memory.bypassRooms) Memory.bypassRooms = []
-            if (roomNames.length <= 0) delete Memory.bypassRooms
-            else Memory.bypassRooms = _.difference(Memory.bypassRooms, [roomNames])
-            return `[bypass]已移除绕过房间${roomNames}`
-        }
-    },
     /* 白名单api */
     whitesheet: {
         add(username: string): string {
@@ -282,7 +301,7 @@ export default {
 
     support: {
         // 紧急援建
-        build(roomName: string, disRoom: string, num: number, interval: number, shard: shardName = Game.shard.name as shardName): string {
+        build(roomName: string, disRoom: string, num: number = 2, interval: number = 1000, shard: shardName = Game.shard.name as shardName): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[support] 不存在房间${roomName}`
             let task = thisRoom.Public_helpBuild(disRoom, num, shard, interval)
@@ -296,7 +315,7 @@ export default {
             for (var i of thisRoom.memory.Misson['Creep']) {
                 if (i.name == '紧急援建' && i.Data.disRoom == disRoom && i.Data.shard == shard) {
                     if (thisRoom.DeleteMission(i.id))
-                        return Colorful(`[support] 房间${roomName}紧急援建任务成功`, 'green')
+                        return Colorful(`[support] 房间${roomName}取消紧急援建任务成功`, 'green')
                 }
             }
             return Colorful(`[support] 房间${roomName}紧急援建任务失败`, 'red')
@@ -337,11 +356,43 @@ export default {
             for (var i of thisRoom.memory.Misson['Creep']) {
                 if (i.name == '签名' && i.Data.disRoom == disRoom && i.Data.shard == shard) {
                     if (thisRoom.DeleteMission(i.id))
-                        return Colorful(`[签名] 房间${roomName}签名任务成功`, 'green')
+                        return Colorful(`删除 [签名] 房间${roomName}任务成功`, 'green')
                 }
             }
             return Colorful(`[签名] 房间${roomName}签名任务失败`, 'red')
         }
-    }
+    },
+
+    loot: {
+        /**
+         * 
+         * @param roomName 我的房间
+         * @param sourceFlagName 要掠夺的旗子名称
+         * @param targetStructureId 要放入我的容器
+         * @returns 
+         */
+        loot(roomName: string, sourceFlagName: string, targetStructureId: string, num: number) {
+            var myRoom = Game.rooms[roomName]
+            if (!myRoom) return `不是我的房间，请确认房间${roomName}！`;
+            if (!targetStructureId || !sourceFlagName) return `[掠夺任务] 发布失败，请填写 旗子名称 和 要存放到的建筑的id`
+            let loot_ = myRoom.Public_loot(sourceFlagName, targetStructureId, num);
+            if (!loot_) return `[掠夺]任务挂载失败`;
+            if (myRoom.AddMission(loot_))
+                return Colorful(`[掠夺] 房间${roomName}挂载掠夺任务成功 -> ${sourceFlagName}`, 'green')
+            return Colorful(`[掠夺] 房间${roomName}挂载掠夺任务失败 -> ${sourceFlagName}`, 'red')
+        },
+
+        Cloot(roomName: string, sourceFlagName: string) {
+            var thisRoom = Game.rooms[roomName];
+            if (!thisRoom) return `不是我的房间，请确认房间${roomName}！`
+            for (var i of thisRoom.memory.Misson['Creep']) {
+                if (i.name == '掠夺者' && i.Data.sourceFlagName == sourceFlagName) {
+                    if (thisRoom.DeleteMission(i.id))
+                        return Colorful(`删除 [掠夺] 房间${roomName}任务成功`, 'green')
+                }
+            }
+            return Colorful(`[签名] 房间${roomName}签名任务失败`, 'red')
+        }
+    },
 
 }

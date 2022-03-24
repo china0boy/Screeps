@@ -4,19 +4,20 @@
  * Memory里的类型定义
  */
 interface Memory {
-    RoomControlData:RoomControlData
+    RoomControlData: RoomControlData
+    stats?: any
 }
 
 /**
  * 房间控制Memory数据格式
  */
 interface RoomControlData {
-    [roomName:string]:{
+    [roomName: string]: {
         // 房间布局 手动布局 | hoho布局 | dev布局 | om布局 | 自动布局
-        arrange: 'man' | 'hoho' | 'dev' 
-        
+        arrange: 'man' | 'hoho' | 'dev'
+
         // 中心点
-        center: [number,number]
+        center: [number, number]
 
         // 防御 [不包括防御塔]
         defend?: {

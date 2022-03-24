@@ -141,24 +141,4 @@ export default class RoomMissonDefendExtension extends Room {
         }
     }
     
-    // 主动防御
-    public Active_Defend():void{
-        if (Game.time % 7) return
-        if (!this.memory.state) return
-        if (this.memory.state != 'war') return
-        if (!Memory.RoomControlData[this.name] || !Memory.RoomControlData[this.name].defend) return
-        let enemys = this.find(FIND_HOSTILE_CREEPS,{filter:(creep)=>{
-            return !isInArray(Memory.whitesheet,creep.owner.username) && (creep.owner.username != 'Invader')
-        }})
-        if (enemys.length <= 0) return
-        else
-        {
-            /* 爬虫满足被boost了的条件 */
-
-            /* 只有1~3个爬虫 */
-
-            /* 爬虫数量超过3个 */
-
-        }
-    }
 }

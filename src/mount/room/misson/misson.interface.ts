@@ -6,9 +6,11 @@ interface Room {
     RoleMissionNum(role: string, name: string): number
     GainMission(id: string): MissionModel | null
     MissionNum(range: string, name: string): number
-    Check_Carry(role: string, source: RoomPosition, pos: RoomPosition, rType: ResourceConstant): boolean
+    Check_Carry(role: string, source: RoomPosition, pos: RoomPosition, rType?: ResourceConstant): boolean
     Check_Lab(misson: MissionModel, role: string, tankType: 'storage' | 'terminal' | 'complex'): boolean
     Check_Link(source: RoomPosition, pos: RoomPosition): boolean
+    Check_Buy(resource:ResourceConstant):boolean
+    MissionName(range:string,name:string):MissionModel|null
 
     // 主动任务
     Spawn_Feed(): void
@@ -20,14 +22,24 @@ interface Room {
     Task_Clink(): void
     Task_ComsumeLink(): void
     Nuke_Defend(): void
+    Task_CompoundDispatch():void
+    Task_Auto_Defend():void
 
     // 被动任务
     Task_Carry(misson: MissionModel): void
     Task_Repair(mission: MissionModel): void
     Task_dismantle(mission: MissionModel): void
+    Task_AIO(mission: MissionModel): void
     Task_Quick_upgrade(mission: MissionModel): void
     Task_HelpDefend(mission: MissionModel): void
+    Task_doubleDismantle(mission: MissionModel): void
     Task_HelpBuild(mission: MissionModel): void
+    Task_Compound(misson:MissionModel):void
+    Task_Red_Defend(mission:MissionModel):void
+    Task_Blue_Defend(mission:MissionModel):void
+    Task_Double_Defend(mission:MissionModel):void
+    Task_OutMine(misson:MissionModel):void
+    Task_squad(mission:MissionModel):void
 }
 
 interface RoomMemory {
@@ -36,7 +48,8 @@ interface RoomMemory {
     CoolDownDic: { [Name: string]: number }      /* 冷却时间的哈希表 key为任务名 */
     nukeID?: string[]
     nukeData?: NukeData
-
+    ComDispatchData?:{[re in ResourceConstant]?:{ok?:boolean,dispatch_num:number}}
+    enemy?:enemyAllotData
 }
 
 interface NukeData {
@@ -81,4 +94,6 @@ interface RoomLabBind {
 }
 
 
-
+interface enemyAllotData{
+    [myCreepName:string]:string[]   // 敌人分配
+}

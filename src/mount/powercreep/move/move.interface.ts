@@ -36,8 +36,6 @@ interface PowerCreepMemory{
         // 缓存路径的目标，该目标发生变化时刷新路径, 形如"14/4E14S1"
         targetPos?: string
     }
-    // 爬虫绕过房间列表
-    bypassRooms?: string[]
     // 对穿等级
     crossLevel?:number
     // 目标shard

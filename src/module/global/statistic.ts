@@ -22,7 +22,7 @@ export function CreepNumStatistic():void {
         if (!creep_)
         {
             delete Memory.creeps[c]
-            console.log(`爬虫${c}的记忆已被清除！`)
+            //console.log(`爬虫${c}的记忆已被清除！`)
             continue
         }
         /* 代表爬虫没记忆或刚出星门  */

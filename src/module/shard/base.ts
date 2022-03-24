@@ -55,6 +55,8 @@ export function InitShardMemory():void{
         Data['creep'][cData].delay -= 10
         if (Data['creep'][cData].delay <= 0)
             delete  Data['creep'][cData]
+        if (Game.creeps[cData] && Game.creeps[cData].memory.role)
+            delete Data['creep'][cData]
         /* 如果记忆已经成功赋予了就删除 */
         // if (Game.creeps[cData] && Game.creeps[cData].memory.role)
         //     delete  Data['creep'][cData]

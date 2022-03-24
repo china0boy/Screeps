@@ -4,6 +4,7 @@ interface Creep {
 }
 
 interface CreepMemory {
+    fillingConstruction?: string; //填充爬下一个的要填充建筑的id
     belong: string      // 爬虫所属房间
     shard: string       // 爬虫所属shard
     role: string        // 爬虫角色

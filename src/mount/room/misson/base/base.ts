@@ -1,4 +1,5 @@
 import { RoleData } from "@/constant/SpawnConstant"
+import { checkDispatch, checkSend, DispatchNum } from "@/module/fun/funtion"
 import { Colorful, compare, generateID, isInArray } from "@/utils"
 
 /* 房间原型拓展   --任务  --任务框架 */
@@ -13,6 +14,9 @@ export default class RoomMissonFrameExtension extends Room {
         this.UnbindMonitor()
         // 任务-爬虫 孵化
         this.MissonRoleSpawn()
+        /* PC任务管理器 */
+        this.PowerCreep_TaskManager()
+
         /* [全自动] 任务挂载区域 需要按照任务重要程度进行排序 */
         this.Spawn_Feed()    // 虫卵填充任务 
         this.Task_CenterLink()  // 能量采集  
@@ -23,16 +27,28 @@ export default class RoomMissonFrameExtension extends Room {
         this.Lab_Feed()     // 实验室填充\回收任务  
         this.Nuker_Feed()   // 核弹填充任务      
         this.Nuke_Defend()  // 核弹防御
+        this.Task_CompoundDispatch()    // 合成规划 （中级）
+        this.Task_Auto_Defend()     // 主动防御任务发布
+
         /* 基本任务监控区域 */
         for (var index in this.memory.Misson)
             for (var misson of this.memory.Misson[index]) {
+                A:
                 switch (misson.name) {
-                    case "物流运输": { this.Task_Carry(misson); break; }
-                    case "墙体维护": { this.Task_Repair(misson); break; }
-                    case '黄球拆迁': { this.Task_dismantle(misson); break; }
-                    case '急速冲级': { this.Task_Quick_upgrade(misson); break }
-                    case '紧急援建': { this.Task_HelpBuild(misson); break }
-                    case '紧急支援': { this.Task_HelpDefend(misson); break }
+                    case "物流运输": { this.Task_Carry(misson); break A; }
+                    case "墙体维护": { this.Task_Repair(misson); break A; }
+                    case '黄球拆迁': { this.Task_dismantle(misson); break A; }
+                    case '一体机': { this.Task_AIO(misson); break A; }
+                    case '急速冲级': { this.Task_Quick_upgrade(misson); break A; }
+                    case '紧急援建': { this.Task_HelpBuild(misson); break A; }
+                    case '紧急支援': { this.Task_HelpDefend(misson); break A; }
+                    case '双人攻击': { this.Task_doubleDismantle(misson); break A; }
+                    case '资源合成': { this.Task_Compound(misson); break A; }
+                    case '红球防御': { this.Task_Red_Defend(misson); break A; }
+                    case '蓝球防御': { this.Task_Blue_Defend(misson); break A; }
+                    case '双人防御': { this.Task_Double_Defend(misson); break A; }
+                    case '外矿开采': { this.Task_OutMine(misson); break A; }
+                    case '四人小队': { this.Task_squad(misson); break A; }
                 }
             }
     }
@@ -41,6 +57,7 @@ export default class RoomMissonFrameExtension extends Room {
      * 添加任务
     */
     public AddMission(mis: MissionModel): boolean {
+        if (!mis) return false
         var Index: string
         if (mis.range == 'Creep') Index = 'C-'
         else if (mis.range == 'Room') Index = 'R-'
@@ -181,7 +198,7 @@ export default class RoomMissonFrameExtension extends Room {
                 for (var r in m.CreepBind) {
                     for (var c of m.CreepBind[r].bind)
                         if (!Game.creeps[c]) {
-                            console.log(`已经清除爬虫${c}的绑定数据!`)
+                            //console.log(`已经清除爬虫${c}的绑定数据!`)
                             var index = m.CreepBind[r].bind.indexOf(c)
                             m.CreepBind[r].bind.splice(index, 1)
                         }
@@ -220,6 +237,16 @@ export default class RoomMissonFrameExtension extends Room {
                 if (t.id == id)
                     return t
             }
+        return null
+    }
+
+    /* 通过名称获取唯一任务 */
+    public MissionName(range: string, name: string): MissionModel | null {
+        for (var i of this.memory.Misson[range]) {
+            if (i.name == name) {
+                return i
+            }
+        }
         return null
     }
 
@@ -299,6 +326,8 @@ export default class RoomMissonFrameExtension extends Room {
         for (var misson of this.memory.Misson['Creep']) {
             if (misson.CreepBind) {
                 for (var role in misson.CreepBind) {
+                    let memData = {}
+                    if (RoleData[role].mem) memData = RoleData[role].mem
                     /* 间隔型 未测试 */
                     if (misson.CreepBind[role].interval) {
                         if (misson.CreepBind[role].num <= 0) continue
@@ -307,14 +336,15 @@ export default class RoomMissonFrameExtension extends Room {
                         if (!misson.Data) misson.Data = {}
                         if (!misson.Data.intervalTime) misson.Data.intervalTime = Game.time
                         if ((Game.time - misson.Data.intervalTime) % misson.CreepBind[role].interval == 0) {
-                            /* 如果孵化队列里太多这种类型的爬虫就不孵化 最高允许8个 */
+                            /* 如果孵化队列里太多这种类型的爬虫就不孵化 最高允许10个 */
                             let n = 0
                             for (var ii of this.memory.SpawnList) {
                                 if (ii.role == role) n += 1
                             }
-                            if (n > 8) continue
+                            if (n > 10) continue
+                            memData["taskRB"] = misson.id
                             for (let i = 0; i < misson.CreepBind[role].num; i++) {
-                                this.SingleSpawn(role, RoleData[role].level ? RoleData[role].level : 10, { taskRB: misson.id })
+                                this.SingleSpawn(role, RoleData[role].level ? RoleData[role].level : 10,  memData )
                             }
                         }
                         continue
@@ -327,7 +357,7 @@ export default class RoomMissonFrameExtension extends Room {
                         let relateSpawnList = this.SpawnListRoleNum(role)
                         let relateCreeps = _.filter(Game.creeps, (creep) => creep.memory.belong == this.name && creep.memory.role == role && (!creep.memory.MissionData || !creep.memory.MissionData.id)).length
                         if (relateSpawnList + relateCreeps < spawnNum) {
-                            this.SingleSpawn(role)
+                            this.SingleSpawn(role,RoleData[role].level?RoleData[role].level:10,memData)
                         }
                     }
                 }
@@ -349,7 +379,14 @@ export default class RoomMissonFrameExtension extends Room {
         }
         var tank_ = Game.getObjectById(id) as StructureStorage | StructureTerminal
         if (!tank_ && id) return false
-        /* 先负责lab的填充 */
+
+        //for (var i in misson.LabBind) {
+        //   if (!this.memory.ResourceLimit[misson.LabBind[i]])
+        //        this.memory.ResourceLimit[misson.LabBind[i]] = 8000
+        //    if (this.memory.ResourceLimit[misson.LabBind[i]] < 8000)
+        //        this.memory.ResourceLimit[misson.LabBind[i]] = 8000
+        //}
+        /* 负责lab的填充 */
         for (var i in misson.LabBind) {
             var All_i_Num: number
             if (tankType == 'complex') {
@@ -369,8 +406,21 @@ export default class RoomMissonFrameExtension extends Room {
             if (!tank_) return false
             All_i_Num = tank_.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant)
             if (All_i_Num < 4000) {
-                /* 买能量  暂缺 */
-
+                /* 资源调度 */
+                if (DispatchNum(this.name) <= 0 && this.MissionNum('Structure', '资源购买') <= 0 && !checkSend(this.name, misson.LabBind[i] as ResourceConstant)) {
+                    console.log(Colorful(`[资源调度] 房间${this.name}没有足够的资源[${misson.LabBind[i] as ResourceConstant}],将执行资源调度!`, 'yellow'))
+                    let dispatchTask: RDData = {
+                        sourceRoom: this.name,
+                        rType: misson.LabBind[i] as ResourceConstant,
+                        num: 3000,
+                        delayTick: 200,
+                        conditionTick: 20,
+                        buy: true,
+                        mtype: 'deal'
+                    }
+                    Memory.ResourceDispatchData.push(dispatchTask)
+                }
+                return
             }
             var disLab = Game.getObjectById(i) as StructureLab
             if (!disLab) return false
@@ -388,7 +438,7 @@ export default class RoomMissonFrameExtension extends Room {
     }
 
     /* 判断已经有了该类型的搬运任务 true:代表没有重复， false代表有 */
-    public Check_Carry(role: string, source: RoomPosition, pos: RoomPosition, rType: ResourceConstant): boolean {
+    public Check_Carry(role: string, source: RoomPosition, pos: RoomPosition, rType?: ResourceConstant): boolean {
         for (let i of this.memory.Misson['Creep']) {
             if (!i.CreepBind) continue
             if (i.name != '物流运输') continue
@@ -412,5 +462,13 @@ export default class RoomMissonFrameExtension extends Room {
             }
         }
         return true
+    }
+
+    // 判断房间是否存在资源购买指定资源的任务
+    public Check_Buy(resource: ResourceConstant): boolean {
+        for (let i of this.memory.Misson['Structure']) {
+            if (i.name == '资源购买' && i.Data.rType == resource) return true
+        }
+        return false
     }
 }

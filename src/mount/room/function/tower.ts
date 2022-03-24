@@ -28,7 +28,7 @@ export default class RoomFunctionTowerExtension extends Room {
         else if (this,this.memory.state == 'war')
         {
             if (Game.flags[`${this.name}/stop`]) return
-            if (this.MissionNum('Creep','主动防御')>0)
+            if (this.memory.switch.AutoDefend)
             {
                 return
             }
