@@ -165,6 +165,15 @@ export default class RoomMissonPublish extends Room {
         return thisTask
     }
 
+    public public_Nuker():MissionModel{
+        var thisTask: MissionModel = {
+            name: '核弹填充',
+            range: 'Structure',
+            delayTick: 500,
+            maxTime:1
+        }
+        return thisTask
+    }
     /* 外矿开采任务发布函数 */
     public public_OutMine(sourceRoom:string,x:number,y:number,disRoom:string):MissionModel{
         var pos = new RoomPosition(x,y,sourceRoom)
@@ -290,7 +299,7 @@ export default class RoomMissonPublish extends Room {
         var thisTask: MissionModel = {
             name: '扩张援建',
             range: 'Creep',
-            delayTick: 40000,
+            delayTick: 99999,
             level: 10,
             Data: {
                 disRoom: disRoom
@@ -546,7 +555,7 @@ export default class RoomMissonPublish extends Room {
                 FlagName: FlagName,
                 healerCreepName: healerCreepName,
             },
-            maxTime: 4//同时存在任务数
+            maxTime: 3//同时存在任务数
         }
         thisTask.reserve = true
         thisTask.CreepBind = { 'pb_attack': { num: num, bind: [], interval: time ? time : 1000 }, 'pb_heal': { num: num, bind: [], interval: time ? time : 1000 } }
@@ -566,7 +575,7 @@ export default class RoomMissonPublish extends Room {
                 pbx: pbx,
                 pby: pby,
             },
-            maxTime: 2//同时存在任务数
+            maxTime: 3//同时存在任务数
         }
         thisTask.reserve = true
         thisTask.CreepBind = { 'pb_transfer': { num: num, bind: [], interval: time ? time : 100000 }, }
@@ -583,7 +592,7 @@ export default class RoomMissonPublish extends Room {
                 FlagName: FlagName,
                 transferCreepName: transferCreepName,
             },
-            maxTime: 2//同时存在任务数
+            maxTime: 5//同时存在任务数
         }
         thisTask.reserve = true
         if (boost) thisTask.LabBind = this.Bind_Lab([boost])
@@ -602,7 +611,7 @@ export default class RoomMissonPublish extends Room {
                 transferCreepName: harvestCreepName,
                 creeptimebool: true,
             },
-            maxTime: 2//同时存在任务数
+            maxTime: 5//同时存在任务数
         }
         thisTask.reserve = true
         thisTask.CreepBind = { 'dp_transfer': { num: num, bind: [], interval: time ? time : 1000 }, }

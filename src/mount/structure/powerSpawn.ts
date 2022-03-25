@@ -23,7 +23,7 @@ export class PowerSpawnExtension extends StructurePowerSpawn {
         // 发布强化powerSpawn任务
         if (Game.powerCreeps[`${this.room.name}/queen/${Game.shard.name}`] && this.room.storage && this.room.storage.store.power >= 6000) this.room.enhance_powerspawn()
         // 剩余 power 不足且 storage 内 power 充足
-        if (!this.keepResource(RESOURCE_POWER, 10, this.room.storage, 0)) return
+        if (!this.keepResource(RESOURCE_POWER, 10, this.room.storage, 100)) return
         // 剩余energy 不足且 storage 内 energy 充足
         if (!this.keepResource(RESOURCE_ENERGY, 1000, this.room.storage, 50000)) return
     }

@@ -1,4 +1,4 @@
-import { resourceComDispatch } from "@/constant/ResourceConstant"
+import { LabMap, resourceComDispatch } from "@/constant/ResourceConstant"
 import { avePrice, haveOrder, highestPrice, RecognizeLab } from "@/module/fun/funtion"
 import { Colorful, compare, isInArray, unzipPosition, zipPosition } from "@/utils"
 export default {
@@ -69,7 +69,7 @@ export default {
             return str
         },
     },
-
+    
     /* 外矿 */
     mine: {
         harvest(roomName: string, x: number, y: number, disRoom: string): string {
@@ -290,6 +290,14 @@ export default {
             var myRoom = Game.rooms[roomName]
             if (!myRoom) return `[lab] 未找到房间${roomName},请确认房间`
             let str = []
+            //初始化
+            myRoom.memory.StructureIdData.labInspect = {}
+            let result = RecognizeLab(roomName)
+            if (result == null) return `[lab] 房间${roomName}初始化合成lab信息失败!`
+            myRoom.memory.StructureIdData.labInspect['raw1'] = result.raw1
+            myRoom.memory.StructureIdData.labInspect['raw2'] = result.raw2
+            myRoom.memory.StructureIdData.labInspect['com'] = result.com
+
             for (var i of myRoom.memory.StructureIdData.labInspect.com) {
                 if (!myRoom.memory.RoomLabBind[i]) str.push(i)
             }
@@ -299,6 +307,17 @@ export default {
                 return `[lab] 房间${roomName}合成${res}任务挂载成功! ${thisTask.Data.raw1} + ${thisTask.Data.raw2} = ${res}`
             else
                 return `[lab] 房间${roomName}挂载合成任务失败!`
+        },
+        Ccompound(roomName: string): string {
+            var myRoom = Game.rooms[roomName]
+            if (!myRoom) return `[lab] 未找到房间${roomName},请确认房间`
+            for (var i of myRoom.memory.Misson['Room']) {
+                if (i.name == '资源合成') {
+                    if (myRoom.DeleteMission(i.id))
+                        return Colorful(`[plan] 房间${roomName}删除资源合成任务成功`, 'green')
+                }
+            }
+            return Colorful(`[war] 房间${roomName}删除资源合成任务失败`, 'red')
         },
         dispatch(roomName: string, res: ResourceConstant, num: number): string {
             var myRoom = Game.rooms[roomName]
@@ -318,7 +337,7 @@ export default {
             return `[lab] 已经修改房间${roomName}的资源调度数据，为{}.本房见现已无资源合成调度`
         },
     },
-    
+
     /* pc */
     pc: {
         option(roomName: string, stru: string): string {

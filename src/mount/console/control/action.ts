@@ -334,6 +334,25 @@ export default {
                 return Colorful(`[nuke]${roomName}->${disRoom}的核弹发射成功!预计---500000---ticks后着陆!`, 'yellow', true)
             else
                 return Colorful(`[nuke]${roomName}->${disRoom}的核弹发射失败!`, 'yellow', true)
+        },
+        add(roomName: string):string{
+            var thisRoom = Game.rooms[roomName]
+            if (!thisRoom) return `[nuker] 不存在房间${roomName}`
+            var thisTask = thisRoom.public_Nuker()
+            if (thisRoom.AddMission(thisTask)) return `[nuker] ${roomName} 的核弹填充任务挂载成功！`
+            return `[nuker] ${roomName} 的核弹填充任务挂载失败！`
+        },
+        remove(roomName: string):string{
+            var thisRoom = Game.rooms[roomName]
+            if (!thisRoom) return `[nuker] 不存在房间${roomName}`
+            for (var i of thisRoom.memory.Misson['Structure']) {
+                if (i.name == '核弹填充') {
+                    if (thisRoom.DeleteMission(i.id)) {
+                        return `[nuker] ${roomName} 的核弹填充任务删除成功！`
+                    }
+                }
+            }
+            return `[nuker] ${roomName} 的核弹填充任务删除失败！`
         }
     },
 

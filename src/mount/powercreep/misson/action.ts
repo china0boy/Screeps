@@ -15,13 +15,12 @@ export default class PowerCreepMissonAction extends PowerCreep {
             return
         }
         else {
-            if(this.usePower(PWR_OPERATE_STORAGE, storage_)==OK)
-            if (Game.rooms[this.memory.belong].GainMission(this.memory.MissionData.id))
-            {
-                Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id)
-                this.memory.MissionData = {}
-            }
-            else this.memory.MissionData = {}
+            if (this.usePower(PWR_OPERATE_STORAGE, storage_) == OK)
+                if (Game.rooms[this.memory.belong].GainMission(this.memory.MissionData.id)) {
+                    Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id)
+                    this.memory.MissionData = {}
+                }
+                else this.memory.MissionData = {}
         }
     }
 
@@ -50,7 +49,9 @@ export default class PowerCreepMissonAction extends PowerCreep {
     // 操作lab
     public handle_pwr_lab(): void {
         if (!this.OpsPrepare()) return
-        for (var id of this.memory.MissionData.data.lab) {
+        let disTask = this.room.MissionName('Room', '资源合成')
+        if (!disTask) return
+        for (let id of disTask.Data.comData) {
             var lab_ = Game.getObjectById(id) as StructureTower
             if (!isOPWR(lab_)) {
                 if (!this.pos.inRangeTo(lab_.pos, 3)) {

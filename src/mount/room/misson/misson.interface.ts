@@ -17,7 +17,6 @@ interface Room {
     Constru_Build(): void
     Tower_Feed(): void
     Lab_Feed(): void
-    Nuker_Feed(): void
     Task_CenterLink(): void
     Task_Clink(): void
     Task_ComsumeLink(): void
@@ -28,6 +27,7 @@ interface Room {
     // 被动任务
     Task_Carry(misson: MissionModel): void
     Task_Repair(mission: MissionModel): void
+    Task_Nuker(mission: MissionModel): void
     Task_dismantle(mission: MissionModel): void
     Task_AIO(mission: MissionModel): void
     Task_Quick_upgrade(mission: MissionModel): void

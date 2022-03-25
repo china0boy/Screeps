@@ -5,7 +5,7 @@ import { createHelp } from '../help/help'
  * deposit 最大的采集冷却时长
  * 超过该时长则不会再进行挖掘
  */
-export const DEPOSIT_MAX_COOLDOWN = 80
+export const DEPOSIT_MAX_COOLDOWN = 60
 
 /**
  * observer 房间扫描间隔
@@ -117,7 +117,6 @@ export class ObserverExtension extends StructureObserver {
         }
         else if (target instanceof Deposit) {
             const targetFlagName = `deposit ${this.room.name} ${Game.time}`
-            target.pos.createFlag(targetFlagName)
 
             // 更新数量
             memory.depositNumber += 1
@@ -128,7 +127,8 @@ export class ObserverExtension extends StructureObserver {
             const harvestBoost = memory.boost.harvest;
             let harvest = this.room.public_dp_harvest(this.room.name, targetFlagName, transferName, 1, time, harvestBoost);
             let transfer = this.room.public_dp_transfer(this.room.name, targetFlagName, transferName, 1, time);
-            if (!this.room.AddMission(harvest) || !this.room.AddMission(transfer)) { console.log(Colorful(`房间${this.room.name} -> ${target.pos.roomName}:挂载挖pb失败 `, 'red')); memory.depositNumber--; }
+            if (!this.room.AddMission(harvest) || !this.room.AddMission(transfer)) { console.log(Colorful(`房间${this.room.name} -> ${target.pos.roomName}:挂载挖dp失败 `, 'red')); memory.depositNumber--; }
+            else target.pos.createFlag(targetFlagName)
 
         }
         else return ERR_INVALID_TARGET

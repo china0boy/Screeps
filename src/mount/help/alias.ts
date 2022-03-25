@@ -467,6 +467,22 @@ export default [
                                 functionName: 'lab.dispatch'
                             },
                             {
+                                title: '核弹填充:',
+                                describe: '例: nuke.add("W1N1")',
+                                params: [
+                                    { name: 'roomName', desc: '我的房间' },
+                                ],
+                                functionName: 'nuke.add'
+                            },
+                            {
+                                title: '取消核弹填充:',
+                                describe: '例: nuke.remove("W1N1")',
+                                params: [
+                                    { name: 'roomName', desc: '我的房间' },
+                                ],
+                                functionName: 'nuke.remove'
+                            },
+                            {
                                 title: '发射核弹:',
                                 describe: '例: nuke.launch("W1N1","W1N2",1,1)',
                                 params: [

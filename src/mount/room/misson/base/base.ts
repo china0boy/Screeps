@@ -24,8 +24,7 @@ export default class RoomMissonFrameExtension extends Room {
         this.Constru_Build()   // 建筑任务
         this.Task_Clink()       // 链接送仓任务
         this.Tower_Feed()   // 防御塔填充任务 
-        this.Lab_Feed()     // 实验室填充\回收任务  
-        this.Nuker_Feed()   // 核弹填充任务      
+        this.Lab_Feed()     // 实验室填充\回收任务       
         this.Nuke_Defend()  // 核弹防御
         this.Task_CompoundDispatch()    // 合成规划 （中级）
         this.Task_Auto_Defend()     // 主动防御任务发布
@@ -37,6 +36,7 @@ export default class RoomMissonFrameExtension extends Room {
                 switch (misson.name) {
                     case "物流运输": { this.Task_Carry(misson); break A; }
                     case "墙体维护": { this.Task_Repair(misson); break A; }
+                    case "核弹填充": { this.Task_Nuker(misson); break }
                     case '黄球拆迁': { this.Task_dismantle(misson); break A; }
                     case '一体机': { this.Task_AIO(misson); break A; }
                     case '急速冲级': { this.Task_Quick_upgrade(misson); break A; }
@@ -344,7 +344,7 @@ export default class RoomMissonFrameExtension extends Room {
                             if (n > 10) continue
                             memData["taskRB"] = misson.id
                             for (let i = 0; i < misson.CreepBind[role].num; i++) {
-                                this.SingleSpawn(role, RoleData[role].level ? RoleData[role].level : 10,  memData )
+                                this.SingleSpawn(role, RoleData[role].level ? RoleData[role].level : 10, memData)
                             }
                         }
                         continue
@@ -357,7 +357,7 @@ export default class RoomMissonFrameExtension extends Room {
                         let relateSpawnList = this.SpawnListRoleNum(role)
                         let relateCreeps = _.filter(Game.creeps, (creep) => creep.memory.belong == this.name && creep.memory.role == role && (!creep.memory.MissionData || !creep.memory.MissionData.id)).length
                         if (relateSpawnList + relateCreeps < spawnNum) {
-                            this.SingleSpawn(role,RoleData[role].level?RoleData[role].level:10,memData)
+                            this.SingleSpawn(role, RoleData[role].level ? RoleData[role].level : 10, memData)
                         }
                     }
                 }
@@ -380,12 +380,6 @@ export default class RoomMissonFrameExtension extends Room {
         var tank_ = Game.getObjectById(id) as StructureStorage | StructureTerminal
         if (!tank_ && id) return false
 
-        //for (var i in misson.LabBind) {
-        //   if (!this.memory.ResourceLimit[misson.LabBind[i]])
-        //        this.memory.ResourceLimit[misson.LabBind[i]] = 8000
-        //    if (this.memory.ResourceLimit[misson.LabBind[i]] < 8000)
-        //        this.memory.ResourceLimit[misson.LabBind[i]] = 8000
-        //}
         /* 负责lab的填充 */
         for (var i in misson.LabBind) {
             var All_i_Num: number

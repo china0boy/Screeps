@@ -41,6 +41,7 @@ export default class CreepMoveExtension extends Creep {
             return route
         }
 
+
         var result = { path: [], incomplete: true };
         if (this.room.name != target.roomName)
             result = this.findSearch(target, range, 0, flee)
@@ -62,7 +63,7 @@ export default class CreepMoveExtension extends Creep {
         if (result.path.length <= 0) return null
         // 寻路结果压缩
         route = this.serializeFarPath(result.path)
-        if (!result.incomplete) global.routeCache[routeKey] = route
+        global.routeCache[routeKey] = route
         return route
     }
 
@@ -139,11 +140,18 @@ export default class CreepMoveExtension extends Creep {
                     else costs.set(creep.pos.x, creep.pos.y, 255)
                 })
                 room.find(FIND_MY_CREEPS).forEach(creep => {
-                    if ((creep.memory.crossLevel && creep.memory.crossLevel > this.memory.crossLevel) || creep.memory.standed)
+                    if ((creep.memory.crossLevel && this.memory.crossLevel && creep.memory.crossLevel > this.memory.crossLevel) || creep.memory.standed)
                         costs.set(creep.pos.x, creep.pos.y, 255)
                     else
                         costs.set(creep.pos.x, creep.pos.y, 3)
                 })
+                const pc = Game.powerCreeps[`${this.pos.roomName}/queen/${Game.shard.name}`]
+                if (pc) {
+                    if ((pc.memory.crossLevel && this.memory.crossLevel && pc.memory.crossLevel > this.memory.crossLevel) || pc.memory.standed)
+                        costs.set(pc.pos.x, pc.pos.y, 255)
+                    else
+                        costs.set(pc.pos.x, pc.pos.y, 3)
+                }
                 return costs
             }
         })
@@ -153,6 +161,7 @@ export default class CreepMoveExtension extends Creep {
     // 使用寻路结果移动
     public goByPath(): CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET {
         if (!this.memory.moveData) return ERR_NO_PATH
+        if (this.memory.moveData.index == undefined) this.memory.moveData.index = 0
         const index = this.memory.moveData.index
         // 移动索引超过数组上限代表到达目的地
         if (index >= this.memory.moveData.path.length) {
@@ -173,7 +182,12 @@ export default class CreepMoveExtension extends Creep {
         //  var a = Game.cpu.getUsed()
         if (this.memory.moveData == undefined) this.memory.moveData = {}
         // 确认目标没有变化，如果变化了就重新规划路线
-        const targetPosTag = this.standardizePos(target)
+        var targetPosTag: string
+        //防止骑墙导致目标一直变化导致的重新寻路
+        if (this.memory.moveData.targetPos && this.memory.moveData.targetPos.indexOf(target.roomName) != -1 && this.pos.roomName != target.roomName) {
+            targetPosTag = this.memory.moveData.targetPos
+        }
+        else targetPosTag = this.standardizePos(target)
         if (targetPosTag !== this.memory.moveData.targetPos || flee) {
             this.memory.moveData.targetPos = targetPosTag
             this.memory.moveData.path = this.findPath(target, range, flee)

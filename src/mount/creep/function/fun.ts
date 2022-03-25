@@ -133,13 +133,14 @@ export default class CreepFunctionExtension extends Creep {
             if (!container) { delete this.memory.unBoostContainer; return true }
             if (container.store.getUsedCapacity() >= 1000) {
                 let a = this.room.storage ? this.room.storage : this.room.terminal;
-                let thisTask = this.room.Public_Carry({ 'transport': { num: 2, bind: [] } }, 50, this.name, container.pos.x, container.pos.y, this.name, a.pos.x, a.pos.y)
+                let thisTask = this.room.Public_Carry({ 'transport': { num: 2, bind: [] } }, 50, this.name, container.pos.x, container.pos.y, this.name, a.pos.x, a.pos.y, Object.keys(container.store)[0] as ResourceConstant, container.store[Object.keys(container.store)[0]])
                 this.room.AddMission(thisTask)
             }
             if (getDistance1(this.pos, container.pos) == 0) {
                 let creep_ = this;
                 let lab = this.pos.findClosestByRange(FIND_MY_STRUCTURES, { filter: function (object) { return object.structureType == STRUCTURE_LAB && object.cooldown < creep_.ticksToLive - 4 && getDistance1(object.pos, container.pos) <= 1; } }) as StructureLab
                 if (lab && lab.unboostCreep(this) == OK) this.suicide();
+                else { this.suicide(); }
             }
             else {
                 if (!this.store.getUsedCapacity())

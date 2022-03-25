@@ -1,5 +1,5 @@
-import { avePrice, haveOrder, highestPrice } from "@/module/fun/funtion";
-import { Colorful } from "@/utils";
+import { avePrice, haveOrder, highestPrice, checkDispatch, checkSend } from "@/module/fun/funtion";
+import { Colorful, StatisticalResources } from "@/utils";
 import { times } from "lodash";
 
 /* 房间原型拓展   --行为  --维护任务 */
@@ -16,6 +16,38 @@ export default class RoomMissonVindicateExtension extends Room {
         }
         else if (mission.Data.RepairType == 'nuker') {
 
+        }
+    }
+
+    /* 核弹填充 */
+    public Task_Nuker(mission: MissionModel): void {
+        if (!this.memory.StructureIdData.NukerID || !this.memory.StructureIdData.storageID) return
+        var nuker = Game.getObjectById(this.memory.StructureIdData.NukerID) as StructureNuker
+        var storage_ = this.storage
+        if (!nuker) { delete this.memory.StructureIdData.NukerID; return }
+        if (!storage_) { delete this.memory.StructureIdData.storageID; return }
+        let num = 5000 - nuker.store.G;
+        if (storage_.store.getUsedCapacity('G') < num && !(checkDispatch(this.name, 'G') || checkSend(this.name, 'G'))) {
+            if (StatisticalResources('G') >= num) {
+                let dispatchTask: RDData = {
+                    sourceRoom: this.name,   // 请求调度资源的房间
+                    rType: 'G',  // 资源类型
+                    num: num - storage_.store.getUsedCapacity('G'),      // 数量
+                    delayTick: 500,        // 超时时间 默认 500 tick
+                    buy: false,        // 超时过后是否会寻求购买
+                }
+                Memory.ResourceDispatchData.push(dispatchTask);
+            }
+        }
+        if (nuker.store.getUsedCapacity('G') < 5000 && storage_.store.getUsedCapacity('G') >= 5000) {
+            var thisTask = this.Public_Carry({ 'transport': { num: 1, bind: [] } }, 40, this.name, storage_.pos.x, storage_.pos.y, this.name, nuker.pos.x, nuker.pos.y, 'G', 5000 - nuker.store.getUsedCapacity('G'))
+            this.AddMission(thisTask)
+            return
+        }
+        if (nuker.store.getUsedCapacity('energy') < 300000 && storage_.store.getUsedCapacity('energy') > 130000) {
+            var thisTask = this.Public_Carry({ 'transport': { num: 1, bind: [] } }, 40, this.name, storage_.pos.x, storage_.pos.y, this.name, nuker.pos.x, nuker.pos.y, 'energy', 300000 - nuker.store.getUsedCapacity('energy'))
+            this.AddMission(thisTask)
+            return
         }
     }
 
@@ -78,7 +110,7 @@ export default class RoomMissonVindicateExtension extends Room {
                     totalAmount: 100000,
                     roomName: this.name
                 });
-                console.log(Colorful(`[急速冲级]房间${this.name}创建能量订单，价格:${avePrice};数量:100000`,'green',true))
+                console.log(Colorful(`[急速冲级]房间${this.name}创建能量订单，价格:${avePrice};数量:100000`, 'green', true))
             }
             else {
                 Game.market.changeOrderPrice(thisRoomOrder.id, avePrice)//修改单价

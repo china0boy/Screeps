@@ -7,12 +7,12 @@ export default class RoomMissonTransportExtension extends Room {
         if (!this.memory.StructureIdData.storageID) return
         if (this.RoleMissionNum('transport', '虫卵填充') < 1) {
             let thisPos = new RoomPosition(Memory.RoomControlData[this.name].center[0], Memory.RoomControlData[this.name].center[1], this.name)
-            let emptyExtensions = thisPos.findClosestByPath(FIND_MY_STRUCTURES, {
-                filter: (structure) => {
-                    return (structure.structureType == 'spawn' || structure.structureType == 'extension') && structure.store.getFreeCapacity('energy') > 0
-                }
-            })
-            if (emptyExtensions) {
+            //let emptyExtensions = thisPos.findClosestByPath(FIND_MY_STRUCTURES, {
+            //    filter: (structure) => {
+            //        return (structure.structureType == 'spawn' || structure.structureType == 'extension') && structure.store.getFreeCapacity('energy') > 0
+            //    }
+            //})
+            if (this.energyAvailable < this.energyCapacityAvailable) {
                 /* 满足条件则触发虫卵填充任务 */
                 var thisMisson: MissionModel = {
                     name: "虫卵填充",
@@ -89,24 +89,4 @@ export default class RoomMissonTransportExtension extends Room {
         }
     }
 
-    // 核弹填充任务
-    public Nuker_Feed(): void {
-        if (Game.time % 103) return
-        if (!this.memory.StructureIdData.NukerID || !this.memory.StructureIdData.storageID) return
-        if (this.RoleMissionNum('transport', '物流运输') >= 1) return
-        var nuker = Game.getObjectById(this.memory.StructureIdData.NukerID) as StructureNuker
-        var storage_ = Game.getObjectById(this.memory.StructureIdData.storageID) as StructureStorage
-        if (!nuker) { delete this.memory.StructureIdData.NukerID; return }
-        if (!storage_) { delete this.memory.StructureIdData.storageID; return }
-        if (nuker.store.getUsedCapacity('G') < 5000 && storage_.store.getUsedCapacity('G') >= 5000) {
-            var thisTask = this.Public_Carry({ 'transport': { num: 1, bind: [] } }, 40, this.name, storage_.pos.x, storage_.pos.y, this.name, nuker.pos.x, nuker.pos.y, 'G', 5000 - nuker.store.getUsedCapacity('G'))
-            this.AddMission(thisTask)
-            return
-        }
-        if (nuker.store.getUsedCapacity('energy') < 300000 && storage_.store.getUsedCapacity('energy') > 130000) {
-            var thisTask = this.Public_Carry({ 'transport': { num: 1, bind: [] } }, 40, this.name, storage_.pos.x, storage_.pos.y, this.name, nuker.pos.x, nuker.pos.y, 'energy', 300000 - nuker.store.getUsedCapacity('energy'))
-            this.AddMission(thisTask)
-            return
-        }
-    }
 }

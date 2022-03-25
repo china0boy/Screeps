@@ -122,7 +122,7 @@ export default class RoomCoreSpawnExtension extends Room {
                     adaption_body(body, allEnergy)
                     adaption = true
                 }
-                else if (this.controller.level < 4 && roleName == 'harvest' && global.CreepNumData[this.name]['carry'] <= 0) {
+                else if (this.controller.level < 6 && roleName == 'harvest' && global.CreepNumData[this.name]['carry'] <= 0) {
                     /* 特殊情况，防止卡死 */
                     adaption_body(body, allEnergy)
                     adaption = true
@@ -153,7 +153,7 @@ export default class RoomCoreSpawnExtension extends Room {
                 }
             }
             if (allEnergy >= CalculateEnergy(body)) {
-                let result = thisSpawn.spawnCreep(body, `${timestr}----${mark}`, { memory: thisMem })//[${mark}] ${randomStr}${timestr}  ${timestr}----${mark}
+                let result = thisSpawn.spawnCreep(body, `[${mark}] ${randomStr}${timestr}`, { memory: thisMem })//[${mark}] ${randomStr}${timestr}  ${timestr}----${mark}
                 if (result == OK) {
                     allEnergy -= CalculateEnergy(body)
                     spawnlist.splice(0, 1)   // 孵化成功，删除该孵化数据

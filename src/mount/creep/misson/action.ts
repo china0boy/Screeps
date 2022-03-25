@@ -203,13 +203,14 @@ export default class CreepMissonActionExtension extends Creep {
         }
         this.workstate('energy')
         if (this.memory.role == 'claim') {
-            if (!this.pos.isNearTo(Game.rooms[mission.Data.disRoom].controller))
-                this.goTo(Game.rooms[mission.Data.disRoom].controller.pos, 1)
+            let controller = Game.rooms[mission.Data.disRoom].controller;
+            if (!this.pos.isNearTo(controller))
+                this.goTo(controller.pos, 1)
             else {
-                this.claimController(Game.rooms[mission.Data.disRoom].controller)
-                this.say("claim")
+                if (controller.level && !controller.my) this.attackController(controller)
+                else this.claimController(controller)
             }
-            if (Game.rooms[mission.Data.disRoom].controller.level && Game.rooms[mission.Data.disRoom].controller.owner) {
+            if (controller.level && controller.owner) {
                 mission.CreepBind[this.memory.role].num = 0
             }
         }
@@ -321,13 +322,11 @@ export default class CreepMissonActionExtension extends Creep {
         let id = missionData.id
         let data = missionData.Data
         if (this.room.name != data.disRoom || Game.shard.name != data.shard) {
-            if (!data.controlPos) this.arriveTo(new RoomPosition(24, 24, data.disRoom), 20, data.shard)
-            else { this.goTo(new RoomPosition(data.controlPos.x, data.controlPos.y, data.controlPos.roomName), 1) };
+            this.arriveTo(new RoomPosition(24, 24, data.disRoom), 20, data.shard)
         }
         else {
             let control = this.room.controller
             if (!control) { this.say('无控制器'); return }
-            if (!data.controlPos) data.controlPos = { roomName: control.pos.roomName, x: control.pos.x, y: control.pos.y };
             if (!this.pos.isNearTo(control)) this.goTo(control.pos, 1)
             else {
                 if (!control.my && control.owner) this.attackController(control)
