@@ -118,15 +118,6 @@ export default class PowerCreepMissonAction extends PowerCreep {
     public handle_pwr_factory(): void {
         var factory_ = global.Stru[this.memory.belong]['factory'] as StructureStorage
         if (!factory_) return
-        if (this.powers[PWR_OPERATE_FACTORY] && this.powers[PWR_OPERATE_FACTORY].cooldown) {
-            if (Game.rooms[this.memory.belong].GainMission(this.memory.MissionData.id)) {
-                Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id)
-                this.memory.MissionData = {}
-            }
-            else
-                this.memory.MissionData = {}
-            return
-        }
         if (!this.OpsPrepare()) return
         if (!this.pos.inRangeTo(factory_.pos, 3)) {
             this.goTo(factory_.pos, 3)

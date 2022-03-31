@@ -253,13 +253,16 @@ export function getOppositeDirection(direction: DirectionConstant): DirectionCon
 }
 
 /* 打印指定颜色 */
-type Colors = 'red' | 'blue' | 'green' | 'yellow' | 'orange'
+type Colors = 'red' | 'blue' | 'green' | 'yellow' | 'orange' | 'purple' | 'brown' | 'pink'
 const colors: { [name in Colors]: string } = {
-  red: '#ef9a9a',
-  green: '#6b9955',
-  yellow: '#c5c599',
-  blue: '#8dc5e3',
-  orange: '#ff9d00',
+  red: '#ef9a9a',     //红色
+  green: '#6b9955',   //绿色
+  yellow: '#c5c599',  //黄色
+  blue: '#8dc5e3',    //蓝色
+  orange: '#ff9d00',  //橙色
+  purple: '#800080',  //紫色
+  pink: '	#FF69B4',   //粉色
+  brown: '#8B4513',   //棕色
 }
 export function Colorful(content: string, colorName: Colors | string = null, bolder: boolean = false): string {
   const colorStyle = colorName ? `color: ${colors[colorName] ? colors[colorName] : colorName};` : ''
@@ -290,13 +293,13 @@ export function unzipPosition(str: string): RoomPosition | undefined {
 
 //查找最近的有能量的建筑
 export function posFindClosestByRange(structurePos: RoomPosition, type?: ResourceConstant): any {
-  let targetStructure: any = structurePos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
+  let targetStructure: any = structurePos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
     filter: (structure: StructureWithStore) => {
       return filter_structure(structure, [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_LAB, STRUCTURE_TERMINAL, STRUCTURE_TOWER, STRUCTURE_STORAGE, STRUCTURE_FACTORY, STRUCTURE_CONTAINER, STRUCTURE_POWER_SPAWN]) && (structure.store.getUsedCapacity('energy') || structure.store.getUsedCapacity(type))
     }
   }) as StructureWithStore
   if (!targetStructure) {
-    targetStructure = structurePos.findClosestByPath(FIND_RUINS, {
+    targetStructure = structurePos.findClosestByRange(FIND_RUINS, {
       filter: (structure: Ruin) => {
         return (structure.store.getUsedCapacity('energy') || structure.store.getUsedCapacity(type))
       }

@@ -585,7 +585,7 @@ export default class RoomMissonPublish extends Room {
         var thisTask: MissionModel = {
             name: 'dp_harvest',
             range: 'Creep',
-            delayTick: 99999,
+            delayTick: 50000,
             level: 12,
             Data: {
                 myroomname: myroomname,
@@ -603,7 +603,7 @@ export default class RoomMissonPublish extends Room {
         var thisTask: MissionModel = {
             name: 'dp_transfer',
             range: 'Creep',
-            delayTick: 99999,
+            delayTick: 50000,
             level: 12,
             Data: {
                 myroomname: myroomname,
@@ -637,11 +637,11 @@ export default class RoomMissonPublish extends Room {
         if (RNum + ANum + DNum + HNum + AIONum != 4) return null    // 防止数量不对
         if (HNum != 2 && AIONum != 4) return null   // 防止搭配不均
         let creepData = {
-            'x-range':{num:RNum,bd:['XZHO2','XLHO2','XKHO2','XGHO2']},
-            'x-heal':{num:HNum,bd:['XZHO2','XLHO2','XKHO2','XGHO2']},
-            'x-aio':{num:AIONum,bd:['XZHO2','XLHO2','XKHO2','XGHO2']},
-            'x-attack':{num:ANum,bd:['XZHO2','XUH2O','XGHO2']},
-            'x-dismantle':{num:DNum,bd:['XZHO2','XZH2O','XGHO2']},
+            'x-range':{num:RNum,bd:['XZHO2','XLHO2','XKHO2','XGHO2']},//篮球
+            'x-heal':{num:HNum,bd:['XZHO2','XLHO2','XKHO2','XGHO2']},//绿球
+            'x-aio':{num:AIONum,bd:['XZHO2','XLHO2','XKHO2','XGHO2']},//一体机
+            'x-attack':{num:ANum,bd:['XZHO2','XUH2O','XGHO2']},//红球
+            'x-dismantle':{num:DNum,bd:['XZHO2','XZH2O','XGHO2']},//黄球
         }
         let tbd = []
         for (var i in creepData)

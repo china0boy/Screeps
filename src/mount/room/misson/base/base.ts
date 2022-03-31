@@ -28,6 +28,7 @@ export default class RoomMissonFrameExtension extends Room {
         this.Nuke_Defend()  // 核弹防御
         this.Task_CompoundDispatch()    // 合成规划 （中级）
         this.Task_Auto_Defend()     // 主动防御任务发布
+        this.Un_boost()     // unBoost回收
 
         /* 基本任务监控区域 */
         for (var index in this.memory.Misson)
@@ -402,7 +403,7 @@ export default class RoomMissonFrameExtension extends Room {
             if (All_i_Num < 4000) {
                 /* 资源调度 */
                 if (DispatchNum(this.name) <= 0 && this.MissionNum('Structure', '资源购买') <= 0 && !checkSend(this.name, misson.LabBind[i] as ResourceConstant)) {
-                    console.log(Colorful(`[资源调度] 房间${this.name}没有足够的资源[${misson.LabBind[i] as ResourceConstant}],将执行资源调度!`, 'yellow'))
+                    console.log(Colorful(`[资源调度] 房间${this.name}没有足够的资源[${misson.LabBind[i] as ResourceConstant}],将执行资源调度!`, 'brown'))
                     let dispatchTask: RDData = {
                         sourceRoom: this.name,
                         rType: misson.LabBind[i] as ResourceConstant,

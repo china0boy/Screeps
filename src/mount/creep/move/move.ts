@@ -69,8 +69,7 @@ export default class CreepMoveExtension extends Creep {
 
     public findSearch(target: RoomPosition, range: number, key: number, flee: boolean): PathFinderPath {
         // 使用`findRoute`计算路径的高阶计划，优先选择大路和自有房间
-        let allowedRooms = { [this.pos.roomName]: true };
-
+        let allowedRooms = { [this.pos.roomName]: true }
         if (key == 0) {
             let ret = Game.map.findRoute(this.pos.roomName, target.roomName, {
                 routeCallback(roomName) {
@@ -146,7 +145,7 @@ export default class CreepMoveExtension extends Creep {
                         costs.set(creep.pos.x, creep.pos.y, 3)
                 })
                 const pc = Game.powerCreeps[`${this.pos.roomName}/queen/${Game.shard.name}`]
-                if (pc) {
+                if (pc && pc.shard) {
                     if ((pc.memory.crossLevel && this.memory.crossLevel && pc.memory.crossLevel > this.memory.crossLevel) || pc.memory.standed)
                         costs.set(pc.pos.x, pc.pos.y, 255)
                     else
@@ -226,7 +225,9 @@ export default class CreepMoveExtension extends Creep {
         if (!fontCreep) return ERR_NOT_FOUND
         if (fontCreep.owner.username != this.owner.username) return
         this.say("👉")
-        if (fontCreep.manageCross(getOppositeDirection(direction), this.memory.crossLevel)) this.move(direction)
+        if (fontCreep.manageCross(getOppositeDirection(direction), this.memory.crossLevel)) {
+            this.move(direction);
+        }
         return OK
     }
 

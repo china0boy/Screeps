@@ -200,15 +200,24 @@ export default class RoomFunctionFindExtension extends Room {
             this.memory.originLevel = this.controller.level
     }
 
-    /* 监控8级房的冷却时间出升级爬 和控制出挖化合物的爬 */
+    /* 监控升级工任务动态数量孵化 和 监控发布挖化合物任务 */
     public LevelUpgradeCreep(): void {
-        if (this.controller.my && this.controller.level == 8) {
+        if (Game.time % 100) return
+        if (this.controller.my) {
             //控制升级工数量
-            if (this.controller.ticksToDowngrade <= 100000) {
-                if (this.memory.SpawnConfig.upgrade.num == 0) this.memory.SpawnConfig.upgrade.num = 1;
+            if (this.controller.level == 8) {
+                if (this.controller.ticksToDowngrade <= 100000) {
+                    if (this.memory.SpawnConfig.upgrade.num == 0) this.memory.SpawnConfig.upgrade.num = 1;
+                }
+                else {
+                    if (this.memory.SpawnConfig.upgrade.num) this.memory.SpawnConfig.upgrade.num = 0;
+                }
             }
             else {
-                if (this.memory.SpawnConfig.upgrade.num) this.memory.SpawnConfig.upgrade.num = 0;
+                let storage = this.storage;
+                if (storage) {
+                    this.memory.SpawnConfig.upgrade.num = Math.floor(storage.store.energy / 50000) >= 2 ? 2 : Math.floor(storage.store.energy / 50000);
+                }
             }
         }
 

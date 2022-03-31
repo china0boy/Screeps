@@ -24,6 +24,6 @@ export default () => {
 
         thisRoom.LevelMessageUpdate()        // 房间等级Memory信息更新
 
-        thisRoom.LevelUpgradeCreep() //监控8级房时间发布升级工任务 和 监控发布挖化合物任务
+        thisRoom.LevelUpgradeCreep() //监控升级工任务动态数量孵化 和 监控发布挖化合物任务
     }
 }

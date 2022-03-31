@@ -288,11 +288,16 @@ export default class terminalExtension extends StructureTerminal {
                 this.room.DeleteMission(task.id)
                 return
             }
-            console.log('资源传送任务监控中: ###########################\n 房间:', this.room.name, '--->', task.Data.disRoom, ' 运送资源：', task.Data.rType)
-            console.log('路费:', Colorful(`${wastage}`, 'yellow'), 'energy  ', '终端拥有能量:', Colorful(`${this.store.getUsedCapacity('energy')}`, 'yellow'), 'energy')
             /* 资源判断 */
             var cargoNum: number = task.Data.rType == 'energy' ? this.store.getUsedCapacity(task.Data.rType) - wastage : this.store.getUsedCapacity(task.Data.rType)
-            console.log('终端拥有资源量:', Colorful(`${cargoNum}`, 'blue'), ' 仓库拥有资源量:', storage_.store.getUsedCapacity(task.Data.rType), ' 任务所需资源量:', task.Data.num)
+            console.log(
+                Colorful(`                     资源传送任务监控中\n`, 'blue') +
+                Colorful(`———————————————————————————————————————————————————————————\n`, 'blue') +
+                Colorful(`房间：${this.room.name}--->${task.Data.disRoom}  运送资源：${task.Data.rType}\n`, 'blue') +
+                Colorful(`———————————————————————————————————————————————————————————\n`, 'blue') +
+                Colorful(`路费:${wastage} energy\t终端拥有能量:${this.store.getUsedCapacity('energy')} energy\n`, 'blue') +
+                Colorful(`终端拥有资源量:${cargoNum}\t仓库拥有资源量:${storage_.store.getUsedCapacity(task.Data.rType)}\t任务所需资源量:${task.Data.num}\n`, 'blue') +
+                Colorful(`———————————————————————————————————————————————————————————\n`, 'blue'))
             if (task.Data.num > cargoNum) {
                 let MaxStore: number;
                 switch (this.room.controller.level) {

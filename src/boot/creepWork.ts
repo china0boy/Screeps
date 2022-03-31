@@ -7,6 +7,7 @@ export default () => {
   for (var pc in Game.powerCreeps) {
     if (Game.powerCreeps[pc].ticksToLive) {
       Game.powerCreeps[pc].ManageMisson()
+      //console.log(`${pc}`)
     }
 
   }
@@ -14,8 +15,10 @@ export default () => {
   /* creep */
   let adaption = true  // 每tick执行一次adaption检查
   for (var c in Game.creeps) {
+    //let time1 = Game.cpu.getUsed()//
     let thisCreep = Game.creeps[c]
     if (!thisCreep) continue
+    //console.log(`${thisCreep} ${thisCreep.pos.roomName}`)
     /* 跨shard找回记忆 */
     if (!thisCreep.memory.role) {
       var InshardMemory = JSON.parse(InterShardMemory.getLocal()) || {}
@@ -52,5 +55,7 @@ export default () => {
     /* 进行治疗 */
     if (thisCreep.hits < thisCreep.hitsMax && thisCreep.room.name == thisCreep.memory.belong && thisCreep.room.memory.state == 'peace')
       thisCreep.optTower('heal', thisCreep);
+    //let time2 = Game.cpu.getUsed()//
+    //if (time2 - time1 > 1) console.log(`${thisCreep.pos.roomName}: ${thisCreep.name} cpu:${time2 - time1}`)
   }
 }

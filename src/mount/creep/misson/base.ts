@@ -8,6 +8,15 @@ export default class CreepMissonBaseExtension extends Creep {
         if (!this.memory.MissionData) this.memory.MissionData = {}
         /* 中央爬的无缝衔接 */
         if (this.memory.role == 'manage' && this.room.controller.my && this.room.controller.level == 8) {
+            if (this.ticksToLive >= 1480) {
+                if (Memory.RoomControlData[this.memory.belong]) {
+                    let center = Memory.RoomControlData[this.memory.belong].center
+                    if (this.pos.x != center[0] && this.pos.y != center[1]) {
+                        this.goTo(new RoomPosition(center[0], center[1], this.memory.belong), 0)
+                        return;
+                    }
+                }
+            }
             if (this.ticksToLive <= 190) this.room.memory.SpawnConfig.manage.num = 2;
             else this.room.memory.SpawnConfig.manage.num = 1;
         }

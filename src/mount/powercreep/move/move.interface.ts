@@ -5,11 +5,11 @@ interface PowerCreep{
     // 寻找不允许对穿的爬虫的位置
     getStandedPos():RoomPosition[]
     // 通用寻路
-    findPath(target:RoomPosition,range:number):string|null
+    findPath(target:RoomPosition,range:number, flee: boolean):string|null
     // 使用压缩数据移动
     goByPath():CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET
     // 通用移动
-    goTo(target:RoomPosition,range:number):CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET
+    goTo(target:RoomPosition,range:number, flee?: boolean):CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET
     // 请求对穿
     requestCross(direction:DirectionConstant):OK | ERR_BUSY | ERR_NOT_FOUND
     // 处理对穿

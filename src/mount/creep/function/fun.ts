@@ -117,25 +117,10 @@ export default class CreepFunctionExtension extends Creep {
             if (body.boost) unBody++;
         }
         if (!unBody) return false
-        //找到挨着的小罐子和lab
         if (this.store.getUsedCapacity()) this.transfer_(this.room.storage ? this.room.storage : this.room.terminal, Object.keys(this.store)[0] as ResourceConstant);
-        if (!this.memory.unBoostContainer) {
-            let container = this.pos.findClosestByRange(FIND_STRUCTURES, {
-                filter: function (object) {
-                    return object.structureType == STRUCTURE_CONTAINER &&
-                        object.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: function (object) { return object.structureType == STRUCTURE_LAB; } }).length
-                }
-            }) as StructureContainer;
-            if (container) this.memory.unBoostContainer = container.id;
-        }
-        else {
-            let container = Game.getObjectById(this.memory.unBoostContainer);
-            if (!container) { delete this.memory.unBoostContainer; return true }
-            if (container.store.getUsedCapacity() >= 1000) {
-                let a = this.room.storage ? this.room.storage : this.room.terminal;
-                let thisTask = this.room.Public_Carry({ 'transport': { num: 2, bind: [] } }, 50, this.name, container.pos.x, container.pos.y, this.name, a.pos.x, a.pos.y, Object.keys(container.store)[0] as ResourceConstant, container.store[Object.keys(container.store)[0]])
-                this.room.AddMission(thisTask)
-            }
+        if (Game.rooms[this.memory.belong].memory.StructureIdData.UnBoostId) {//找到挨着的小罐子和lab
+            let container = Game.getObjectById(Game.rooms[this.memory.belong].memory.StructureIdData.UnBoostId) as StructureContainer;
+            if (!container) { delete Game.rooms[this.memory.belong].memory.StructureIdData.UnBoostId; return true }
             if (getDistance1(this.pos, container.pos) == 0) {
                 let creep_ = this;
                 let lab = this.pos.findClosestByRange(FIND_MY_STRUCTURES, { filter: function (object) { return object.structureType == STRUCTURE_LAB && object.cooldown < creep_.ticksToLive - 4 && getDistance1(object.pos, container.pos) <= 1; } }) as StructureLab

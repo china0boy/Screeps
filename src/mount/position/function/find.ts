@@ -74,9 +74,9 @@ export default class PositionFunctionFindExtension extends RoomPosition {
      * 获取最近的store能量有空的spawn或扩展
     */
     public getClosestStore(cstructure?: StructureExtension | StructureSpawn): StructureExtension | StructureSpawn | StructureLab | undefined {
-        return this.findClosestByPath(FIND_MY_STRUCTURES, {
+        return this.findClosestByRange(FIND_MY_STRUCTURES, {
             filter: (structure: StructureExtension | StructureSpawn) => {
-                return filter_structure(structure, [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_LAB]) && structure != cstructure && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                return filter_structure(structure, [STRUCTURE_EXTENSION, STRUCTURE_SPAWN]) && structure != cstructure && structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0
             }
         }) as StructureExtension | StructureSpawn | undefined
     }
@@ -119,6 +119,28 @@ export default class PositionFunctionFindExtension extends RoomPosition {
                     if (terrain.get(x, y) != TERRAIN_MASK_WALL) {
                         result.push(new RoomPosition(x, y, this.roomName))
                     }
+                }
+            )
+        )
+        return result
+    }
+
+    /**
+     *  获取周围的站位 
+     */
+    public getVoid(): RoomPosition[] {
+        var result: RoomPosition[] = []
+        var terrain = new Room.Terrain(this.roomName)
+        var xs = [this.x - 1, this.x, this.x + 1]
+        var ys = [this.y - 1, this.y, this.y + 1]
+        xs.forEach(
+            x => ys.forEach(
+                y => {
+                    let pos=new RoomPosition(x, y, this.roomName)
+                    if (Game.rooms[this.roomName] && x != 0 && x != 49 && y != 0 && y != 49) {
+                        if (pos.look().length <= 1) result.push(pos)
+                    }
+                    else result.push(pos)
                 }
             )
         )
@@ -169,7 +191,7 @@ export default class PositionFunctionFindExtension extends RoomPosition {
         if (!global.routeCache) global.routeCache = {}
         /* 路线查找 */
         const result = PathFinder.search(this, { pos: target, range: range }, {
-            plainCost: 2,
+            plainCost: 5,
             swampCost: 10,
             maxOps: 8000,
             roomCallback: roomName => {
@@ -190,6 +212,7 @@ export default class PositionFunctionFindExtension extends RoomPosition {
                         costs.set(struct.pos.x, struct.pos.y, 0xff)
                 })
                 room.find(FIND_MY_CONSTRUCTION_SITES).forEach(cons => {
+                    if (cons.structureType == 'road') costs.set(cons.pos.x, cons.pos.y, 1)
                     if (cons.structureType != 'road' && cons.structureType != 'rampart' && cons.structureType != 'container')
                         costs.set(cons.pos.x, cons.pos.y, 255)
                 })

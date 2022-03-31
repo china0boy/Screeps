@@ -370,6 +370,7 @@ export default class CreepMissonWarExtension extends Creep {
         }
     }
     
+    //四人小队
     public handle_task_squard():void{
         var misson = this.memory.MissionData.Data
         var shard = misson.shard

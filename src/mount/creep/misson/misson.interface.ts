@@ -38,9 +38,12 @@ interface CreepMemory {
     captain?: boolean
     swith?: boolean
     unBoostContainer?: Id<StructureContainer>
-    disPos?:string
     num?:number
-    bindpoint?:string
+    //外矿
+    disPos?:string//source的pos
+    bindpoint?:string//source的id
+    containerId?:string//小罐子的id
+
     controlledBySquardFrame?:boolean
     squad?:Squad
     arrived?:boolean

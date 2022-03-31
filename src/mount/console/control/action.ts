@@ -120,7 +120,7 @@ export default {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[war] 不存在房间${roomName}`
             let interval_ = interval ? interval : 1000
-            let task = thisRoom.Public_dismantle(disRoom, num, interval_, boost,shard)
+            let task = thisRoom.Public_dismantle(disRoom, num, interval_, boost, shard)
             if (thisRoom.AddMission(task))
                 return Colorful(`[war] 房间${roomName}挂载拆迁任务成功 -> ${disRoom}`, 'green')
             return Colorful(`[war] 房间${roomName}挂载拆迁任务失败 -> ${disRoom}`, 'red')
@@ -155,10 +155,11 @@ export default {
             }
             return Colorful(`[war] 房间${roomName}紧急支援任务失败`, 'red')
         },
-        control(roomName: string, disRoom: string,body:number=1 ,interval: number = 800, shard: shardName = Game.shard.name as shardName): string {
+        control(roomName: string, disRoom: string, body: number = 1, interval: number = 800, shard: shardName = Game.shard.name as shardName): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[war] 不存在房间${roomName}`
-            let task = thisRoom.Public_control(disRoom,body, interval,shard)
+            if (body != 1 && body != 2) return `body 只限1或者2`;
+            let task = thisRoom.Public_control(disRoom, body, interval, shard)
             if (thisRoom.AddMission(task))
                 return Colorful(`[war] 房间${roomName}挂载控制攻击任务成功 -> ${disRoom}`, 'green')
             return Colorful(`[war] 房间${roomName}挂载控制攻击任务失败 -> ${disRoom}`, 'red')
@@ -174,51 +175,42 @@ export default {
             }
             return Colorful(`[war] 房间${roomName}控制攻击任务失败`, 'red')
         },
-        squad(roomName:string,disRoom:string,shard:shardName,mtype:'R'|'A'|'D'|'Aio'|'RA'|'DA'|'DR',time:number= 1000):string{
+        squad(roomName: string, disRoom: string, mtype: 'R' | 'A' | 'D' | 'Aio' | 'RA' | 'DA' | 'DR', time: number = 1000, shard: shardName = Game.shard.name as shardName): string {
             var myRoom = Game.rooms[roomName]
             if (!myRoom) return `[war] 未找到房间${roomName},请确认房间!`
-            let thisTask:MissionModel
-            if (mtype == 'R')
-            {
-                thisTask = myRoom.public_squad(disRoom,shard,time,2,0,0,2,0,mtype)
+            let thisTask: MissionModel
+            if (mtype == 'R') {
+                thisTask = myRoom.public_squad(disRoom, shard, time, 2, 0, 0, 2, 0, mtype)//蓝绿
             }
-            else if (mtype == 'A')
-            {
-                thisTask = myRoom.public_squad(disRoom,shard,time,0,2,0,2,0,mtype)
+            else if (mtype == 'A') {
+                thisTask = myRoom.public_squad(disRoom, shard, time, 0, 2, 0, 2, 0, mtype)//红绿
             }
-            else if (mtype == 'D')
-            {
-                thisTask = myRoom.public_squad(disRoom,shard,time,0,0,2,2,0,mtype)
+            else if (mtype == 'D') {
+                thisTask = myRoom.public_squad(disRoom, shard, time, 0, 0, 2, 2, 0, mtype)//黄绿
             }
-            else if (mtype == 'Aio')
-            {
-                thisTask = myRoom.public_squad(disRoom,shard,time,0,0,0,0,4,mtype)
+            else if (mtype == 'Aio') {
+                thisTask = myRoom.public_squad(disRoom, shard, time, 0, 0, 0, 0, 4, mtype)//一体机
             }
-            else if (mtype == 'RA')
-            {
-                thisTask = myRoom.public_squad(disRoom,shard,time,1,1,0,2,0,mtype)
+            else if (mtype == 'RA') {
+                thisTask = myRoom.public_squad(disRoom, shard, time, 1, 1, 0, 2, 0, mtype)//蓝红绿
             }
-            else if (mtype == 'DA')
-            {
-                thisTask = myRoom.public_squad(disRoom,shard,time,0,1,1,2,0,mtype)
+            else if (mtype == 'DA') {
+                thisTask = myRoom.public_squad(disRoom, shard, time, 0, 1, 1, 2, 0, mtype)//红黄绿
             }
-            else if (mtype == 'DR')
-            {
-                thisTask = myRoom.public_squad(disRoom,shard,time,1,0,1,2,0,mtype)
+            else if (mtype == 'DR') {
+                thisTask = myRoom.public_squad(disRoom, shard, time, 1, 0, 1, 2, 0, mtype)//蓝黄绿
             }
             if (myRoom.AddMission(thisTask))
-            return `[war] 四人小队任务挂载成功! ${Game.shard.name}/${roomName} -> ${shard}/${disRoom}`
+                return `[war] 四人小队任务挂载成功! ${Game.shard.name}/${roomName} -> ${shard}/${disRoom}`
             return `[war] 四人小队挂载失败!`
         },
-        Csquad(roomName:string,disRoom:string,shard:shardName,mtype:'R'|'A'|'D'|'Aio'|'RA'|'DA'|'DR'):string{
+        Csquad(roomName: string, disRoom: string, mtype: 'R' | 'A' | 'D' | 'Aio' | 'RA' | 'DA' | 'DR', shard: shardName = Game.shard.name as shardName): string {
             var myRoom = Game.rooms[roomName]
             if (!myRoom) return `[war] 未找到房间${roomName},请确认房间!`
-            for (var i of myRoom.memory.Misson['Creep'])
-            {
-                if (i.name == '四人小队' && i.Data.disRoom == disRoom && i.Data.shard == shard && i.Data.flag == mtype)
-                {
+            for (var i of myRoom.memory.Misson['Creep']) {
+                if (i.name == '四人小队' && i.Data.disRoom == disRoom && i.Data.shard == shard && i.Data.flag == mtype) {
                     if (myRoom.DeleteMission(i.id))
-                    return `[war] 删除去往${shard}/${disRoom}的四人小队任务成功!`
+                        return `[war] 删除去往${shard}/${disRoom}的四人小队任务成功!`
                 }
             }
             return `[war] 删除去往${shard}/${disRoom}的四人小队任务失败!`
@@ -335,14 +327,14 @@ export default {
             else
                 return Colorful(`[nuke]${roomName}->${disRoom}的核弹发射失败!`, 'yellow', true)
         },
-        add(roomName: string):string{
+        add(roomName: string): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[nuker] 不存在房间${roomName}`
             var thisTask = thisRoom.public_Nuker()
             if (thisRoom.AddMission(thisTask)) return `[nuker] ${roomName} 的核弹填充任务挂载成功！`
             return `[nuker] ${roomName} 的核弹填充任务挂载失败！`
         },
-        remove(roomName: string):string{
+        remove(roomName: string): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[nuker] 不存在房间${roomName}`
             for (var i of thisRoom.memory.Misson['Structure']) {

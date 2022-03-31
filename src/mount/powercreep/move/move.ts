@@ -27,7 +27,7 @@ export default class PowerCreepMoveExtension extends PowerCreep {
     }
 
     // 通用寻路
-    public findPath(target: RoomPosition, range: number): string | null {
+    public findPath(target: RoomPosition, range: number, flee: boolean): string | null {
         /* 全局路线存储 */
         if (!global.routeCache) global.routeCache = {}
         if (!this.memory.moveData) this.memory.moveData = {}
@@ -39,10 +39,37 @@ export default class PowerCreepMoveExtension extends PowerCreep {
             return route
         }
 
-        // 使用`findRoute`计算路径的高阶计划，优先选择大路和自有房间
-        let allowedRooms = { [this.pos.roomName]: true };
+        var result = { path: [], incomplete: true };
+        if (this.room.name != target.roomName)
+            result = this.findSearch(target, range, 0, flee)
+        else result = this.findSearch(target, range, 1, flee)
 
-        if (this.pos.roomName != target.roomName) {
+        // 寻路异常返回null
+        if (result.path.length <= 0) return null
+        if (!result.incomplete) {//寻到就存起来
+            route = this.serializeFarPath(result.path)
+            global.routeCache[routeKey] = route
+            return route
+        }
+        else {//没寻到尝试在寻一次
+            if (this.room.name == target.roomName) {
+                result = this.findSearch(target, range, 2, flee)
+            }
+        }
+
+        // 寻路异常返回null
+        if (result.path.length <= 0) return null
+        // 寻路结果压缩
+        route = this.serializeFarPath(result.path)
+        global.routeCache[routeKey] = route
+        return route
+    }
+
+
+    public findSearch(target: RoomPosition, range: number, key: number, flee: boolean): PathFinderPath {
+        // 使用`findRoute`计算路径的高阶计划，优先选择大路和自有房间
+        var allowedRooms = { [this.pos.roomName]: true }
+        if (key == 0) {
             let ret = Game.map.findRoute(this.pos.roomName, target.roomName, {
                 routeCallback(roomName) {
                     // 在全局绕过房间列表的房间 false
@@ -71,10 +98,11 @@ export default class PowerCreepMoveExtension extends PowerCreep {
         const result = PathFinder.search(this.pos, { pos: target, range: range }, {
             plainCost: 2,
             swampCost: 5,
-            maxOps: 8000,
+            maxOps: flee ? 1000 : ((key == 0 || key == 1) && target.roomName == this.room.name) ? 1000 : 8000,
+            flee: flee,
             roomCallback: roomName => {
                 //躲避这些房间
-                if (allowedRooms[roomName] === undefined) {
+                if ((key == 0 || key == 1) && allowedRooms[roomName] === undefined) {
                     return false;
                 }
                 const room = Game.rooms[roomName]
@@ -108,12 +136,7 @@ export default class PowerCreepMoveExtension extends PowerCreep {
                 return costs
             }
         })
-        // 寻路异常返回null
-        if (result.path.length <= 0) return null
-        // 寻路结果压缩
-        route = this.serializeFarPath(result.path)
-        if (!result.incomplete) global.routeCache[routeKey] = route
-        return route
+        return result
     }
 
     // 使用寻路结果移动
@@ -135,18 +158,18 @@ export default class PowerCreepMoveExtension extends PowerCreep {
     }
 
     // 通用移动 (配合findPath 和 goByPath)
-    public goTo(target: RoomPosition, range: number = 1): CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET {
+    public goTo(target: RoomPosition, range: number = 1, flee: boolean = false): CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET {
         //  var a = Game.cpu.getUsed()
         if (this.memory.moveData == undefined) this.memory.moveData = {}
         // 确认目标没有变化，如果变化了就重新规划路线
         const targetPosTag = this.standardizePos(target)
         if (targetPosTag !== this.memory.moveData.targetPos) {
             this.memory.moveData.targetPos = targetPosTag
-            this.memory.moveData.path = this.findPath(target, range)
+            this.memory.moveData.path = this.findPath(target, range, flee)
         }
         // 确认缓存有没有被清除
         if (!this.memory.moveData.path) {
-            this.memory.moveData.path = this.findPath(target, range)
+            this.memory.moveData.path = this.findPath(target, range, flee)
         }
         // 还为空的话就是没有找到路径
         if (!this.memory.moveData.path) {
@@ -178,7 +201,9 @@ export default class PowerCreepMoveExtension extends PowerCreep {
         if (!fontCreep) return ERR_NOT_FOUND
         if (fontCreep.owner.username != this.owner.username) return
         this.say("👉")
-        if (fontCreep.manageCross(getOppositeDirection(direction), this.memory.crossLevel)) this.move(direction)
+        if (fontCreep.manageCross(getOppositeDirection(direction), this.memory.crossLevel)) {
+            this.move(direction)
+        }
         return OK
     }
 

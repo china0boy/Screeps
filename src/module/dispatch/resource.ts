@@ -98,7 +98,7 @@ export function ResourceDispatch(thisRoom: Room): void {
                 let task = thisRoom.Public_Send(i.sourceRoom, i.rType, SendNum)
                 if (task && thisRoom.AddMission(task)) {
                     if (i.num <= 50000) i.dealRoom = thisRoom.name // 如果调度数量大于50k 则只减少num数量
-                    console.log(`房间${thisRoom.name}接取房间${i.sourceRoom}的资源调度申请,资源:${i.rType},数量:${SendNum}`)
+                    console.log(Colorful(`房间${thisRoom.name}接取房间${i.sourceRoom}的资源调度申请,资源:${i.rType},数量:${SendNum}`, 'green'))
                     i.num -= SendNum
                     return
                 }
@@ -108,7 +108,7 @@ export function ResourceDispatch(thisRoom: Room): void {
                 let SendNum = storage_.store.getUsedCapacity(i.rType) - limitNum
                 let task = thisRoom.Public_Send(i.sourceRoom, i.rType, SendNum)
                 if (task && thisRoom.AddMission(task)) {
-                    console.log(`房间${thisRoom.name}接取房间${i.sourceRoom}的资源调度申请,资源:${i.rType},数量:${SendNum}`)
+                    console.log(Colorful(`房间${thisRoom.name}接取房间${i.sourceRoom}的资源调度申请,资源:${i.rType},数量:${SendNum}`, 'green'))
                     i.num -= SendNum
                     return
                 }
@@ -123,7 +123,7 @@ export function ResourceDispatchTick(): void {
     for (let i of Memory.ResourceDispatchData) {
         // 超时将删除调度信息
         if (!i.delayTick || i.delayTick <= 0 || i.num <= 0 || !i.rType) {
-            console.log(`[资源调度]房间${i.sourceRoom}的[${i.rType}]资源调度删除!原因:调度任务已部署|超时|无效调度`)
+            console.log(Colorful(`[资源调度]房间${i.sourceRoom}的[${i.rType}]资源调度删除!原因:调度任务已部署|超时|无效调度`,'pink'))
             let index = Memory.ResourceDispatchData.indexOf(i)
             Memory.ResourceDispatchData.splice(index, 1)
         }

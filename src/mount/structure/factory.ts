@@ -53,7 +53,7 @@ export class factoryExtension extends StructureFactory {
                                         //总底物需要的数量 = 总数量*底物单次合成的数量/单次合成的数量 - 罐子 - 终端 - 工厂
                                         num = this.room.memory.Factory.dataProduce[j].num * COMMODITIES[j].components[i] / COMMODITIES[j].amount - storage_.store[i] - numT - this.store[i];
                                         num = num > a ? a : num;//看看是否全局资源比就算少，少就按全局资源来算，多就按需要的资源算
-                                        for (; num >= 150000; num /= 2) { }//防止太多无法调度成功
+                                        num = num > 150000 ? 150000 : num//防止太多无法调度成功
                                         break;
                                     }
                                 }
@@ -263,6 +263,8 @@ export class factoryExtension extends StructureFactory {
         }
         if (!Factory.produce[type]) this.add(type as CommodityConstant | MineralConstant | "energy" | "G");//添加合成
 
+        for (let i in COMMODITIES[type].components)
+            if (this.store[i] < COMMODITIES[type].components[i]) return
         let a = this.produce(type)//合成
         if (a == 0) {
             if (Factory.dataProduce[type]) {//如果有单个物品合成就减少数量，没有的话就无脑合
@@ -270,6 +272,7 @@ export class factoryExtension extends StructureFactory {
             }
             return true
         }
+        //console.log(`${this.room.name}: ${type} : ${a}`)
         if (a == ERR_BUSY && Factory.level == COMMODITIES[type].level && Game.powerCreeps[`${this.room.name}/queen/${Game.shard.name}`])
             this.room.enhance_factory();
         return false
@@ -346,7 +349,7 @@ export class factoryExtension extends StructureFactory {
      */
     public add_Bar(types: CommodityConstant | MineralConstant | "energy" | "G", num: number): string {
         if (this.room.memory.Factory.automation_Bar === undefined) this.room.memory.Factory.automation_Bar = {}
-        let type = ['U', 'L', 'K', 'Z', 'X', 'O', 'H', 'battery'];
+        let type = ['U', 'L', 'K', 'Z', 'X', 'O', 'H', 'battery', 'silicon', 'biomass', 'mist', 'metal'];
         if (type.indexOf(types) != -1) {
             this.room.memory.Factory.automation_Bar[types] = { num: num }
             return `添加 ${type} 数量高于 ${num} 将自动发布合成压缩包任务`
@@ -390,6 +393,7 @@ export class factoryExtension extends StructureFactory {
         if (Game.time % 1000) return
         let storage_ = global.Stru[this.room.name]['storage'] as StructureStorage
         let type = ['U', 'L', 'K', 'Z', 'X', 'O', 'H'];
+        let type1 = { 'metal': 'alloy', 'mist': 'condensate', 'biomass': 'cell', 'silicon': 'wire' };
         let Factory = this.room.memory.Factory
         if (Factory.automation_Bar === undefined) Factory.automation_Bar = {}
         for (let i of type) {
@@ -400,6 +404,12 @@ export class factoryExtension extends StructureFactory {
                         this.addDataProduce(j as CommodityConstant | MineralConstant | "energy" | "G", Factory.automation_Bar[i].num * COMMODITIES[i].components[j] / COMMODITIES[i].amount); return
                     }
                 }
+            }
+        }
+        for (let i in type1) {
+            if (Factory.automation_Bar[i] && storage_.store[i] >= Factory.automation_Bar[i].num) {
+                console.log(`${this.room.name}:${i}>=${Factory.automation_Bar[i].num} 自动添加合成  ${type1[i]}`)
+                this.addDataProduce(type1[i], Factory.automation_Bar[i].num / 5); return
             }
         }
     }

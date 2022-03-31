@@ -222,23 +222,13 @@ export default class CreepMissonActionExtension extends Creep {
                     this.build_(cons)
                     return
                 }
-                let roads = this.pos.findClosestByRange(FIND_STRUCTURES, {
-                    filter: (stru) => {
-                        return (stru.structureType == 'road' || stru.structureType == 'container') && stru.hits < stru.hitsMax
+                if (Game.rooms[this.room.name] && Game.rooms[this.room.name].memory.StructureIdData.AtowerID) {
+                    let towers = []
+                    Game.rooms[this.room.name].memory.StructureIdData.AtowerID.forEach((tower: Id<StructureTower>) => { if (Game.getObjectById(tower).store.getFreeCapacity('energy')) towers.push(Game.getObjectById(tower)) })
+                    if (towers.length && towers[0]) {
+                        this.transfer_(towers[0], 'energy')
+                        return
                     }
-                })
-                if (roads) {
-                    this.repair_(roads)
-                    return
-                }
-                let tower = this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-                    filter: (stru) => {
-                        return stru.structureType == 'tower' && stru.store.getFreeCapacity('energy') > 0
-                    }
-                })
-                if (tower) {
-                    this.transfer_(tower, 'energy')
-                    return
                 }
                 let store = this.pos.getClosestStore()
                 if (store) {
@@ -248,13 +238,21 @@ export default class CreepMissonActionExtension extends Creep {
                 this.upgrade_()
             }
             else {
-                let source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)
-                if (source) this.harvest_(source)
+                if (Game.time % 10 == 0 || this.pos.x == 0 || this.pos.x == 49 || this.pos.y == 0 || this.pos.y == 49) {
+                    let source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)
+                    if (source) {
+                        missionData.sourceId = source.id
+                    }
+                }
+                if (missionData.sourceId) {
+                    let source = Game.getObjectById(missionData.sourceId) as Source
+                    this.harvest_(source)
+                }
                 else {
                     let structure = posFindClosestByRange(this.pos, 'energy');
                     if (structure) this.withdraw_(structure, 'energy');
                 }
-                if (this.ticksToLive < 50 && this.store.getUsedCapacity('energy') <= 20) this.suicide()
+                if (this.ticksToLive < 80 && this.store.getUsedCapacity('energy') <= 0) this.suicide()
             }
         }
         else if (this.memory.role == 'Eupgrade') {
@@ -266,13 +264,21 @@ export default class CreepMissonActionExtension extends Creep {
                 else this.upgrade_()
             }
             else {
-                let source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)
-                if (source) this.harvest_(source)
+                if (Game.time % 10 == 0 || this.pos.x == 0 || this.pos.x == 49 || this.pos.y == 0 || this.pos.y == 49) {
+                    let source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)
+                    if (source) {
+                        missionData.sourceId = source.id
+                    }
+                }
+                if (missionData.sourceId) {
+                    let source = Game.getObjectById(missionData.sourceId) as Source
+                    this.harvest_(source)
+                }
                 else {
                     let structure = posFindClosestByRange(this.pos, 'energy');
                     if (structure) this.withdraw_(structure, 'energy');
                 }
-                if (this.ticksToLive < 50 && this.store.getUsedCapacity('energy') <= 20) this.suicide()
+                if (this.ticksToLive < 80 && this.store.getUsedCapacity('energy') <= 0) this.suicide()
             }
         }
     }
@@ -467,7 +473,6 @@ export default class CreepMissonActionExtension extends Creep {
     public handle_doubleDismantle(): void {
         let missionData = this.memory.MissionData
         if (!missionData) return
-        if (!this.memory.standed) this.memory.standed = true;
         let id = missionData.id
         let data = missionData.Data
         var Flag = Game.flags[data.FlagName]
@@ -505,6 +510,7 @@ export default class CreepMissonActionExtension extends Creep {
             return
         }
         else { if (!Game.creeps[this.memory.double]) delete this.memory.double }
+        this.memory.crossLevel = 15;
         if (this.memory.role == 'double-attack') {
             if (!Game.creeps[this.memory.double]) return
             let creep_ = Game.creeps[this.memory.double];//配对爬
@@ -601,6 +607,11 @@ export default class CreepMissonActionExtension extends Creep {
             let creep_ = Game.creeps[this.memory.double];//配对爬
             if (creep_) {
                 this.handle_heal(creep_)
+                if (creep_.pos.roomName == this.pos.roomName && Flag.pos.roomName == this.pos.roomName && getDistance1(this.pos, creep_.pos) <= 1 && getDistance1(this.pos, Flag.pos) <= 2 && (this.pos.x == 0 || this.pos.x == 49 || this.pos.y == 0 || this.pos.y == 49)) {
+                    let pos = creep_.pos.getVoid()
+                    console.log(pos)
+                    if (pos.length) { this.move(this.pos.getDirectionTo(pos[0])); return }
+                }
                 if (creep_.pos.roomName == this.pos.roomName && getDistance1(this.pos, creep_.pos) >= 2) this.goTo(creep_.pos, 1);
                 else this.move(this.pos.getDirectionTo(creep_))
             }
@@ -781,11 +792,11 @@ export default class CreepMissonActionExtension extends Creep {
     public handle_AIO(): void {
         let missionData = this.memory.MissionData;
         if (!missionData) return;
-        if (!this.memory.standed) this.memory.standed = true;
         let id = missionData.id;
         let data = missionData.Data;
         let Falg = Game.flags[data.FlagName];
         if (!this.BoostCheck(['move', 'ranged_attack', 'heal', 'tough'])) return
+        if (!this.memory.standed) this.memory.standed = true;
         if (Game.shard.name != data.shard) {//先到同shard
             this.arriveTo(new RoomPosition(24, 24, 'W39S59'), 23, data.shard)//这个房间名我也不知道怎么填，跨shard前搜不到旗子，先跨shard
             return;

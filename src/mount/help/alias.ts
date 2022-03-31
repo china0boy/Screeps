@@ -165,6 +165,29 @@ export default [
                                 functionName: 'expand.remove'
                             },
                             {
+                                title: '四人小队(蓝旗集结  攻击"squad_attack"名字的旗子):',
+                                describe: '例: war.squad("W1N1","W1N2","A")',
+                                params: [
+                                    { name: 'roomName', desc: '我的房间名' },
+                                    { name: 'disRoom', desc: '要攻击的目标房间' },
+                                    { name: 'mtype', desc: '小队类型 R:蓝绿 A:红绿 D:黄绿 Aio:一体机 RA:蓝红绿 DA:黄红绿 DR:蓝黄绿' },
+                                    { name: 'interval', desc: '出兵间隔时间 (默认1000)' },
+                                    { name: 'shard', desc: 'shard (默认此shard)' },
+                                ],
+                                functionName: 'war.squad'
+                            },
+                            {
+                                title: '取消四人小队:',
+                                describe: '例: war.Csquad("W1N1","W1N2","A")',
+                                params: [
+                                    { name: 'roomName', desc: '我的房间名' },
+                                    { name: 'disRoom', desc: '要攻击的目标房间' },
+                                    { name: 'mtype', desc: '小队类型 R:蓝绿 A:红绿 D:黄绿 Aio:一体机 RA:蓝红绿 DA:黄红绿 DR:蓝黄绿' },
+                                    { name: 'shard', desc: 'shard (默认此shard)' },
+                                ],
+                                functionName: 'war.Csquad'
+                            },
+                            {
                                 title: '一体机(需要t3 XKHO2 XGHO2 XLHO2 XZHO2):',
                                 describe: '出动一体机攻击 例:war.disaio("W1N1","Flag1", 1, 2, "shard3", "1000")',
                                 params: [
@@ -250,7 +273,7 @@ export default [
                             },
                             {
                                 title: '控制器攻击:',
-                                describe: '一直攻击控制器 例: war.control("W1N1","W1N2",800)',
+                                describe: '一直攻击控制器 例: war.control("W1N1","W1N2",1,800)',
                                 params: [
                                     { name: 'roomName', desc: '我的房间名' },
                                     { name: 'disRoom', desc: '目标房间' },
@@ -495,7 +518,7 @@ export default [
                             },
                         ]
                     },
-                    
+
                     {
                         name: '外矿指令',
                         describe: '关于外矿',

@@ -89,4 +89,22 @@ export default class RoomMissonTransportExtension extends Room {
         }
     }
 
+    // unBoost的化合物回收
+    public Un_boost(): void {
+        if ((global.Gtime[this.name] - Game.time) % 13) return
+        if (this.memory.StructureIdData.UnBoostId) {
+            let container = Game.getObjectById(this.memory.StructureIdData.UnBoostId) as StructureContainer
+            if (!container) { delete this.memory.StructureIdData.UnBoostId; return }
+
+            if (container.store.getUsedCapacity()) {
+                let a = this.storage ? this.storage : this.terminal;
+                if (a && this.Check_Carry('transport', container.pos, a.pos, Object.keys(container.store)[0] as ResourceConstant)) {
+                    let thisTask = this.Public_Carry({ 'transport': { num: 1, bind: [] } }, 20, this.name, container.pos.x, container.pos.y, this.name, a.pos.x, a.pos.y, Object.keys(container.store)[0] as ResourceConstant, container.store[Object.keys(container.store)[0]])
+                    this.AddMission(thisTask)
+                }
+            }
+        }
+    }
+
 }
+

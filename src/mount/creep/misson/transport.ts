@@ -1,42 +1,32 @@
 /* 爬虫原型拓展   --任务  --搬运工任务 */
 
 export default class CreepMissonTransportExtension extends Creep {
+    /** 虫卵填充 */
     public handle_feed(): void {
         if (!this.room.memory.StructureIdData.storageID) return
-        var storage_ = Game.getObjectById(this.room.memory.StructureIdData.storageID as Id<StructureStorage>)
+        var storage_ = global.Stru[this.memory.belong]['storage'] as StructureStorage
         if (!storage_) return
-        this.workstate('energy')
         for (var r in this.store) {
             if (r != 'energy') {
                 this.say("🚽")
                 /* 如果是自己的房间，则优先扔到最近的storage去 */
                 if (this.room.name == this.memory.belong) {
                     if (!this.room.memory.StructureIdData.storageID) return
-                    var storage = Game.getObjectById(this.room.memory.StructureIdData.storageID as Id<StructureStorage>)
-                    if (!storage) return
-                    if (storage.store.getUsedCapacity() > this.store.getUsedCapacity()) {
-                        this.transfer_(storage, r as ResourceConstant)
+                    if (storage_.store.getUsedCapacity() > this.store.getUsedCapacity()) {
+                        this.transfer_(storage_, r as ResourceConstant)
                     }
                     else return
                 }
                 return
             }
         }
-        if (this.memory.working) {
+        if (this.store.getUsedCapacity('energy')) {
             this.say("🍉")
             if (this.memory.fillingConstruction == undefined) this.memory.fillingConstruction = null;//防止没内存
             if (this.memory.fillingConstruction && !Game.getObjectById(this.memory.fillingConstruction as Id<StructureExtension | StructureSpawn>).store.getFreeCapacity('energy')) this.memory.fillingConstruction = null;//要填的建筑容量满了就重置
             var extensions = null;
             if (!this.memory.fillingConstruction) {
-                if (!extensions) extensions = this.pos.getClosestStore();//首先搜索虫卵
-                if (!extensions)    // 再其次防御塔
-                {
-                    extensions = this.pos.findClosestByRange(FIND_STRUCTURES, {
-                        filter: (stru) => {
-                            return stru.structureType == 'tower' && stru.store.getFreeCapacity('energy') > this.store.getUsedCapacity('energy')
-                        }
-                    })
-                }
+                if (!extensions) extensions = this.pos.getClosestStore();//搜索虫卵
             }
             let a: ScreepsReturnCode = null;
 
@@ -50,11 +40,6 @@ export default class CreepMissonTransportExtension extends Creep {
             if (a == OK) {
                 let target1 = null;
                 target1 = this.pos.getClosestStore(fillingConstruction);//搜索除当前的建筑的以外建筑
-                if (!target1) {
-                    target1 = this.pos.findClosestByRange(FIND_STRUCTURES, {
-                        filter: (stru) => { return stru != fillingConstruction && stru.structureType == 'tower' && stru.store.getFreeCapacity('energy') > this.store.getUsedCapacity('energy') }
-                    });
-                }
                 if (target1) this.memory.fillingConstruction = target1.id;
                 if (this.store.getUsedCapacity('energy') > fillingConstruction.store.getFreeCapacity('energy') && target1 && Math.max(Math.abs(target1.pos.x - this.pos.x), Math.abs(target1.pos.y - this.pos.y)) > 1) { this.goTo(target1.pos, 1); }
             }
@@ -68,7 +53,7 @@ export default class CreepMissonTransportExtension extends Creep {
             }
         }
         else {
-            let terminal_ = Game.getObjectById(Game.rooms[this.memory.belong].memory.StructureIdData.terminalID) as StructureTerminal
+            let terminal_ = global.Stru[this.memory.belong]['terminal'] as StructureTerminal
 
             if (terminal_) {
                 if (storage_.store['energy'] >= terminal_.store['energy']) {
@@ -129,7 +114,7 @@ export default class CreepMissonTransportExtension extends Creep {
                 }
             }
             if (Data.num) {
-                if (Data.num < 0) { Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id); return }
+                if (Data.num <= 0) { Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id); return }
                 /* 如果指定了num-- 任务结束条件：[搬运了指定num] */
                 if (this.memory.working) {
                     var thisPos = new RoomPosition(Data.targetPosX, Data.targetPosY, Data.targetRoom)

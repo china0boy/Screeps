@@ -140,8 +140,8 @@ export default class RoomCoreInitExtension extends Room {
         }
         /* 仓库记忆更新 */
         if (level >= 4 && !this.memory.StructureIdData.storageID) {
-            var new_storage = this.find(FIND_MY_STRUCTURES, { filter: { structureType: STRUCTURE_STORAGE } })
-            if (new_storage.length == 1) this.memory.StructureIdData.storageID = new_storage[0].id
+            var new_storage = this.storage
+            if (new_storage && new_storage.my) this.memory.StructureIdData.storageID = new_storage.id
         }
         /* 防御塔记忆更新 */
         if (Game.time % 150 == 0 && this.controller.level >= 3) {
@@ -158,8 +158,8 @@ export default class RoomCoreInitExtension extends Room {
         }
         /* 终端识别 */
         if (!this.memory.StructureIdData.terminalID && level >= 6) {
-            var Terminal = this.getStructure(STRUCTURE_TERMINAL)
-            if (Terminal.length == 1) this.memory.StructureIdData.terminalID = Terminal[0].id
+            var Terminal = this.terminal
+            if (Terminal && Terminal.my) this.memory.StructureIdData.terminalID = Terminal.id
         }
         /* 提取器识别 */
         if (!this.memory.StructureIdData.extractID && this.controller.level >= 5) {
@@ -186,30 +186,42 @@ export default class RoomCoreInitExtension extends Room {
 
         }
         /* 观察器识别 */
-        if (!this.memory.StructureIdData.ObserverID && this.controller.level >= 8) {
+        if (!this.memory.StructureIdData.ObserverID && this.controller.level >= 8 && Game.time % 200 == 0) {
             var observer_ = this.getStructure(STRUCTURE_OBSERVER)
             if (observer_.length > 0) {
                 this.memory.StructureIdData.ObserverID = observer_[0].id
             }
         }
         /* PowerSpawn识别 */
-        if (!this.memory.StructureIdData.PowerSpawnID && this.controller.level >= 8) {
+        if (!this.memory.StructureIdData.PowerSpawnID && this.controller.level >= 8 && Game.time % 200 == 0) {
             var powerSpawn = this.getStructure(STRUCTURE_POWER_SPAWN)
             if (powerSpawn.length > 0)
                 this.memory.StructureIdData.PowerSpawnID = powerSpawn[0].id
         }
         /* 核弹识别 */
-        if (!this.memory.StructureIdData.NukerID && this.controller.level >= 8) {
+        if (!this.memory.StructureIdData.NukerID && this.controller.level >= 8 && Game.time % 200 == 0) {
             var nuke_ = this.getStructure(STRUCTURE_NUKER)
             if (nuke_.length > 0) {
                 this.memory.StructureIdData.NukerID = nuke_[0].id
             }
         }
         /* 工厂识别 */
-        if (!this.memory.StructureIdData.FactoryId && this.controller.level >= 7) {
+        if (!this.memory.StructureIdData.FactoryId && this.controller.level >= 7 && Game.time % 200 == 0) {
             var factory_ = this.getStructure(STRUCTURE_FACTORY)
             if (factory_.length > 0) {
                 this.memory.StructureIdData.FactoryId = factory_[0].id
+            }
+        }
+        /* unBoost的小罐子识别 */
+        if (!this.memory.StructureIdData.UnBoostId && this.controller.level >= 6 && Game.time % 200 == 0) {
+            let container = this.find(FIND_STRUCTURES, {
+                filter: function (object) {
+                    return object.structureType == STRUCTURE_CONTAINER &&
+                        object.pos.findInRange(FIND_MY_STRUCTURES, 1, { filter: function (object) { return object.structureType == STRUCTURE_LAB; } }).length
+                }
+            }) as StructureContainer[];
+            if (container.length > 0) {
+                this.memory.StructureIdData.UnBoostId = container[0].id
             }
         }
         // harvestData 数据更新

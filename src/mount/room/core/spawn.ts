@@ -153,7 +153,7 @@ export default class RoomCoreSpawnExtension extends Room {
                 }
             }
             if (allEnergy >= CalculateEnergy(body)) {
-                let result = thisSpawn.spawnCreep(body, `[${mark}] ${randomStr}${timestr}`, { memory: thisMem })//[${mark}] ${randomStr}${timestr}  ${timestr}----${mark}
+                let result = thisSpawn.spawnCreep(body, `[${mark}] ${randomStr}${timestr}`, { memory: thisMem })//[${mark}] ${randomStr}${timestr}  ${timestr}----${mark}  ${timestr}|${mark}${randomStr}  ${randomStr}__${mark}${timestr}
                 if (result == OK) {
                     allEnergy -= CalculateEnergy(body)
                     spawnlist.splice(0, 1)   // 孵化成功，删除该孵化数据

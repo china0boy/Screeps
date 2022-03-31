@@ -16,6 +16,7 @@ interface Room {
     Spawn_Feed(): void
     Constru_Build(): void
     Tower_Feed(): void
+    Un_boost(): void
     Lab_Feed(): void
     Task_CenterLink(): void
     Task_Clink(): void
