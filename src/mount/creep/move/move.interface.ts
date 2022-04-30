@@ -17,9 +17,10 @@ interface Creep {
     // 单位移动
     go(direction: DirectionConstant): CreepMoveReturnCode | ERR_INVALID_TARGET
     //寻找我和目标之间路径是否完整 ture为完整路径
-    PathFinder(target: RoomPosition, range: number): boolean
+    PathFinders(target: RoomPosition, range: number, bool?: boolean): boolean
     // 跨shard移动
-    arriveTo(target: RoomPosition, range: number, shard: shardName): void
+    arriveTo(target: RoomPosition, range: number, shard: shardName,shardData?:shardRoomData[]): void
+    updateShardAffirm():void
     serializeFarPath(positions: RoomPosition[]): string
     goTo_defend(target: RoomPosition, range: number): CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET
     findPath_defend(target: RoomPosition, range: number): string | null
@@ -52,6 +53,25 @@ interface CreepMemory {
     prePos?: string
     // 禁用自己对穿
     disableCross?: boolean
+    // 跨多个shard数据
+    shardAffirm?:shardAffirmData[]
 }
 
 type shardName = "shard0" | "shard1" | "shard2" | "shard3"
+interface shardRoomData{
+    shard:shardName,    // 星门所在shard
+    roomName:string,        // 星门所处的房间
+    disShardName?:shardName
+    // disRoomName:string,     // 星门通向的房间
+    x:number,
+    y:number
+}
+interface shardAffirmData{
+    shardName:shardName,    // 星门所在shard
+    disShardName:shardName  // 星门通向shard
+    roomName:string,        // 星门所处的房间
+    disRoomName:string,     // 星门通向的房间
+    affirm:boolean,
+    x:number,
+    y:number
+}

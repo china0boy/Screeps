@@ -2,6 +2,7 @@
  * 功能相关声明
  */
 interface Creep {
+    handle_nuke(): boolean 
     workstate(rType: ResourceConstant): void
     harvest_(source_: Source | Mineral): void
     transfer_(distination: Structure, rType: ResourceConstant): ScreepsReturnCode
@@ -14,4 +15,5 @@ interface Creep {
     unBoost(): boolean
     optTower(otype:'heal'|'attack',creep:Creep):void
     isInDefend(creep:Creep):boolean
+    closestCreep(creep:Creep[],hurt?:boolean):Creep
 }

@@ -6,7 +6,7 @@ export default class NormalWarExtension extends Room {
     public Task_dismantle(mission: MissionModel): void {
         if (mission.Data.boost) {
             // 体型
-            global.SpecialBodyData[this.name]['dismantle'] = GenerateAbility(40, 0, 10, 0, 0, 0, 0, 0)
+            global.MSB[mission.id] = { 'dismantle': GenerateAbility(40, 0, 10, 0, 0, 0, 0, 0) }
             // boost lab填充检查
             if (!this.Check_Lab(mission, 'transport', 'complex')) return
         }
@@ -35,37 +35,53 @@ export default class NormalWarExtension extends Room {
         if (mission.Data.level == 10) {
             body = bodyFree({ 'tough': 1, 'ranged_attack': 1, 'move': 1, 'heal': 1 })
         }
-        global.SpecialBodyData[this.name]['AIO'] = body
+        global.MSB[mission.id] = { 'AIO': body }
         // boost lab填充检查
         if (!this.Check_Lab(mission, 'transport', 'complex')) return
         /* 数量投放 */
         if (mission.CreepBind['AIO'].num == 0)
             mission.CreepBind['AIO'].num = mission.Data.num
     }
-    
+
     // 四人小队
-    public Task_squad(mission:MissionModel):void{
-        if ((Game.time - global.Gtime[this.name])% 7) return
-        if (!mission.Data.squadID)
-        {
+    public Task_squad(mission: MissionModel): void {
+        if ((Game.time - global.Gtime[this.name]) % 7) return
+        if (!mission.Data.squadID) {
             if (!Memory.squadMemory) Memory.squadMemory = {}
-            for (var i = 1;i<100;i++)
-            {
-                if (!Memory.squadMemory[`${mission.Data.flag}${i}|${Game.shard.name}`])
-                {
-                    mission.Data.squadID = `${mission.Data.flag}${i}|${Game.shard.name}`
-                    break
-                }
+            let randomStr = Math.random().toString(36).substr(3)
+            if (!Memory.squadMemory[`${mission.Data.flag}|${randomStr}|${Game.shard.name}`]) {
+                mission.Data.squadID = `${mission.Data.flag}|${randomStr}|${Game.shard.name}`
             }
         }
-        else
-        {
-            if (Memory.squadMemory[mission.Data.squadID] && Object.keys(Memory.squadMemory[mission.Data.squadID].creepData).length >= 4)
-            {
+        else {
+            if (Memory.squadMemory[mission.Data.squadID] && Object.keys(Memory.squadMemory[mission.Data.squadID].creepData).length >= 4) {
                 delete mission.Data.squadID
             }
         }
-        if (!this.Check_Lab(mission,'transport','complex')) return
+        if (!this.Check_Lab(mission, 'transport', 'complex')) return
+    }
+
+    // 紧急支援
+    public Task_HelpDefend(mission: MissionModel): void {
+        if ((Game.time - global.Gtime[this.name]) % 7) return
+        if (mission.LabBind) {
+            if (!this.Check_Lab(mission, 'transport', 'complex')) return
+        }
+    }
+
+    //跨shard运输
+    public Task_carry_shard(mission: MissionModel): void {
+        // 体型
+        let body: BodyPartConstant[]
+        switch (mission.Data.level) {
+            case 0: body = bodyFree({ 'move': 25, 'carry': 25 }); break
+            case 1: body = bodyFree({ 'move': 10, 'carry': 40 }); break
+            case 2: body = bodyFree({ 'tough': 10, 'move': 2 }); body.push.apply(body, bodyFree({ 'heal': 20, 'move': 5, 'carry': 10 })); body.push.apply(body, bodyFree({ 'move': 3 })); break
+            case 3: body = bodyFree({ 'tough': 20, 'move': 5, 'carry': 20 }); body.push.apply(body, bodyFree({ 'move': 5 })); break
+        }
+        global.MSB[mission.id] = { 'carryShard': body }
+        // boost lab填充检查
+        if (!this.Check_Lab(mission, 'transport', 'complex')) return
     }
 }
 

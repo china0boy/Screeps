@@ -43,7 +43,11 @@ export default class RoomCoreSpawnExtension extends Room {
         }
         /* 数量信息二次加工 */
         if (this.controller.level != this.memory.originLevel)
+            A:
             for (let role in this.memory.SpawnConfig) {
+                if (role == 'upgrade')
+                    for (let i of this.memory.Misson['Creep'])
+                        if (i.name == '急速冲级') continue A
                 var role_ = this.memory.SpawnConfig[role]
                 if (!role_.manual && RoleLevelData[role] && RoleLevelData[role][this.controller.level]) {
                     role_.num = RoleLevelData[role][this.controller.level].num
@@ -51,7 +55,7 @@ export default class RoomCoreSpawnExtension extends Room {
             }
     }
 
-    /* 爬虫孵化管理器 */
+    /* 常驻爬虫孵化管理器 (任务爬虫是另外一个孵化函数) */
     public SpawnManager(): void {
         LoopA:
         for (let role in this.memory.SpawnConfig) {
@@ -87,6 +91,17 @@ export default class RoomCoreSpawnExtension extends Room {
         if (!this.memory.SpawnList || this.memory.SpawnList.length <= 0) return
         // 如果没有spawn就return
         if (!this.memory.StructureIdData.spawn || this.memory.StructureIdData.spawn.length <= 0) return
+        //核弹要来了，不生了
+        if (this.memory.nukeID && this.memory.nukeID.length) {
+            let nukeTime = 50000;
+            for (let i of this.memory.nukeID) {
+                let nuke = Game.getObjectById(i) as Nuke;
+                if (!nuke) continue
+                if (nuke.timeToLand <= nukeTime) nukeTime = nuke.timeToLand;
+            }
+            if (nukeTime <= 200) return
+        }
+
         let allEnergy = this.energyAvailable;
         for (let sID of this.memory.StructureIdData.spawn as string[]) {
             let thisSpawn = Game.getObjectById(sID) as StructureSpawn
@@ -106,9 +121,14 @@ export default class RoomCoreSpawnExtension extends Room {
             let mem = spawnlist[0].memory
             let bd = spawnlist[0].body
             let body = GenerateAbility(bd[0], bd[1], bd[2], bd[3], bd[4], bd[5], bd[6], bd[7])
-            // 如果global有该爬虫的部件信息，优先用global的数据
+            // 如果global有该爬虫的部件信息，优先用global的数据 global.SpecialBodyData  次优先级
             if (global.SpecialBodyData[this.name][roleName]) {
                 body = global.SpecialBodyData[this.name][roleName]
+            }
+            if (mem && mem.msb && mem.taskRB)       // 任务爬虫特殊体型处于最高优先级
+            {
+                if (global.MSB[mem.taskRB] && global.MSB[mem.taskRB][roleName])
+                    body = global.MSB[mem.taskRB][roleName]
             }
             /* 计算部件需要的能量 */
             let bodyEnergy = CalculateEnergy(body)
@@ -118,12 +138,7 @@ export default class RoomCoreSpawnExtension extends Room {
             /* 对具备自适应属性的爬虫进行自适应 */
             let adaption = false
             if (this.memory.SpawnConfig[roleName] && this.memory.SpawnConfig[roleName].adaption && allEnergy < bodyEnergy) {
-                if (global.CreepNumData[this.name][roleName] <= 0) {
-                    adaption_body(body, allEnergy)
-                    adaption = true
-                }
-                else if (this.controller.level < 6 && roleName == 'harvest' && global.CreepNumData[this.name]['carry'] <= 0) {
-                    /* 特殊情况，防止卡死 */
+                if (!global.CreepNumData[this.name][roleName]) {
                     adaption_body(body, allEnergy)
                     adaption = true
                 }
@@ -153,7 +168,7 @@ export default class RoomCoreSpawnExtension extends Room {
                 }
             }
             if (allEnergy >= CalculateEnergy(body)) {
-                let result = thisSpawn.spawnCreep(body, `[${mark}] ${randomStr}${timestr}`, { memory: thisMem })//[${mark}] ${randomStr}${timestr}  ${timestr}----${mark}  ${timestr}|${mark}${randomStr}  ${randomStr}__${mark}${timestr}
+                let result = thisSpawn.spawnCreep(body, `${mark}·${timestr}${randomStr}`, { memory: thisMem })//${mark}·${timestr}${randomStr} ${timestr}----${mark}  ${timestr}|${mark}${randomStr}  ${randomStr}__${mark}${timestr}  人${timestr}类${mark}高质量
                 if (result == OK) {
                     allEnergy -= CalculateEnergy(body)
                     spawnlist.splice(0, 1)   // 孵化成功，删除该孵化数据

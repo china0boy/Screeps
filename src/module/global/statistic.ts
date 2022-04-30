@@ -1,3 +1,5 @@
+import { AppLifecycleCallbacks } from "../framework/types"
+
 /**
  * 统计所有爬虫归属，统计数目 【已测试】
  */
@@ -30,10 +32,15 @@ export function CreepNumStatistic():void {
         /* 代表爬虫是其他shard的来客 */
         if (creep_.memory.shard != shard) continue
         /* 代表爬虫所属房间已经没了 */
-        if (!Game.rooms[creep_.memory.belong]) continue
+        if (!Game.rooms[creep_.memory.belong]||!global.CreepNumData[creep_.memory.belong]) continue
         if (!global.CreepNumData[creep_.memory.belong][creep_.memory.role])
             global.CreepNumData[creep_.memory.belong][creep_.memory.role] = 0
         /* 添加统计数目 */
         global.CreepNumData[creep_.memory.belong][creep_.memory.role] += 1
     }
+}
+
+
+export const creepRecycleAndStatistic:AppLifecycleCallbacks = {
+    tickStart:CreepNumStatistic
 }

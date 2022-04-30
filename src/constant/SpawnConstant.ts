@@ -21,10 +21,10 @@ export const RoleData: SpawnConstantData = {
     'carry': { num: 0, ability: [0, 3, 3, 0, 0, 0, 0, 0], level: 5, mark: "运", init: true, adaption: true, fun: carry_ },  // 矿点搬运工
     'upgrade': { num: 0, ability: [1, 1, 2, 0, 0, 0, 0, 0], level: 10, mark: "升级", init: true, fun: upgrade_ },   // 升级工
     'build': { num: 0, ability: [1, 1, 2, 0, 0, 0, 0, 0], level: 10, mark: "建设", init: true, fun: build_, must: true },   // 建筑工
-    'harvest_Mineral': { num: 0, ability: [16, 16, 16, 0, 0, 0, 0, 0], level: 11, mark: "挖化合物", init: true, fun: harvest_Mineral, adaption: true },   // 挖化合物
+    'harvest_Mineral': { num: 0, ability: [16, 16, 16, 0, 0, 0, 0, 0], level: 11, mark: "挖化合物", init: true, fun: harvest_Mineral },   // 挖化合物
     'manage': { num: 0, ability: [0, 1, 1, 0, 0, 0, 0, 0], level: 2, mark: "中央", init: true, must: true, adaption: true },   // 中央搬运工
     'transport': { num: 0, ability: [0, 2, 2, 0, 0, 0, 0, 0], level: 1, mark: "搬运", init: true, must: true, adaption: true },  // 房间物流搬运工
-    'repair': { num: 0, ability: [1, 1, 1, 0, 0, 0, 0, 0], level: 2, mark: "刷墙", must: true },     // 刷墙
+    'repair': { num: 0, ability: [1, 1, 1, 0, 0, 0, 0, 0], level: 8, mark: "刷墙", must: true },     // 刷墙
     'cclaim': { num: 0, ability: [0, 0, 1, 0, 0, 0, 1, 0], level: 10, mark: "C" },           // 开房sf
     'cupgrade': { num: 0, ability: [2, 5, 7, 0, 0, 0, 0, 0], level: 11, mark: "C" },
     'dismantle': { num: 0, ability: [25, 0, 25, 0, 0, 0, 0, 0], level: 11, mark: "拆家" },
@@ -46,22 +46,25 @@ export const RoleData: SpawnConstantData = {
     'sig': { num: 0, ability: [0, 0, 1, 0, 0, 0, 0, 0], level: 20, mark: "签名" },
     'loot': { num: 1, ability: [0, 25, 25, 0, 0, 0, 0, 0], adaption: true, level: 11, mark: "掠夺者" },
     'AIO': { num: 0, ability: [0, 0, 1, 0, 0, 0, 0, 0], level: 5, mark: "一体机", must: true },
+    'carryShard':{num: 0, ability: [0, 0, 1, 0, 0, 0, 0, 0], level: 5, mark: "跨shard运输" },
     /* 外矿 */
-    'out-claim':{num:0,ability:[0,0,2,0,0,0,2,0],level:11,mark:"🟣"},
-    'out-harvest':{num:0,ability:[4,2,4,0,0,0,0,0],level:12,mark:"外挖"},
-    'out-car':{num:0,ability:[1,5,6,0,0,0,0,0],level:12,mark:"外运"},
-    'out-defend':{num:0,ability:[0,0,10,0,10,10,0,0],level:10,mark:"外防"},
+    'out-claim': { num: 0, ability: [0, 0, 2, 0, 0, 0, 2, 0], adaption: true, level: 11, mark: "🟣" },
+    'out-harvest': { num: 0, ability: [4, 2, 4, 0, 0, 0, 0, 0], level: 12, mark: "外挖" },
+    'out-attackHarvest': { num: 0, ability: [10, 2, 10, 19, 0, 9, 0, 0], level: 12, mark: "外挖" },
+    'out-mineral': { num: 0, ability: [16, 16, 16, 0, 0, 0, 0, 0], level: 12, mark: "挖" },
+    'out-car': { num: 0, ability: [1, 5, 6, 0, 0, 0, 0, 0], level: 12, mark: "外运" },
+    'out-defend': { num: 0, ability: [0, 0, 10, 0, 10, 10, 0, 0], level: 10, mark: "外防" },
     /* 主动防御 */
     'defend-attack': { num: 0, ability: [0, 0, 10, 40, 0, 0, 0, 0], level: 8, mark: "🔴", must: true },
     'defend-range': { num: 0, ability: [0, 0, 10, 0, 40, 0, 0, 0], level: 8, mark: "🔵", must: true },
     'defend-douAttack': { num: 0, ability: [0, 0, 10, 30, 0, 0, 0, 10], level: 7, mark: "🔴", must: true },
     'defend-douHeal': { num: 0, ability: [0, 0, 10, 0, 0, 30, 0, 10], level: 7, mark: "🟢", must: true },
     /* 四人小队 */
-    'x-dismantle':{num:0,ability:[28,0,10,0,0,0,0,12],level:9,mark:"🟨",must:true,mem:{creepType:'attack'}},
-    'x-heal':{num:0,ability:[0,0,10,0,2,26,0,12],level:9,mark:"🟩",must:true,mem:{creepType:'heal'}},
-    'x-attack':{num:0,ability:[0,0,10,28,0,0,0,12],level:9,mark:"🟥",must:true,mem:{creepType:'attack'}},
-    'x-range':{num:0,ability:[0,0,10,0,24,4,0,12],level:9,mark:"🟦",must:true,mem:{creepType:'attack'}},
-    'x-aio':{num:0,ability:[0,0,10,0,10,20,0,10],level:9,mark:"🌈",must:true,mem:{creepType:'heal'}},
+    'x-dismantle': { num: 0, ability: [28, 0, 10, 0, 0, 0, 0, 12], level: 9, mark: "🟨", must: true, mem: { creepType: 'attack' } },
+    'x-heal': { num: 0, ability: [0, 0, 10, 0, 2, 26, 0, 12], level: 9, mark: "🟩", must: true, mem: { creepType: 'heal' } },
+    'x-attack': { num: 0, ability: [0, 0, 10, 28, 0, 0, 0, 12], level: 9, mark: "🟥", must: true, mem: { creepType: 'attack' } },
+    'x-range': { num: 0, ability: [0, 0, 10, 0, 24, 4, 0, 12], level: 9, mark: "🟦", must: true, mem: { creepType: 'attack' } },
+    'x-aio': { num: 0, ability: [0, 0, 10, 0, 10, 20, 0, 10], level: 9, mark: "🌈", must: true, mem: { creepType: 'heal' } },
 }
 /* 爬虫部件随房间等级变化的动态列表 */
 export const RoleLevelData = {
@@ -99,7 +102,7 @@ export const RoleLevelData = {
         1: { bodypart: [1, 1, 2, 0, 0, 0, 0, 0], num: 1 },
         2: { bodypart: [2, 2, 4, 0, 0, 0, 0, 0], num: 1 },
         3: { bodypart: [3, 3, 6, 0, 0, 0, 0, 0], num: 1 },
-        4: { bodypart: [4, 4, 8, 0, 0, 0, 0, 0], num: 1 },//[4, 4, 8, 0, 0, 0, 0, 0]
+        4: { bodypart: [5, 5, 5, 0, 0, 0, 0, 0], num: 1 },//[4, 4, 8, 0, 0, 0, 0, 0]
         5: { bodypart: [8, 8, 8, 0, 0, 0, 0, 0], num: 0 },//[4, 4, 8, 0, 0, 0, 0, 0]
         6: { bodypart: [10, 10, 10, 0, 0, 0, 0, 0], num: 0 },//[5, 5, 10, 0, 0, 0, 0, 0]
         7: { bodypart: [15, 15, 15, 0, 0, 0, 0, 0], num: 0 },//[10, 10, 10, 0, 0, 0, 0, 0]
@@ -125,6 +128,12 @@ export const RoleLevelData = {
         7: { bodypart: [0, 20, 10, 0, 0, 0, 0, 0], num: 1 },
         8: { bodypart: [0, 49, 1, 0, 0, 0, 0, 0], num: 1 },
     },
+    'harvest_Mineral': {
+        6: { bodypart: [10, 10, 10, 0, 0, 0, 0, 0], num: 0 },
+        7: { bodypart: [16, 16, 16, 0, 0, 0, 0, 0], num: 0 },
+        8: { bodypart: [16, 16, 16, 0, 0, 0, 0, 0], num: 0 },
+    }
+    ,
     'repair': {
         1: { bodypart: [1, 1, 2, 0, 0, 0, 0, 0], num: 0 },
         2: { bodypart: [1, 1, 2, 0, 0, 0, 0, 0], num: 0 },
@@ -180,34 +189,44 @@ export const RoleLevelData = {
         7: { bodypart: [10, 10, 20, 0, 0, 0, 0, 0], num: 0 },
         8: { bodypart: [10, 10, 20, 0, 0, 0, 0, 0], num: 0 },
     },
-    "out-harvest":{
-        1:{bodypart:[1,1,1,0,0,0,0,0],num:0},
-        2:{bodypart:[1,1,1,0,0,0,0,0],num:0},
-        3:{bodypart:[1,1,1,0,0,0,0,0],num:0},
-        4:{bodypart:[2,1,1,0,0,0,0,0],num:0},
-        5:{bodypart:[5,1,3,0,0,0,0,0],num:0},
-        6:{bodypart:[5,1,3,0,0,0,0,0],num:0},
-        7:{bodypart:[10,2,5,0,0,0,0,0],num:0},
-        8:{bodypart:[10,2,5,0,0,0,0,0],num:0},
+    "out-harvest": {
+        1: { bodypart: [1, 1, 1, 0, 0, 0, 0, 0], num: 0 },
+        2: { bodypart: [1, 1, 1, 0, 0, 0, 0, 0], num: 0 },
+        3: { bodypart: [1, 1, 1, 0, 0, 0, 0, 0], num: 0 },
+        4: { bodypart: [6, 1, 3, 0, 0, 0, 0, 0], num: 0 },
+        5: { bodypart: [6, 1, 3, 0, 0, 0, 0, 0], num: 0 },
+        6: { bodypart: [8, 1, 4, 0, 0, 0, 0, 0], num: 0 },
+        7: { bodypart: [10, 2, 5, 0, 0, 0, 0, 0], num: 0 },
+        8: { bodypart: [10, 2, 5, 0, 0, 0, 0, 0], num: 0 },
     },
-    "out-car":{
-        1:{bodypart:[1,1,2,0,0,0,0,0],num:0},
-        2:{bodypart:[1,2,2,0,0,0,0,0],num:0},
-        3:{bodypart:[1,2,3,0,0,0,0,0],num:0},
-        4:{bodypart:[1,5,3,0,0,0,0,0],num:0},
-        5:{bodypart:[1,7,4,0,0,0,0,0],num:0},
-        6:{bodypart:[2,10,6,0,0,0,0,0],num:0},
-        7:{bodypart:[4,28,16,0,0,0,0,0],num:0},
-        8:{bodypart:[4,28,16,0,0,0,0,0],num:0},
+    "out-mineral": {
+        1: { bodypart: [1, 1, 1, 0, 0, 0, 0, 0], num: 0 },
+        2: { bodypart: [1, 1, 1, 0, 0, 0, 0, 0], num: 0 },
+        3: { bodypart: [1, 1, 1, 0, 0, 0, 0, 0], num: 0 },
+        4: { bodypart: [2, 1, 1, 0, 0, 0, 0, 0], num: 0 },
+        5: { bodypart: [5, 1, 3, 0, 0, 0, 0, 0], num: 0 },
+        6: { bodypart: [5, 1, 3, 0, 0, 0, 0, 0], num: 0 },
+        7: { bodypart: [10, 2, 5, 0, 0, 0, 0, 0], num: 0 },
+        8: { bodypart: [16, 16, 16, 0, 0, 0, 0, 0], num: 0 },
     },
-    "out-defend":{
-        1:{bodypart:[0,0,1,0,0,1,0,0],num:0},
-        2:{bodypart:[0,0,1,0,0,1,0,0],num:0},
-        3:{bodypart:[0,0,1,0,0,1,0,0],num:0},
-        4:{bodypart:[0,0,3,0,2,2,0,0],num:0},
-        5:{bodypart:[0,0,6,0,3,3,0,0],num:0},
-        6:{bodypart:[0,0,8,0,4,4,0,0],num:0},
-        7:{bodypart:[0,0,16,0,8,8,0,0],num:0},
-        8:{bodypart:[0,0,20,0,10,10,0,0],num:0},
+    "out-car": {
+        1: { bodypart: [1, 1, 2, 0, 0, 0, 0, 0], num: 0 },
+        2: { bodypart: [1, 2, 2, 0, 0, 0, 0, 0], num: 0 },
+        3: { bodypart: [1, 2, 3, 0, 0, 0, 0, 0], num: 0 },
+        4: { bodypart: [1, 11, 6, 0, 0, 0, 0, 0], num: 0 },
+        5: { bodypart: [1, 11, 6, 0, 0, 0, 0, 0], num: 0 },
+        6: { bodypart: [2, 18, 10, 0, 0, 0, 0, 0], num: 0 },
+        7: { bodypart: [4, 28, 16, 0, 0, 0, 0, 0], num: 0 },
+        8: { bodypart: [4, 28, 16, 0, 0, 0, 0, 0], num: 0 },
+    },
+    "out-defend": {
+        1: { bodypart: [0, 0, 1, 0, 0, 1, 0, 0], num: 0 },
+        2: { bodypart: [0, 0, 1, 0, 0, 1, 0, 0], num: 0 },
+        3: { bodypart: [0, 0, 1, 0, 0, 1, 0, 0], num: 0 },
+        4: { bodypart: [0, 0, 3, 0, 2, 2, 0, 0], num: 0 },
+        5: { bodypart: [0, 0, 6, 0, 3, 3, 0, 0], num: 0 },
+        6: { bodypart: [0, 0, 8, 0, 4, 4, 0, 0], num: 0 },
+        7: { bodypart: [0, 0, 16, 0, 8, 8, 0, 0], num: 0 },
+        8: { bodypart: [0, 0, 16, 0, 20, 12, 0, 0], num: 0 },
     },
 }

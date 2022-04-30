@@ -9,7 +9,6 @@ export default class RoomCoreInitExtension extends Room {
         this.RoomMemoryInit()
         this.RoomStructureInit()
         this.RoomSpawnListInit()
-        this.RoomGlobalStructure()
     }
 
     /**
@@ -28,7 +27,6 @@ export default class RoomCoreInitExtension extends Room {
         if (!this.memory.Misson['Room']) this.memory.Misson['Room'] = []
         if (!this.memory.Misson['Creep']) this.memory.Misson['Creep'] = []
         if (!this.memory.Misson['PowerCreep']) this.memory.Misson['PowerCreep'] = []
-        if (!global.Stru[this.name]) global.Stru[this.name] = {}
         if (!this.memory.TerminalData) this.memory.TerminalData = { 'energy': { num: 50000, fill: true } }
         if (!this.memory.Factory) this.memory.Factory = { factoryData: {}, produce: {}, dataProduce: {}, level: 0, automation_Bar: {} }
         if (!this.memory.market) this.memory.market = { 'deal': [], 'order': [] }
@@ -76,7 +74,7 @@ export default class RoomCoreInitExtension extends Room {
                 let position = new RoomPosition(centerlist[0], centerlist[1], this.name)
                 var NTower = position.getClosestStructure([STRUCTURE_TOWER], 0) as StructureTower
                 if (NTower && NTower.my)
-                    if (getDistance(NTower.pos, position) < 7) this.memory.StructureIdData.NtowerID = NTower.id
+                    if (getDistance(NTower.pos, position) < 25) this.memory.StructureIdData.NtowerID = NTower.id
             }
         }
         /* 资源矿记忆更新 */
@@ -108,8 +106,23 @@ export default class RoomCoreInitExtension extends Room {
             StructureData.comsume_link = []
         }
         /* 矿点link记忆更新 */
-        if (level >= 5 && level < 6) {
+        if (level == 5) {
             if (StructureData.source_links.length <= 0) {
+                let temp_link_list = []
+                for (let sID of StructureData.source) {
+                    let source_ = Game.getObjectById(sID) as Source
+                    let nearlink = source_.pos.getRangedStructure(['link'], 2, 0) as StructureLink[]
+                    LoopLink:
+                    for (let l of nearlink) {
+                        if (StructureData.upgrade_link && l.id == StructureData.upgrade_link) continue LoopLink
+                        temp_link_list.push(l.id)
+                    }
+                }
+                StructureData.source_links = temp_link_list
+            }
+        }
+        if (level == 6) {
+            if (StructureData.source_links.length < StructureData.source.length) {
                 let temp_link_list = []
                 for (let sID of StructureData.source) {
                     let source_ = Game.getObjectById(sID) as Source
@@ -147,13 +160,15 @@ export default class RoomCoreInitExtension extends Room {
         if (Game.time % 150 == 0 && this.controller.level >= 3) {
             if (!this.memory.StructureIdData.AtowerID) this.memory.StructureIdData.AtowerID = []
             this.memory.StructureIdData.AtowerID as string[]
-            var ATowers = this.getStructure(STRUCTURE_TOWER) as StructureTower[]
-            if (ATowers.length > this.memory.StructureIdData.AtowerID.length) {
-                for (var t of ATowers)
-                    if (t.my && !isInArray(this.memory.StructureIdData.AtowerID as string[], t.id)) {
-                        var AtowerID = this.memory.StructureIdData.AtowerID as string[]
-                        AtowerID.push(t.id)
-                    }
+            if (this.memory.StructureIdData.AtowerID.length < 6) {
+                var ATowers = this.getStructure(STRUCTURE_TOWER) as StructureTower[]
+                if (ATowers.length > this.memory.StructureIdData.AtowerID.length) {
+                    for (var t of ATowers)
+                        if (t.my && !isInArray(this.memory.StructureIdData.AtowerID as string[], t.id)) {
+                            var AtowerID = this.memory.StructureIdData.AtowerID as string[]
+                            AtowerID.push(t.id)
+                        }
+                }
             }
         }
         /* 终端识别 */
@@ -168,13 +183,23 @@ export default class RoomCoreInitExtension extends Room {
         }
         /* 实验室识别 */
         if (Game.time % 200 == 0) {
+            if (!this.memory.StructureIdData.labs) this.memory.StructureIdData.labs = []
             var ALabs = this.getStructure(STRUCTURE_LAB) as StructureLab[]
-            if (ALabs.length >= 1) {
-                if (!this.memory.StructureIdData.labs) this.memory.StructureIdData.labs = []
+            if (ALabs.length >= 1 && this.memory.StructureIdData.labs.length < 10) {
                 for (var llab of ALabs) {
                     if (llab.my && !isInArray(this.memory.StructureIdData.labs as string[], llab.id)) {
                         var labs = this.memory.StructureIdData.labs as string[]
                         labs.push(llab.id)
+                    }
+                }
+            }
+            /* 删除无用lab */
+            if (this.memory.StructureIdData.labs) {
+                for (let labID of this.memory.StructureIdData.labs) {
+                    let theLab = Game.getObjectById(labID) as StructureLab
+                    if (!theLab) {
+                        let index = this.memory.StructureIdData.labs.indexOf(labID)
+                        this.memory.StructureIdData.labs.splice(index, 1)
                     }
                 }
             }
@@ -240,7 +265,7 @@ export default class RoomCoreInitExtension extends Room {
                         if (containers.length > 0) this.memory.harvestData[id].containerID = containers[0].id
                     }
                 }
-                else if (level >= 5) {
+                else {
                     let source = Game.getObjectById(id) as Source
                     if (!this.memory.harvestData[id].linkID) {
                         if (!this.memory.harvestData[id].containerID) {
@@ -261,13 +286,6 @@ export default class RoomCoreInitExtension extends Room {
                         }
                     }
                 }
-                else {
-                    if (!this.memory.harvestData[id].linkID) {
-                        let source = Game.getObjectById(id) as Source
-                        let links = source.pos.findInRange(FIND_STRUCTURES, 2, { filter: (stru) => { return stru.structureType == 'container' } })
-                        if (links.length > 0) this.memory.harvestData[id].linkID = links[0].id
-                    }
-                }
             }
     }
 
@@ -280,54 +298,5 @@ export default class RoomCoreInitExtension extends Room {
         if (!global.CreepNumData) global.CreepNumData = {}
         if (!global.CreepNumData[this.name]) global.CreepNumData[this.name] = {}
 
-    }
-
-    /**
-     * 房间全局建筑初始化
-     */
-    public RoomGlobalStructure(): void {
-        // 目前只支持 storage terminal factory powerspawn
-        if (this.memory.StructureIdData.storageID) {
-            global.Stru[this.name]['storage'] = Game.getObjectById(this.memory.StructureIdData.storageID) as StructureStorage
-            if (!global.Stru[this.name]['storage']) {
-                delete this.memory.StructureIdData.storageID
-            }
-        }
-        if (this.memory.StructureIdData.terminalID) {
-            global.Stru[this.name]['terminal'] = Game.getObjectById(this.memory.StructureIdData.terminalID) as StructureTerminal
-            if (!global.Stru[this.name]['terminal']) {
-                delete this.memory.StructureIdData.terminalID
-            }
-        }
-        if (this.memory.StructureIdData.PowerSpawnID) {
-            global.Stru[this.name]['powerspawn'] = Game.getObjectById(this.memory.StructureIdData.PowerSpawnID) as StructurePowerSpawn
-            if (!global.Stru[this.name]['powerspawn']) {
-                delete this.memory.StructureIdData.PowerSpawnID
-            }
-        }
-        if (this.memory.StructureIdData.FactoryId) {
-            global.Stru[this.name]['factory'] = Game.getObjectById(this.memory.StructureIdData.FactoryId) as StructureFactory
-            if (!global.Stru[this.name]['factory']) {
-                delete this.memory.StructureIdData.FactoryId
-            }
-        }
-        if (this.memory.StructureIdData.NtowerID) {
-            global.Stru[this.name]['Ntower'] = Game.getObjectById(this.memory.StructureIdData.NtowerID) as StructureTower
-            if (!global.Stru[this.name]['Ntower']) {
-                delete this.memory.StructureIdData.NtowerID
-            }
-        }
-        if (this.memory.StructureIdData.AtowerID && this.memory.StructureIdData.AtowerID.length > 0) {
-            var otlist = global.Stru[this.name]['Atower'] = [] as StructureTower[]
-            for (var ti of this.memory.StructureIdData.AtowerID) {
-                var ot = Game.getObjectById(ti) as StructureTower
-                if (!ot) {
-                    var index = this.memory.StructureIdData.AtowerID.indexOf(ti)
-                    this.memory.StructureIdData.AtowerID.splice(index, 1)
-                    continue
-                }
-                otlist.push(ot)
-            }
-        }
     }
 }

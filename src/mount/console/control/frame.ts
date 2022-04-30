@@ -54,7 +54,7 @@ export default {
     },
     frame:
     {
-        set(roomName: string, plan: 'man' | 'hoho' | 'dev', x: number, y: number): string {
+        add(roomName: string, plan: 'man' | 'dev', x: number, y: number): string {
             let thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[frame] 不存在房间${roomName}`
             Memory.RoomControlData[roomName] = { arrange: plan, center: [x, y] }
@@ -132,6 +132,17 @@ export default {
             }
             return `[spawn] 任务${id}的${role}数量信息修改失败`
         },
+        // 只对任务爬虫的定时孵化有效
+        restart(roomName: string, id: string): string {
+            let thisRoom = Game.rooms[roomName]
+            if (!thisRoom) return `[spawn] 不存在房间${roomName}`
+            let misson = thisRoom.GainMission(id)
+            if (misson) {
+                delete misson.Data.intervalTime
+                return `[spawn] 任务${misson.name}<id:${id}>孵化信息已经初始化!`
+            }
+            return `[spawn] 找不到id为${id}的任务!`
+        }
     },
     link: {
         comsume(roomName: string, id: string): string {
@@ -158,12 +169,12 @@ export default {
             Memory.ResourceDispatchData.push(dispatchTask)
             return `[debug] 资源调度任务发布,房间${roomName},资源类型${rType},数量${num},支持购买:${buy},默认超时300T`
         },
-        ResourceBuy(roomName: string, rType: ResourceConstant, num: number, range: number, max: number = 35): string {
+        ResourceBuy(roomName: string, type: "deal" | "sell", rType: ResourceConstant, num: number, range: number, max: number = 35, time?: number): string {
             let thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[link] 不存在房间${roomName}`
-            let task = thisRoom.Public_Buy(rType, num, range, max)
+            let task = thisRoom.Public_Buy(type, rType, num, range, max,time)
             if (task && thisRoom.AddMission(task))
-                return Colorful(`[debug] 资源购买任务发布,房间${roomName},资源类型${rType},数量${num},价格范围${range},最高价格${max}`, 'blue')
+                return Colorful(`[debug] 资源购买任务发布,房间${roomName},订单类型${type} ,资源类型${rType},数量${num},价格范围${range},最高价格${max}`, 'blue')
             return Colorful(`[debug] 房间${roomName}资源购买任务发布失败!`, 'yellow')
         }
     },

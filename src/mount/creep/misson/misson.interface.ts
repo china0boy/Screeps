@@ -21,15 +21,17 @@ interface Creep {
     handle_doubleDismantle(): void
     handle_dp(): void
     handle_pb(): void
-    handle_outmine():void
-    handle_defend_attack():void
-    handle_defend_range():void
-    handle_defend_double():void
-    handle_task_squard():void
-    
+    handle_outmine(): void
+    handle_defend_attack(): void
+    handle_defend_range(): void
+    handle_defend_double(): void
+    handle_task_squard(): void
+    handle_carry_shard(): void
+    handle_normalRush():void
+
     //爬的一些动作
-    handle_ranged_attack(attackcreep: Creep): boolean
-    handle_heal(healcreep?: Creep): boolean
+    handle_ranged_attack(attackcreep: Creep, bool?: boolean): boolean
+    handle_heal(healcreep?: Creep, bool?: boolean): boolean
 }
 
 interface CreepMemory {
@@ -38,15 +40,20 @@ interface CreepMemory {
     captain?: boolean
     swith?: boolean
     unBoostContainer?: Id<StructureContainer>
-    num?:number
+    unBoostRoom?: string
+    num?: number
     //外矿
-    disPos?:string//source的pos
-    bindpoint?:string//source的id
-    containerId?:string//小罐子的id
+    disPos?: string//source的pos
+    bindpoint?: string//source的id
+    containerId?: string//小罐子的id
 
-    controlledBySquardFrame?:boolean
-    squad?:Squad
-    arrived?:boolean
+    controlledBySquardFrame?: boolean
+    squad?: Squad
+    arrived?: boolean
+
+    targetFlag?: string
+
+    nuke?: { on?: boolean, exitRoom?: string, exitPos?: { x: number, y: number, roomName: string } }   //躲避核弹
 }
 
 /**

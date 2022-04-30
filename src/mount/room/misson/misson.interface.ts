@@ -9,8 +9,8 @@ interface Room {
     Check_Carry(role: string, source: RoomPosition, pos: RoomPosition, rType?: ResourceConstant): boolean
     Check_Lab(misson: MissionModel, role: string, tankType: 'storage' | 'terminal' | 'complex'): boolean
     Check_Link(source: RoomPosition, pos: RoomPosition): boolean
-    Check_Buy(resource:ResourceConstant):boolean
-    MissionName(range:string,name:string):MissionModel|null
+    Check_Buy(resource: ResourceConstant): boolean
+    MissionName(range: string, name: string): MissionModel | null
 
     // 主动任务
     Spawn_Feed(): void
@@ -22,8 +22,8 @@ interface Room {
     Task_Clink(): void
     Task_ComsumeLink(): void
     Nuke_Defend(): void
-    Task_CompoundDispatch():void
-    Task_Auto_Defend():void
+    Task_CompoundDispatch(): void
+    Task_Auto_Defend(): void
 
     // 被动任务
     Task_Carry(misson: MissionModel): void
@@ -35,12 +35,17 @@ interface Room {
     Task_HelpDefend(mission: MissionModel): void
     Task_doubleDismantle(mission: MissionModel): void
     Task_HelpBuild(mission: MissionModel): void
-    Task_Compound(misson:MissionModel):void
-    Task_Red_Defend(mission:MissionModel):void
-    Task_Blue_Defend(mission:MissionModel):void
-    Task_Double_Defend(mission:MissionModel):void
-    Task_OutMine(misson:MissionModel):void
-    Task_squad(mission:MissionModel):void
+    Task_Compound(misson: MissionModel): void
+    Task_Red_Defend(mission: MissionModel): void
+    Task_Blue_Defend(mission: MissionModel): void
+    Task_Double_Defend(mission: MissionModel): void
+    Task_OutMine(misson: MissionModel): void
+    Task_squad(mission: MissionModel): void
+    Task_double(mission: MissionModel): void
+    Task_Resource_transfer(mission: MissionModel): void
+    Task_carry_shard(mission: MissionModel): void
+    Task_Normal_upgrade(mission: MissionModel): void
+    Task_Expand(mission: MissionModel): void
 }
 
 interface RoomMemory {
@@ -49,8 +54,8 @@ interface RoomMemory {
     CoolDownDic: { [Name: string]: number }      /* 冷却时间的哈希表 key为任务名 */
     nukeID?: string[]
     nukeData?: NukeData
-    ComDispatchData?:{[re in ResourceConstant]?:{ok?:boolean,dispatch_num:number}}
-    enemy?:enemyAllotData
+    ComDispatchData?: { [re in ResourceConstant]?: { ok?: boolean, dispatch_num: number } }
+    enemy?: enemyAllotData
 }
 
 interface NukeData {
@@ -68,6 +73,7 @@ interface MissionModel {
     state?: number       // 任务状态
     maxTime?: number     // 最大重复任务数   默认1
     LabBind?: MissonLabBind        // 实验室绑定
+    LabMessage?: LabMessageData   // 关于任务-实验室相关配置
     cooldownTick?: number // 冷却时间        默认10
     CreepBind?: BindData  // 爬虫绑定
     level?: number        // 任务等级，越小优先级越高  默认10
@@ -81,8 +87,8 @@ interface MissionModel {
 
 /* 任务角色绑定数据 */
 interface BindData {
-    [role: string]: { num: number, bind: string[], interval?: number }
-}
+    [role: string]: { num: number, bind: string[], interval?: number, MSB?: boolean }
+}   // MSB指的是任务用特殊体型 为true则代表需要特殊体型
 
 /* 任务实验室绑定数据 */
 interface MissonLabBind {
@@ -91,10 +97,14 @@ interface MissonLabBind {
 
 /* 房间记忆实验室绑定数据格式 */
 interface RoomLabBind {
-    [id: string]: { missonID: string[], rType: ResourceConstant, occ?: boolean }     // occ为true时不允许新增占用lab
+    [id: string]: { missonID: string[], rType: ResourceConstant, occ?: boolean, type?: 'boost' | 'com' | 'raw' | 'unboost' }     // occ为true时不允许新增占用lab type为占用类型 }     // occ为true时不允许新增占用lab
 }
 
 
-interface enemyAllotData{
-    [myCreepName:string]:string[]   // 敌人分配
+interface enemyAllotData {
+    [myCreepName: string]: string[]   // 敌人分配
+}
+
+interface LabMessageData {
+    [res: string]: 'boost' | 'unboost' | 'com' | 'raw'    // 资源类型 资源作用 raw是原料 com 是合成化合物 boost 和 unboost 字面意思
 }

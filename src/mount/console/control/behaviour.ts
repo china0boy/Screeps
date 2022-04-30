@@ -69,7 +69,43 @@ export default {
             return str
         },
     },
-    
+
+    /* 物流 */
+    ter: {
+        send(roomName: string, disRoom: string, rType?: ResourceConstant, num?: number): string {
+            var thisRoom = Game.rooms[roomName]
+            if (!thisRoom) return `[ter] 不存在房间${roomName}`
+            let thisTask = thisRoom.public_resource_transfer(disRoom, rType ? rType : null, num ? num : null)
+            if (thisTask && thisRoom.AddMission(thisTask))
+                return Colorful(`[ter] 房间${roomName} --> ${disRoom}资源转移任务已经下达，资源类型:${rType ? rType : "所有资源"} | 数量:${num ? num : "所有"}`, 'green')
+            return Colorful(`[ter] 房间${roomName} --> ${disRoom}资源转移任务已经下达失败!`, 'red')
+        },
+        Csend(roomName: string, disRoom: string): string {
+            var thisRoom = Game.rooms[roomName]
+            if (!thisRoom) return `[ter] 不存在房间${roomName}`
+            for (var i of thisRoom.memory.Misson['Room']) {
+                if (i.name == '资源转移' && thisRoom.DeleteMission(i.id))
+                    return Colorful(`[ter] 房间${roomName} --(${i.Data.rType})--> ${disRoom}资源转移任务删除成功!`, 'green')
+            }
+            return Colorful(`[ter] 房间${roomName} --> ${disRoom}资源转移任务删除失败!`, 'red')
+        },
+        // 查询所有房间的资源转移相关的物流信息
+        show(): string {
+            let result = `[ter] 资源转移物流信息:\n`
+            for (var i in Memory.RoomControlData) {
+                if (Game.rooms[i] && Game.rooms[i].controller && Game.rooms[i].controller.my) {
+                    let room_ = Game.rooms[i]
+                    let task = room_.MissionName('Room', '资源转移')
+                    if (task) {
+                        result += `${room_.name}->${task.Data.disRoom}: 资源类型:${task.Data.rType ? task.Data.rType : "所有资源"},数量:${task.Data.num ? task.Data.num : '所有'}\n`
+                    }
+                }
+            }
+            if (result == `[ter] 资源转移物流信息:\n`) return `[logisitic] 未发现资源转移物流信息`
+            return result
+        },
+    },
+
     /* 外矿 */
     mine: {
         harvest(roomName: string, x: number, y: number, disRoom: string): string {
@@ -210,7 +246,7 @@ export default {
                         bR = false
                 }
                 if (bR) {
-                    thisRoom.memory.market['order'].push({ rType: rType, num: num, unit: unit })
+                    thisRoom.memory.market['order'].push({ rType: rType, num: num, unit: unit, price: price })
                     return `[market] 房间${roomName}成功下达order的资源卖出指令,type:sell,rType:${rType},num:${num},unit:${unit}`
                 }
                 else return `[market] 房间${roomName}已经存在${rType}的sell订单了`
@@ -289,7 +325,6 @@ export default {
         compound(roomName: string, res: ResourceConstant, num: number): string {
             var myRoom = Game.rooms[roomName]
             if (!myRoom) return `[lab] 未找到房间${roomName},请确认房间`
-            let str = []
             //初始化
             myRoom.memory.StructureIdData.labInspect = {}
             let result = RecognizeLab(roomName)
@@ -297,11 +332,7 @@ export default {
             myRoom.memory.StructureIdData.labInspect['raw1'] = result.raw1
             myRoom.memory.StructureIdData.labInspect['raw2'] = result.raw2
             myRoom.memory.StructureIdData.labInspect['com'] = result.com
-
-            for (var i of myRoom.memory.StructureIdData.labInspect.com) {
-                if (!myRoom.memory.RoomLabBind[i]) str.push(i)
-            }
-            var thisTask = myRoom.public_Compound(num, res, str)
+            var thisTask = myRoom.public_Compound(num, res)
             if (thisTask === null) return `[lab] 挂载合成任务失败!`
             if (myRoom.AddMission(thisTask))
                 return `[lab] 房间${roomName}合成${res}任务挂载成功! ${thisTask.Data.raw1} + ${thisTask.Data.raw2} = ${res}`

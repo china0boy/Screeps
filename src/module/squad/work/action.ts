@@ -167,16 +167,56 @@ export function SquadColorFlagRange(SquadData:Squad,color:ColorConstant):Flag{
     return null
 }
 
-/* 小队寻找某类旗帜 */
+/* 小队寻找某类旗帜  （有问题）*/
+// export function SquadNameFlagPath(SquadData:Squad,name:string):Flag{
+//     let pos_ = getStandPos(SquadData)
+//     if (!pos_) return null
+//     let disFlag = pos_.findClosestByPath(FIND_FLAGS,{filter:(flag)=>{
+//         return flag.name.indexOf(name) == 0
+// }})
+// if (disFlag) return disFlag
+//     return null
+// }
+
+/* 整体小队寻找某类旗帜 临时 */
 export function SquadNameFlagPath(SquadData:Squad,name:string):Flag{
     let pos_ = getStandPos(SquadData)
     if (!pos_) return null
-    let disFlag = pos_.findClosestByPath(FIND_FLAGS,{filter:(flag)=>{
-        return flag.name.indexOf(name) == 0
-}})
-if (disFlag) return disFlag
-    return null
+    let flag_ = null
+    let distance_ = null
+    for (let i = pos_.x;i < (pos_.x+2 < 50?pos_.x+2:50);i++)
+    LoopB:
+    for (let j = pos_.y;j < (pos_.y+2 < 50?pos_.y+2:50);j++)
+    {
+        let thisPos = new RoomPosition(i,j,pos_.roomName)
+        let disFlag = thisPos.findClosestByPath(FIND_FLAGS,{filter:(flag)=>{
+            return flag.name.indexOf(name) == 0
+        }})
+        if (!disFlag) continue LoopB
+        if (!flag_)
+        {
+            flag_ = disFlag
+            distance_ = Math.max(Math.abs(thisPos.x - disFlag.pos.x),Math.abs(thisPos.y-disFlag.pos.y)) //存储一下距离
+        }
+        else
+        {
+            if (disFlag == flag_) continue LoopB
+            else
+            {
+                // 判定距离
+                let thisDistance = Math.max(Math.abs(thisPos.x - disFlag.pos.x),Math.abs(thisPos.y-disFlag.pos.y))
+                if (thisDistance < distance_)
+                {
+                    flag_ = disFlag
+                    distance_ = thisDistance
+                }
+            }
+        }
+    }
+    return flag_
 }
+
+
 
 export function SquadNameFlagRange(SquadData:Squad,name:string):Flag{
     let pos_ = getStandPos(SquadData)

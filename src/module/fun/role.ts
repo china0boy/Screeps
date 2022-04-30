@@ -104,6 +104,7 @@ export function carry_(creep_: Creep): void {
         else if (Object.keys(harvestData).length > 1) {
             for (var i in Game.rooms[creep_.memory.belong].memory.harvestData) {
                 var data_ = Game.rooms[creep_.memory.belong].memory.harvestData[i]
+                if (!data_.containerID) continue
                 if (data_.carry == creep_.name) {
                     creep_.memory.containerID = data_.containerID
                     break
@@ -120,7 +121,17 @@ export function carry_(creep_: Creep): void {
             var harvestData_ = harvestData[Object.keys(harvestData)[0]]
             if (harvestData_.containerID) {
                 let container = Game.getObjectById(harvestData_.containerID)
-                if (!container) delete harvestData_.containerID
+                if (!container) {
+                    /* 删除房间相关的记忆 */
+                    for (var hdata in Game.rooms[creep_.memory.belong].memory.harvestData) {
+                        if (Game.rooms[creep_.memory.belong].memory.harvestData[hdata].containerID && Game.rooms[creep_.memory.belong].memory.harvestData[hdata].containerID == creep_.memory.containerID) {
+                            delete Game.rooms[creep_.memory.belong].memory.harvestData[hdata].containerID
+                        }
+                    }
+                    /* 删除爬虫相关记忆 */
+                    delete creep_.memory.containerID
+                    return
+                }
                 else {
                     creep_.memory.containerID = harvestData_.containerID
                 }
@@ -351,15 +362,16 @@ export function build_(creep: Creep): void {
 //挖化合物
 export function harvest_Mineral(creep: Creep): void {
     var thisRoom = Game.rooms[creep.memory.belong];
+    var structues = thisRoom.storage ? thisRoom.storage : thisRoom.terminal ? thisRoom.terminal : null
     var mineral = Game.getObjectById(thisRoom.memory.StructureIdData.mineralID) as Mineral;
-    if (!thisRoom) return;
+    if (!thisRoom || !structues) return;
     if (creep.ticksToLive <= 100) {
-        if (creep.store.getUsedCapacity()) creep.transfer_(thisRoom.storage, Object.keys(creep.store)[0] as ResourceConstant);
+        if (creep.store.getUsedCapacity()) creep.transfer_(structues, Object.keys(creep.store)[0] as ResourceConstant);
         else creep.suicide();
         return;
     }
     if (creep.store.getFreeCapacity() < creep.getActiveBodyparts('work')) {
-        creep.transfer_(thisRoom.storage, Object.keys(creep.store)[0] as ResourceConstant);
+        creep.transfer_(structues, Object.keys(creep.store)[0] as ResourceConstant);
     }
     else {
         creep.harvest_(mineral);

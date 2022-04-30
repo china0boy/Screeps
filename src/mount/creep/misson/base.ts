@@ -8,17 +8,17 @@ export default class CreepMissonBaseExtension extends Creep {
         if (!this.memory.MissionData) this.memory.MissionData = {}
         /* 中央爬的无缝衔接 */
         if (this.memory.role == 'manage' && this.room.controller.my && this.room.controller.level == 8) {
-            if (this.ticksToLive >= 1480) {
-                if (Memory.RoomControlData[this.memory.belong]) {
-                    let center = Memory.RoomControlData[this.memory.belong].center
-                    if (this.pos.x != center[0] && this.pos.y != center[1]) {
-                        this.goTo(new RoomPosition(center[0], center[1], this.memory.belong), 0)
-                        return;
-                    }
+            if (Memory.RoomControlData[this.memory.belong]) {
+                let center = Memory.RoomControlData[this.memory.belong].center
+                if (this.pos.x != center[0] && this.pos.y != center[1]) {
+                    this.goTo(new RoomPosition(center[0], center[1], this.memory.belong), 0)
+                    return;
                 }
             }
             if (this.ticksToLive <= 190) this.room.memory.SpawnConfig.manage.num = 2;
             else this.room.memory.SpawnConfig.manage.num = 1;
+            if (this.store.getUsedCapacity()) this.memory.standed = true;
+            else this.memory.standed = false
         }
         /* 生命低于50就将资源上交 */
         if (this.ticksToLive < 50 && (isInArray(['transport', 'manage'], this.memory.role))) {
@@ -48,6 +48,7 @@ export default class CreepMissonBaseExtension extends Creep {
                     this.memory.MissionData.id = task_.id           // 任务id
                     this.memory.MissionData.name = task_.name        // 任务名
                     this.memory.MissionData.Data = task_.Data ? task_.Data : {}    // 任务数据传输
+                    task_.processing = true
                     return
                 }
             }
@@ -101,6 +102,7 @@ export default class CreepMissonBaseExtension extends Creep {
                 case 'C计划': { this.handle_planC(); break; }
                 case '黄球拆迁': { this.handle_dismantle(); break; }
                 case '急速冲级': { this.handle_quickRush(); break; }
+                case '普通冲级': { this.handle_normalRush(); break; }
                 case '扩张援建': { this.handle_expand(); break }
                 case '紧急支援': { this.handle_support(); break }
                 case '控制攻击': { this.handle_control(); break }
@@ -117,6 +119,7 @@ export default class CreepMissonBaseExtension extends Creep {
                 case '双人防御': { this.handle_defend_double(); break }
                 case '外矿开采': { this.handle_outmine(); break }
                 case '四人小队': { this.handle_task_squard(); break }
+                case '跨shard运输': { this.handle_carry_shard(); break }
             }
         }
     }

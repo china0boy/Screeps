@@ -14,6 +14,8 @@ export default class RoomMissonFrameExtension extends Room {
         this.UnbindMonitor()
         // 任务-爬虫 孵化
         this.MissonRoleSpawn()
+        // 任务相关lab绑定信息更新
+        this.Update_Lab()
         /* PC任务管理器 */
         this.PowerCreep_TaskManager()
 
@@ -21,7 +23,7 @@ export default class RoomMissonFrameExtension extends Room {
         this.Spawn_Feed()    // 虫卵填充任务 
         this.Task_CenterLink()  // 能量采集  
         this.Task_ComsumeLink() // 消费、冲级link
-        this.Constru_Build()   // 建筑任务
+        this.Constru_Build()   // 建造任务
         this.Task_Clink()       // 链接送仓任务
         this.Tower_Feed()   // 防御塔填充任务 
         this.Lab_Feed()     // 实验室填充\回收任务       
@@ -50,6 +52,11 @@ export default class RoomMissonFrameExtension extends Room {
                     case '双人防御': { this.Task_Double_Defend(misson); break A; }
                     case '外矿开采': { this.Task_OutMine(misson); break A; }
                     case '四人小队': { this.Task_squad(misson); break A; }
+                    case '双人小队': { this.Task_double(misson); break A; }
+                    case '资源转移': { this.Task_Resource_transfer(misson); break A; }
+                    case '跨shard运输': { this.Task_carry_shard(misson); break A; }
+                    case '普通冲级': { this.Task_Normal_upgrade(misson); break A; }
+                    case '扩张援建': { this.Task_Expand(misson); break A; }
                 }
             }
     }
@@ -92,31 +99,31 @@ export default class RoomMissonFrameExtension extends Room {
         }
         mis.id = tempID
         /* lab绑定相关，涉及lab的绑定和解绑 */
-        if (mis.LabBind && Object.keys(mis.LabBind).length > 0) {
-            for (var l in mis.LabBind) {
-                if (!this.CheckLabType(l, mis.LabBind[l] as ResourceConstant) || !this.CheckLabOcc(l)) {
-                    console.log(Colorful(`LabID:${l}绑定失败，请检查!`, 'red', true))
-                    return false
-                }
-            }
-        }
-        if (mis.LabBind === null) return false
+        // if (mis.LabBind && Object.keys(mis.LabBind).length > 0) {
+        //     for (var l in mis.LabBind) {
+        //         if (!this.CheckLabType(l, mis.LabBind[l] as ResourceConstant) || !this.CheckLabOcc(l)) {
+        //             console.log(Colorful(`LabID:${l}绑定失败，请检查!`, 'red', true))
+        //             return false
+        //         }
+        //     }
+        // }
+        // if (mis.LabBind === null) return false
         /* 每种相同任务成功挂载一次，将有冷却时间 默认为10 */
         var coolTick = mis.cooldownTick ? mis.cooldownTick : 10
         if (!this.memory.CoolDownDic[mis.name])
             this.memory.CoolDownDic[mis.name] = coolTick
-        mis.level ? mis.level : 10  // 任务等级默认为10
+        mis.level = mis.level ? mis.level : 10  // 任务等级默认为10
         // 挂载任务
         this.memory.Misson[mis.range].push(mis)
         this.memory.Misson[mis.range].sort(compare('level'))      // 每次提交任务都根据优先级排列一下
         if (!isInArray(Memory.ignoreMissonName, mis.name))
             console.log(Colorful(`${mis.name} 任务挂载 √√√ ID:${mis.id} Room:${this.name}`, 'green'))
         /* 任务挂载成功才绑定实验室 */
-        if (mis.LabBind && Object.keys(mis.LabBind).length > 0) {
-            for (var ll in mis.LabBind) {
-                this.BindLabData(ll, mis.LabBind[ll] as ResourceConstant, mis.id)
-            }
-        }
+        // if (mis.LabBind && Object.keys(mis.LabBind).length > 0) {
+        //     for (var ll in mis.LabBind) {
+        //         this.BindLabData(ll, mis.LabBind[ll] as ResourceConstant, mis.id)
+        //     }
+        // }
         return true
     }
 
@@ -328,8 +335,9 @@ export default class RoomMissonFrameExtension extends Room {
             if (misson.CreepBind) {
                 for (var role in misson.CreepBind) {
                     let memData = {}
+                    if (!RoleData[role]) { console.log(`${role} 未注册,请先注册才能孵化`); return }
                     if (RoleData[role].mem) memData = RoleData[role].mem
-                    /* 间隔型 未测试 */
+                    /* 间隔型 */
                     if (misson.CreepBind[role].interval) {
                         if (misson.CreepBind[role].num <= 0) continue
                         if (misson.CreepBind[role].interval <= 0) continue
@@ -344,6 +352,9 @@ export default class RoomMissonFrameExtension extends Room {
                             }
                             if (n > 10) continue
                             memData["taskRB"] = misson.id
+                            if (misson.CreepBind[role].MSB) {
+                                memData["msb"] = true
+                            }
                             for (let i = 0; i < misson.CreepBind[role].num; i++) {
                                 this.SingleSpawn(role, RoleData[role].level ? RoleData[role].level : 10, memData)
                             }
@@ -358,6 +369,10 @@ export default class RoomMissonFrameExtension extends Room {
                         let relateSpawnList = this.SpawnListRoleNum(role)
                         let relateCreeps = _.filter(Game.creeps, (creep) => creep.memory.belong == this.name && creep.memory.role == role && (!creep.memory.MissionData || !creep.memory.MissionData.id)).length
                         if (relateSpawnList + relateCreeps < spawnNum) {
+                            if (misson.CreepBind[role].MSB) {
+                                memData["msb"] = true
+                                memData["taskRB"] = misson.id
+                            }
                             this.SingleSpawn(role, RoleData[role].level ? RoleData[role].level : 10, memData)
                         }
                     }
@@ -400,7 +415,7 @@ export default class RoomMissonFrameExtension extends Room {
             }
             if (!tank_) return false
             All_i_Num = tank_.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant)
-            if (All_i_Num < 4000) {
+            if (All_i_Num < 2100) {
                 /* 资源调度 */
                 if (DispatchNum(this.name) <= 0 && this.MissionNum('Structure', '资源购买') <= 0 && !checkSend(this.name, misson.LabBind[i] as ResourceConstant)) {
                     console.log(Colorful(`[资源调度] 房间${this.name}没有足够的资源[${misson.LabBind[i] as ResourceConstant}],将执行资源调度!`, 'brown'))
@@ -418,7 +433,20 @@ export default class RoomMissonFrameExtension extends Room {
                 return
             }
             var disLab = Game.getObjectById(i) as StructureLab
-            if (!disLab) return false
+            if (!disLab) // 说明找不到lab了
+            {
+                let index = this.memory.StructureIdData.labs.indexOf(i)
+                this.memory.StructureIdData.labs.splice(index, 1)
+                return false
+            }
+            // 去除无关资源
+            if (disLab.mineralType && disLab.mineralType != misson.LabBind[i]) {
+                var roleData: BindData = {}
+                roleData[role] = { num: 1, bind: [] }
+                var carryTask = this.Public_Carry(roleData, 45, this.name, disLab.pos.x, disLab.pos.y, this.name, this.storage.pos.x, this.storage.pos.y, disLab.mineralType, disLab.store.getUsedCapacity(disLab.mineralType))
+                this.AddMission(carryTask)
+                return
+            }
             if (disLab.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant) < 1000 && this.Check_Carry('transport', tank_.pos, disLab.pos, misson.LabBind[i] as ResourceConstant)) {
                 if (All_i_Num < 1500)
                     return false

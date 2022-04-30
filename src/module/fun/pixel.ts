@@ -1,3 +1,5 @@
+import { AppLifecycleCallbacks } from "../framework/types"
+
 export function pixel():void{
     if (Game.cpu.bucket >= 10000)
     {
@@ -8,7 +10,11 @@ export function pixel():void{
         else
         {
             let cpuUsed = Game.cpu.getUsed()
-            if (cpuUsed <= 18) Game.cpu.generatePixel()
+            if (cpuUsed <= 15) Game.cpu.generatePixel()
         }
     }
+}
+
+export const pixelManager:AppLifecycleCallbacks = {
+    tickEnd:pixel
 }

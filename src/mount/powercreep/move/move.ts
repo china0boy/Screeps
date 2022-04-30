@@ -50,12 +50,12 @@ export default class PowerCreepMoveExtension extends PowerCreep {
             route = this.serializeFarPath(result.path)
             global.routeCache[routeKey] = route
             return route
-        }
+        }/*
         else {//没寻到尝试在寻一次
             if (this.room.name == target.roomName) {
                 result = this.findSearch(target, range, 2, flee)
             }
-        }
+        }*/
 
         // 寻路异常返回null
         if (result.path.length <= 0) return null
@@ -74,9 +74,9 @@ export default class PowerCreepMoveExtension extends PowerCreep {
                 routeCallback(roomName) {
                     // 在全局绕过房间列表的房间 false
                     if (Memory.bypassRooms && Memory.bypassRooms.includes(roomName)) return Infinity
-                    let parsed = Number((/^[WE]([0-9]+)[NS]([0-9]+)$/.exec(roomName)));
-                    let isHighway = (parsed[1] % 10 === 0) ||
-                        (parsed[2] % 10 === 0);
+                    let parsed = (/^[WE]([0-9]+)[NS]([0-9]+)$/.exec(roomName));
+                    let isHighway = (Number(parsed[1]) % 10 === 0) ||
+                        (Number(parsed[2]) % 10 === 0);
                     let isMyRoom = Game.rooms[roomName] &&
                         Game.rooms[roomName].controller &&
                         Game.rooms[roomName].controller.my;

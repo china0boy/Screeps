@@ -1,5 +1,7 @@
+import { AppLifecycleCallbacks } from '../src/module/framework/types';
+
 import { drawByConfig } from './common'
-export default function (): void {
+export function layoutVisual(): void {
     for (let name of ['dev']) {
         let flag = Game.flags[name];
         if (flag) {
@@ -7,4 +9,8 @@ export default function (): void {
         }
     }
 
+}
+
+export const layoutVisualMoudle: AppLifecycleCallbacks = {
+    tickEnd: layoutVisual
 }

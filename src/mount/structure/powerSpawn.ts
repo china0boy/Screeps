@@ -25,7 +25,7 @@ export class PowerSpawnExtension extends StructurePowerSpawn {
         // 剩余 power 不足且 storage 内 power 充足
         if (!this.keepResource(RESOURCE_POWER, 10, this.room.storage, 100)) return
         // 剩余energy 不足且 storage 内 energy 充足
-        if (!this.keepResource(RESOURCE_ENERGY, 1000, this.room.storage, 50000)) return
+        if (!this.keepResource(RESOURCE_ENERGY, 1000, this.room.storage, this.room.memory.energyPS ? this.room.memory.energyPS : 50000)) return
     }
 
     /**
@@ -53,11 +53,12 @@ export class PowerSpawnConsole extends PowerSpawnExtension {
     /**
      * 用户操作 - 启动 powerSpawn
      */
-    public on(): string {
+    public on(number?: number): string {
         // 把自己注册到全局的启用 ps 列表
         if (this.room.memory.pausePS === undefined) this.room.memory.pausePS = false
         if (this.room.memory.pausePS)
             this.room.memory.pausePS = false
+        if (number) this.room.memory.energyPS = number
 
         return `[${this.room.name} PowerSpawn] 已启动 process power`
     }
@@ -96,7 +97,10 @@ export class PowerSpawnConsole extends PowerSpawnExtension {
             api: [
                 {
                     title: '启动/恢复处理 power',
-                    functionName: 'on'
+                    functionName: 'on',
+                    params: [
+                        { name: 'num', desc: '房间能量高于num就启动' },
+                    ],
                 },
                 {
                     title: '暂停处理 power',

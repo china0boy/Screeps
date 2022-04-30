@@ -12,13 +12,18 @@ declare module NodeJS {
             [routekey: string]: string
         }
         Gtime: { [roomName: string]: number }
-        // 将对象全局获取，这样只用获取一次对象，不用每次都分别获取
-        Stru: {
-            [roomName: string]: globalStrcutureData
-        }
         intervalData: { [roomName: string]: { [creepRole: string]: number } }
         ResourceLimit: resourceLimitData
         allowedRooms: { [name: string]: { [x: string]: boolean }; }
+        warData:any
+        MSB:MissonSpecialBody   // 任务特殊体型
+        /* 脚本运行总cpu */
+        UsedCpu?:number
+        /* 100Tick内的平均CPU */
+        CpuData?:number[]
+        AveCpu?:number
+        Repairlist?:{[roomName:string]:string[]}
+        Adaption?:any
     }
 }
 
@@ -29,4 +34,30 @@ interface globalStrcutureData {
 
 interface resourceLimitData {
     [roomName: string]: { [res in ResourceConstant]?: number }
+}
+
+interface warData{
+    tower:{[roomName:string]:{count:number,data:TowerRangeMapData}}      // 防御塔伤害数据
+    enemy:{[roomName:string]:{time:number,data:Creep[]}}        // 敌方房间爬虫数据
+    structure:{[roomName:string]:{time:number,data:StructureData}}    // 敌方房间建筑数据
+    flag:{[roomName:string]:{time:number,data:Flag[]}}  // 敌方房间旗帜数据
+}
+
+interface TowerRangeMapData{
+    [strpos:string]:ARH
+}
+
+interface ARH{
+    attack:number
+    repair:number
+    heal:number
+}
+
+interface StructureData{
+    [strutype:string]:Structure[]
+}
+
+/* 任务爬虫特殊体型 */
+interface MissonSpecialBody{
+    [missionID:string]:{[role:string]:BodyPartConstant[]}
 }

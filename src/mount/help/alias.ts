@@ -1,4 +1,4 @@
-import { colorful, createRoomLink, createConst, createLink } from '../../utils'
+import { Colorful, colorful, createRoomLink, createConst, createLink } from '../../utils'
 import { createHelp } from './help'
 
 /**
@@ -49,7 +49,7 @@ export default [
                                     { name: 'x', desc: '中心点x' },
                                     { name: 'y', desc: '中心点y' },
                                 ],
-                                functionName: 'frame.set'
+                                functionName: 'frame.add'
                             },
                             {
                                 title: '在房间列表中删除房间:',
@@ -92,6 +92,15 @@ export default [
                                 functionName: 'spawn.Mnum'
                             },
                             {
+                                title: '定时孵化任务孵化配置一键还原:',
+                                describe: '修改定时信息,立刻重新孵化;例:spawn.restart("W1N1","C-85ednh1ib439985674")',
+                                params: [
+                                    { name: 'roomName', desc: '房间名' },
+                                    { name: 'id', desc: '任务id' },
+                                ],
+                                functionName: 'spawn.restart'
+                            },
+                            {
                                 title: '注册消费link:',
                                 describe: '该link会一直由其他link传入能量',
                                 params: [
@@ -99,7 +108,15 @@ export default [
                                     { name: 'id', desc: 'link的id' },
                                 ],
                                 functionName: 'link.comsume'
-                            }
+                            },
+                            {
+                                title: '删除具体任务:',
+                                describe: '例:Game.rooms["xxxx"].DeleteMission("C-85ednh1ib439985674")',
+                                params: [
+                                    { name: 'missionID', desc: '任务Id' },
+                                ],
+                                functionName: 'Game.rooms["xxxx"].DeleteMission'
+                            },
                         ]
                     },
                     {
@@ -108,13 +125,12 @@ export default [
                         api: [
                             {
                                 title: '墙体维护:',
-                                describe: '',
+                                describe: '例: repair.set("W1N1","global",1,"XLH2O" ',
                                 params: [
                                     { name: 'roomName', desc: '我的房间名' },
                                     { name: 'rtype', desc: 'global(维修最低血量墙) special(维修棋子下的墙---没写完)' },
                                     { name: 'num', desc: '爬的个数 (默认1)' },
                                     { name: 'boost', desc: '要boost work的化合物  (默认没有)' },
-                                    { name: 'vindicate', desc: '没写完 (默认false)' },
                                 ],
                                 functionName: 'repair.set'
                             },
@@ -147,12 +163,16 @@ export default [
                             },
                             {
                                 title: '扩张援建:',
-                                describe: '占领房间并升级',
+                                describe: '占领房间并升级  expand.set("W1N1","W2N2",2,1,1000,false,"shard3")',
                                 params: [
                                     { name: 'roomName', desc: '我的房间名' },
                                     { name: 'disRoom', desc: '目标房间' },
                                     { name: 'num', desc: '升级爬和建造爬的个数 (默认1)' },
                                     { name: 'Cnum', desc: '紫爬个数 (默认1)' },
+                                    { name: 'interval', desc: '出兵间隔时间 (默认1000)' },
+                                    { name: 'defend', desc: '是否需要一定防御能力 (默认没有)' },
+                                    { name: 'shard', desc: '目标房间shard (默认此shard)' },
+                                    { name: 'shardData', desc: '多次跨shard参数 (默认没有)' },
                                 ],
                                 functionName: 'expand.set'
                             },
@@ -161,6 +181,7 @@ export default [
                                 params: [
                                     { name: 'roomName', desc: '我的房间名' },
                                     { name: 'disRoom', desc: '目标房间' },
+                                    { name: 'shard', desc: '目标房间shard' },
                                 ],
                                 functionName: 'expand.remove'
                             },
@@ -173,6 +194,7 @@ export default [
                                     { name: 'mtype', desc: '小队类型 R:蓝绿 A:红绿 D:黄绿 Aio:一体机 RA:蓝红绿 DA:黄红绿 DR:蓝黄绿' },
                                     { name: 'interval', desc: '出兵间隔时间 (默认1000)' },
                                     { name: 'shard', desc: 'shard (默认此shard)' },
+                                    { name: 'shardData', desc: '多次跨shard参数 (默认没有)' },
                                 ],
                                 functionName: 'war.squad'
                             },
@@ -189,14 +211,15 @@ export default [
                             },
                             {
                                 title: '一体机(需要t3 XKHO2 XGHO2 XLHO2 XZHO2):',
-                                describe: '出动一体机攻击 例:war.disaio("W1N1","Flag1", 1, 2, "shard3", "1000")',
+                                describe: '出动一体机攻击 例:war.disaio("W1N1","Flag1",1,2,"1000","shard3")',
                                 params: [
                                     { name: 'roomName', desc: '我的房间名' },
                                     { name: 'FlagName', desc: '目标旗子房间 优先攻击旗子下建筑' },
                                     { name: 'num', desc: '一体机个数 (默认1)' },
                                     { name: 'level', desc: 'heal等级  1:能抗4塔满伤 2:能抗6塔满伤 (默认2)' },
-                                    { name: 'shard', desc: 'shard (默认此shard)' },
                                     { name: 'interval', desc: '出兵间隔时间 (默认1000)' },
+                                    { name: 'shard', desc: 'shard (默认此shard)' },
+                                    { name: 'shardData', desc: '多次跨shard参数 (默认没有)' },
                                 ],
                                 functionName: 'war.disaio'
                             },
@@ -211,14 +234,15 @@ export default [
                             },
                             {
                                 title: '双人小队(XUH2O XGHO2 XLHO2 XZHO2 XZH2O):',
-                                describe: '出动双人小队攻击 例:war.double("W1N1","Flag1", "attack", 2, "shard3", "1000")',
+                                describe: '出动双人小队攻击 例:war.double("W1N1","Flag1", "attack", 1, 1000, "shard3")',
                                 params: [
                                     { name: 'roomName', desc: '我的房间名' },
                                     { name: 'FlagName', desc: '目标旗子房间 优先攻击旗子下建筑' },
                                     { name: 'type', desc: '攻击爬类型 attack work (默认attack)' },
                                     { name: 'num', desc: '双人小对数 (默认1)' },
-                                    { name: 'shard', desc: 'shard (默认此shard)' },
                                     { name: 'interval', desc: '出兵间隔时间 (默认1000)' },
+                                    { name: 'shard', desc: 'shard (默认此shard)' },
+                                    { name: 'shardData', desc: '多次跨shard参数 (默认没有)' },
                                 ],
                                 functionName: 'war.double'
                             },
@@ -233,7 +257,7 @@ export default [
                             },
                             {
                                 title: '黄球拆迁:',
-                                describe: '占领房间并升级 例:war.dismantle("W1N1","W1N2","1","true","1000","shard3")',
+                                describe: '黄灰旗拆墙 例:war.dismantle("W1N1","W1N2",1,true,1000,"shard3")',
                                 params: [
                                     { name: 'roomName', desc: '我的房间名' },
                                     { name: 'disRoom', desc: '目标房间' },
@@ -241,6 +265,7 @@ export default [
                                     { name: 'boost', desc: '是否boost (默认不boost)' },
                                     { name: 'interval', desc: '出兵间隔时间 (默认1000)' },
                                     { name: 'shard', desc: 'shard (默认此shard)' },
+                                    { name: 'shardData', desc: '多次跨shard参数 (默认没有)' },
                                 ],
                                 functionName: 'war.dismantle'
                             },
@@ -254,11 +279,15 @@ export default [
                             },
                             {
                                 title: '紧急支援:',
-                                describe: '支援友军房间 也可以支援自己 (t3 boost) 例: war.support("W1N1","W1N2","double")',
+                                describe: '支援友军房间 例: war.support("W1N1","W1N2","double")',
                                 params: [
                                     { name: 'roomName', desc: '我的房间名' },
                                     { name: 'disRoom', desc: '目标房间' },
-                                    { name: 'rType', desc: '小队类型 double:双人小队 (别的没写)' },
+                                    { name: 'shard', desc: '目标房间所在shard' },
+                                    { name: 'num', desc: '队数' },
+                                    { name: 'sType', desc: '小队类型 double:双人小队' },
+                                    { name: 'interval', desc: '出兵间隔时间 (number)' },
+                                    { name: 'boost', desc: '是否boost 默认true' },
                                 ],
                                 functionName: 'war.support'
                             },
@@ -267,7 +296,8 @@ export default [
                                 params: [
                                     { name: 'roomName', desc: '我的房间名' },
                                     { name: 'disRoom', desc: '目标房间' },
-                                    { name: 'rType', desc: '小队类型 double:双人小队 (别的没写)' },
+                                    { name: 'shard', desc: '目标房间所在shard (shardName)' },
+                                    { name: 'sType', desc: '小队类型 double:双人小队' },
                                 ],
                                 functionName: 'war.Csupport'
                             },
@@ -280,6 +310,7 @@ export default [
                                     { name: 'body', desc: '1 为大球攻击 2为小球预订 (默认1)' },
                                     { name: 'interval', desc: '出生间隔 (默认800)' },
                                     { name: 'shard', desc: 'shardname (默认同一shard)' },
+                                    { name: 'shardData', desc: '多次跨shard参数 (默认没有)' },
                                 ],
                                 functionName: 'war.control'
                             },
@@ -301,6 +332,7 @@ export default [
                                     { name: 'num', desc: '爬的数量 (默认2)' },
                                     { name: 'interval', desc: '出生间隔 (默认1000)' },
                                     { name: 'shard', desc: 'shardname (默认同一shard)' },
+                                    { name: 'shardData', desc: '多次跨shard参数 (默认没有)' },
                                 ],
                                 functionName: 'support.build'
                             },
@@ -313,6 +345,24 @@ export default [
                                     { name: 'shard', desc: 'shardname (默认同一shard)' },
                                 ],
                                 functionName: 'support.Cbuild'
+                            },
+                            {
+                                title: '普通冲级:',
+                                describe: '例: upgrade.normal("W1N1",2,"GH2O")',
+                                params: [
+                                    { name: 'roomName', desc: '房间名' },
+                                    { name: 'num', desc: '冲级爬数量' },
+                                    { name: 'boost', desc: 'boost类型 null | GH | GH2O | XGH2O' },
+                                ],
+                                functionName: 'upgrade.normal'
+                            },
+                            {
+                                title: '取消普通冲级:',
+                                describe: '例: upgrade.Cnormal("W1N1")',
+                                params: [
+                                    { name: 'roomName', desc: '房间名' },
+                                ],
+                                functionName: 'upgrade.Cnormal'
                             },
                             {
                                 title: '急速冲级:',
@@ -380,6 +430,33 @@ export default [
                                 ],
                                 functionName: 'loot.Cloot'
                             },
+                            {
+                                title: '跨shard运输:',
+                                describe: '例: loot.carryShard("W1N1","Flag1","Flag2",1,0,"energy",10000,1500,"shard3","shard2")',
+                                params: [
+                                    { name: 'roomName', desc: '我的房间名' },
+                                    { name: 'naFlagName', desc: '拿资源房间的旗子名字' },
+                                    { name: 'toFlagName', desc: '放资源房间的旗子名字' },
+                                    { name: 'cnum', desc: '爬的数量' },
+                                    { name: 'level', desc: '0无强化 1强化 2有防御强化 3双人小队' },
+                                    { name: 'rtype', desc: '运输的资源类型' },
+                                    { name: 'rnum', desc: '资源数量' },
+                                    { name: 'interval', desc: '孵化间隔时间' },
+                                    { name: 'nashardName', desc: '拿资源的shard' },
+                                    { name: 'toshardName', desc: '放资源的shard' },
+                                    { name: 'shardData', desc: '多次跨shard参数 (默认没有)' },
+                                ],
+                                functionName: 'loot.carryShard'
+                            }, {
+                                title: '取消跨shard运输:',
+                                describe: '例: loot.CcarryShard("W1N1","Flag1","Flag1")',
+                                params: [
+                                    { name: 'roomName', desc: '我的房间名' },
+                                    { name: 'naFlagName', desc: '拿资源房间的旗子名字' },
+                                    { name: 'toFlagName', desc: '放资源房间的旗子名字' },
+                                ],
+                                functionName: 'loot.CcarryShard'
+                            }
                         ]
                     },
                     {
@@ -387,13 +464,38 @@ export default [
                         describe: '关于市场',
                         api: [
                             {
+                                title: '资源转移:【推荐】',
+                                describe: '例:ter.send("W1N1","W1N2","energy",20000)',
+                                params: [
+                                    { name: 'roomName', desc: '源房间' },
+                                    { name: 'disRoom', desc: '目标房间' },
+                                    { name: 'rType(可选)', desc: '资源类型【不选表示除energy和ops外所有资源】' },
+                                    { name: 'num(可选)', desc: '资源数量【不限制数量】，不选表示全部数量' },
+                                ],
+                                functionName: 'ter.send'
+                            },
+                            {
+                                title: '取消资源转移:',
+                                describe: '例:ter.Csend("W1N1","W1N2")',
+                                params: [
+                                    { name: 'roomName', desc: '源房间' },
+                                    { name: 'disRoom', desc: '目标房间' },
+                                ],
+                                functionName: 'ter.Csend'
+                            },
+                            {
+                                title: '资源转移信息查询:',
+                                describe: '例:ter.show()',
+                                functionName: 'ter.show'
+                            },
+                            {
                                 title: '发送资源:',
                                 describe: '例: terminal.send("W1N1","W1N2","energy",100000)',
                                 params: [
                                     { name: 'roomName', desc: '我的房间' },
                                     { name: 'disRoom', desc: '目的房间' },
                                     { name: 'rType', desc: '资源类型' },
-                                    { name: 'amount', desc: '资源数量' },
+                                    { name: 'amount', desc: '资源数量(路费加资源数量不能超30W)' },
                                 ],
                                 functionName: 'terminal.send'
                             },
@@ -409,6 +511,20 @@ export default [
                                 functionName: 'market.buy'
                             },
                             {
+                                title: '买资源:',
+                                describe: '例: debug.ResourceBuy("W1N1","sell","battery",10000,1,25,99999)',
+                                params: [
+                                    { name: 'roomName', desc: '我的房间名' },
+                                    { name: 'type', desc: '购买方式 "deal" | "sell"' },
+                                    { name: 'rType', desc: ' 资源类型 ' },
+                                    { name: 'num', desc: '资源数量' },
+                                    { name: 'range', desc: '动态范围' },
+                                    { name: 'max', desc: '最大价格' },
+                                    { name: 'time', desc: '超时时间' },
+                                ],
+                                functionName: 'debug.ResourceBuy'
+                            },
+                            {
                                 title: '卖资源:',
                                 describe: '例: market.sell("W1N1","energy","deal",100000,1,20000)',
                                 params: [
@@ -420,6 +536,16 @@ export default [
                                     { name: 'unit', desc: '在终端里放入的数量' },
                                 ],
                                 functionName: 'market.sell'
+                            },
+                            {
+                                title: '取消卖资源:',
+                                describe: '例: market.cancel("W1N1","deal","energy")',
+                                params: [
+                                    { name: 'roomName', desc: '我的房间名' },
+                                    { name: 'mtype', desc: '"order" | "deal"' },
+                                    { name: 'rType', desc: '资源类型' },
+                                ],
+                                functionName: 'market.cancel'
                             },
                             {
                                 title: '购买资源:',
@@ -645,6 +771,20 @@ export default [
                                 ],
                                 functionName: 'MissionVisual.remove'
                             },
+                            {
+                                title: '设置全局房间可视化面板画质:',
+                                params: [
+                                    { name: 'level', desc: '画质 low/medium/high/blank' },
+                                ],
+                                functionName: 'panel.level'
+                            },
+                            {
+                                title: '开/关具体房间的可视化面板:',
+                                params: [
+                                    { name: 'name', desc: '房间' },
+                                ],
+                                functionName: 'panel.switch'
+                            },
                         ]
                     },
 
@@ -700,7 +840,28 @@ export default [
 
             return logs.join('\n')
         }
-    }
+    },
+    {
+        alias: 'helpFlag',
+        exec: function (): string {
+            return [
+                `\n    ${colorful('superbitch bot', 'yellow', true)}`,
+                '这里列出一些可能用到的旗帜及其作用 统一规定xx为任何字符串 [xx]为房间名',
+                '旗帜名: [xx]/repair 房间内所有防御塔参与维修',
+                '旗帜名: [xx]/stop 房间内所有防御塔停止攻击',
+                '旗帜名: dismantle_xx 大黄拆迁指定旗帜下建筑',
+                '旗帜名: squad_attack_xx 四人小队攻击指定旗帜下建筑',
+                '旗帜名: support_double_xx 紧急支援双人小队拆迁指定旗帜下建筑',
+                '旗帜名: reapair_xx special维修爬维修指定旗帜下墙体',
+                '旗帜名: withdraw_xx紧急援助爬从该旗帜下的建筑提取能量',
+                '旗帜名: [紧急援助爬所属房间]/HB/harvest 紧急援助爬从该旗帜下的房间的矿点采集能量',
+                '旗帜名: LayoutVisual 插在任意房间可以显示dev自动布局',
+                '旗帜名: TowerVisualAttack 插在距离自己8级房最近房间或有视野房间 显示该房间防御塔伤害信息',
+                '旗帜名: TowerVisualHeal 插在距离自己8级房最近房间或有视野房间 显示该房间防御塔治疗信息',
+                '旗帜名: TowerVisualRepair 插在距离自己8级房最近房间或有视野房间 显示该房间防御塔维修信息',
+            ].join('\n')
+        }
+    },
 ]
 
 /**

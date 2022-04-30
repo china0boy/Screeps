@@ -5,7 +5,7 @@ import { createHelp } from '../help/help'
  * deposit 最大的采集冷却时长
  * 超过该时长则不会再进行挖掘
  */
-export const DEPOSIT_MAX_COOLDOWN = 60
+export const DEPOSIT_MAX_COOLDOWN = 80
 
 /**
  * observer 房间扫描间隔
@@ -57,7 +57,7 @@ export class ObserverExtension extends StructureObserver {
             // 对找到的 deposit 进行处置归档
             deposits.forEach(deposit => {
                 // 冷却过长或者已经插旗的忽略
-                if (deposit.lastCooldown >= DEPOSIT_MAX_COOLDOWN) return
+                if (deposit.lastCooldown >= DEPOSIT_MAX_COOLDOWN || deposit.ticksToDecay <= 10000) return
                 const flags = deposit.pos.lookFor(LOOK_FLAGS)
                 if (flags.length > 0) return
 

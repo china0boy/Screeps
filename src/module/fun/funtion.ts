@@ -1,5 +1,6 @@
 import { ResourceMapData } from "@/constant/ResourceConstant"
 import { isInArray } from "@/utils"
+import { AppLifecycleCallbacks } from "../framework/types"
 
 // 计算平均价格
 export function avePrice(res: ResourceConstant, day: number): number {
@@ -18,6 +19,7 @@ export function haveOrder(roomName: string, res: ResourceConstant, mtype: 'sell'
     {
         for (let i in Game.market.orders) {
             let order = Game.market.getOrderById(i);
+            //console.log(order,Game.market.orders[i])
             if (order.remainingAmount <= 0) { Game.market.cancelOrder(i); continue; }
             if (order.roomName == roomName && order.resourceType == res && order.type == mtype)
                 return true
@@ -186,73 +188,239 @@ export function hurts(creep: Creep): { [bo: string]: number } {
     return result
 }
 
-/* 寻找后一级的爬 */
-export function findNextData(creep:Creep):string {
+/* 爬虫攻击数据 */
+export function bodypartData(creep: Creep): { [bo: string]: number } {
+    var result = { 'attack': 0, 'ranged_attack': 0, 'heal': 0, 'tough': 0 }
+    // 其中tough是抵抗的伤害值
+    for (var i of creep.body) {
+        if (i.type == 'heal') {
+            if (!i.boost) result['heal'] += 12
+            else if (i.boost == 'LO') result['heal'] += 24
+            else if (i.boost == 'LHO2') result['heal'] += 36
+            else if (i.boost == 'XLHO2') result['heal'] += 48
+        }
+        if (i.type == 'attack') {
+            if (!i.boost) result['attack'] += 30
+            else if (i.boost == 'UH') result['attack'] += 60
+            else if (i.boost == 'UH2O') result['attack'] += 90
+            else if (i.boost == 'XUH2O') result['attack'] += 120
+        }
+        else if (i.type == 'ranged_attack') {
+            if (!i.boost) result['ranged_attack'] += 10
+            else if (i.boost == 'KO') result['ranged_attack'] += 20
+            else if (i.boost == 'KHO2') result['ranged_attack'] += 30
+            else if (i.boost == 'XKHO2') result['ranged_attack'] += 40
+        }
+        else if (i.type == 'tough') {
+            if (!i.boost) result['tough'] += 100
+            else if (i.boost == 'GO') result['tough'] += 200
+            else if (i.boost == 'GHO2') result['tough'] += 300
+            else if (i.boost == 'XGHO2') result['tough'] += 400
+        }
+    }
+    return result
+}
+
+/* 寻找后一级的爬 4人小队 */
+export function findNextData(creep: Creep): string {
     if (!creep.memory.squad) return null
-    for (var i in creep.memory.squad)
-    {
-        if (creep.memory.squad[i].index - creep.memory.squad[creep.name].index == 1)
-        {
+    for (var i in creep.memory.squad) {
+        if (creep.memory.squad[i].index - creep.memory.squad[creep.name].index == 1) {
             return i
         }
     }
     return null
 }
 
-/* 判断两个房间是否靠近以及目标房间 (必须是有出口的靠近)*/
-export function identifyNext(thisRoom:string,disRoom:string):boolean{
+/**
+ * 判断房间thisRoom是否可以直接通过出口到达房间disRoom
+ * @param thisRoom 当前房间
+ * @param disRoom  目标房价
+ * @returns boolean
+ * 方向常量 ↑:1 →:3 ↓:5 ←:7
+ */
+export function identifyNext(thisRoom: string, disRoom: string): boolean {
     var thisRoomData = regularRoom(thisRoom)
     var disRoomData = regularRoom(disRoom)
-    if (thisRoomData.coor[0]== disRoomData.coor[0] && thisRoomData.coor[1] == disRoomData.coor[1])
-    {
-        var Xdistanceabs = Math.abs(thisRoomData.num[0]-disRoomData.num[0])
-        var Ydistanceabs = Math.abs(thisRoomData.num[1]-disRoomData.num[1])
-        if ((Xdistanceabs == 0 && Ydistanceabs == 1) || (Xdistanceabs == 1 && Ydistanceabs == 0) && Game.rooms[thisRoom].findExitTo(disRoom)!= -2  && Game.rooms[thisRoom].findExitTo(disRoom)!= -10)
-        {
-        return true
+    if (thisRoomData.coor[0] == disRoomData.coor[0] && thisRoomData.coor[1] == disRoomData.coor[1]) {
+        var Xdistanceabs = Math.abs(thisRoomData.num[0] - disRoomData.num[0])
+        var Ydistanceabs = Math.abs(thisRoomData.num[1] - disRoomData.num[1])
+        if ((Xdistanceabs == 0 && Ydistanceabs == 1) || (Xdistanceabs == 1 && Ydistanceabs == 0) && Game.rooms[thisRoom].findExitTo(disRoom) != -2 && Game.rooms[thisRoom].findExitTo(disRoom) != -10) {
+            /* 已经接近房间了 */
+            let result = Game.rooms[thisRoom].findExitTo(disRoom)
+            if (isInArray([-2, -10], result)) return false
+            else {
+                let direction: number = null
+                /* 判断一个房间相对另一个房间的方向是否和返回的出口方向一致 */
+                if (Xdistanceabs == 1)  // x方向相邻
+                {
+                    let count = thisRoomData.num[0] - disRoomData.num[0]
+                    // W区
+                    if (thisRoomData.coor[0] == 'W') {
+                        switch (count) {
+                            case 1: { direction = 3; break; }
+                            case -1: { direction = 7; break; }
+                        }
+                    }
+                    // E区
+                    else if (thisRoomData.coor[0] == 'E') {
+                        switch (count) {
+                            case 1: { direction = 7; break; }
+                            case -1: { direction = 3; break; }
+                        }
+                    }
+                }
+                else if (Ydistanceabs == 1)       // y方向相邻
+                {
+                    let count = thisRoomData.num[1] - disRoomData.num[1]
+                    // N区
+                    if (thisRoomData.coor[1] == 'N') {
+                        switch (count) {
+                            case 1: { direction = 5; break; }
+                            case -1: { direction = 1; break; }
+                        }
+                    }
+                    // S区
+                    else if (thisRoomData.coor[1] == 'S') {
+                        switch (count) {
+                            case 1: { direction = 1; break; }
+                            case -1: { direction = 5; break; }
+                        }
+                    }
+                }
+                if (!direction) return false
+                else if (direction == result) return true
+            }
         }
     }
-
     return false
 }
 
-export function regularRoom(roomName:string):{coor:string[],num:number[]}
-{
-    var roomName =  roomName
+/**
+ * 格式化房间名称信息
+ * @param roomName 房间名
+ * @returns 一个对象 例: W1N2 -----> {coor:["W","N"], num:[1,2]}
+ */
+export function regularRoom(roomName: string): { coor: string[], num: number[] } {
+    var roomName = roomName
     const regRoom = /[A-Z]/g
     const regNum = /\d{1,2}/g
     let Acoord = regRoom.exec(roomName)[0]
     let AcoordNum = parseInt(regNum.exec(roomName)[0])
     let Bcoord = regRoom.exec(roomName)[0]
     let BcoordNum = parseInt(regNum.exec(roomName)[0])
-    return {coor:[Acoord,Bcoord],num:[AcoordNum,BcoordNum]}
+    return { coor: [Acoord, Bcoord], num: [AcoordNum, BcoordNum] }
 }
-/* 判断是否可以组队了  需要一个方块的位置都没有墙壁，而且坐标需要 5 -> 45 */
 
-export function identifyGarrison(creep:Creep):boolean{
-    if (creep.pos.x > 45 || creep.pos.x < 5 || creep.pos.y > 45 || creep.pos.y < 5) return false
-    for (var i = creep.pos.x;i<creep.pos.x+2;i++)
-    for (var j=creep.pos.y;j<creep.pos.y+2;j++)
-    {
-        var thisPos = new RoomPosition(i,j,creep.room.name)
-        if (thisPos.lookFor(LOOK_TERRAIN)[0] == 'wall')
-        {
-            return false
+/* 获取相邻房间相对于本房间的方向 */
+export function NextRoomDirection(thisRoom: string, disRoom: string): string {
+    var thisRoomData = regularRoom(thisRoom)
+    var disRoomData = regularRoom(disRoom)
+    if (thisRoomData.coor[0] == disRoomData.coor[0] && thisRoomData.coor[1] == disRoomData.coor[1]) {
+        var Xdistanceabs = Math.abs(thisRoomData.num[0] - disRoomData.num[0])
+        var Ydistanceabs = Math.abs(thisRoomData.num[1] - disRoomData.num[1])
+        if ((Xdistanceabs == 0 && Ydistanceabs == 1) || (Xdistanceabs == 1 && Ydistanceabs == 0) && Game.rooms[thisRoom].findExitTo(disRoom) != -2 && Game.rooms[thisRoom].findExitTo(disRoom) != -10) {
+            /* 已经接近房间了 */
+            let direction: string = null
+            /* 判断一个房间相对另一个房间的方向是否和返回的出口方向一致 */
+            if (Xdistanceabs == 1)  // x方向相邻
+            {
+                let count = thisRoomData.num[0] - disRoomData.num[0]
+                // W区
+                if (thisRoomData.coor[0] == 'W') {
+                    switch (count) {
+                        case 1: { direction = "→"; break; }
+                        case -1: { direction = "←"; break; }
+                    }
+                }
+                // E区
+                else if (thisRoomData.coor[0] == 'E') {
+                    switch (count) {
+                        case 1: { direction = "←"; break; }
+                        case -1: { direction = "→"; break; }
+                    }
+                }
+            }
+            else if (Ydistanceabs == 1)       // y方向相邻
+            {
+                let count = thisRoomData.num[1] - disRoomData.num[1]
+                // N区
+                if (thisRoomData.coor[1] == 'N') {
+                    switch (count) {
+                        case 1: { direction = "↓"; break; }
+                        case -1: { direction = "↑"; break; }
+                    }
+                }
+                // S区
+                else if (thisRoomData.coor[1] == 'S') {
+                    switch (count) {
+                        case 1: { direction = "↑"; break; }
+                        case -1: { direction = "↓"; break; }
+                    }
+                }
+            }
+            return direction
         }
-        if (thisPos.GetStructureList(['spawn','constructedWall','rampart','observer','link','nuker','storage','tower','terminal','powerSpawn','extension']).length > 0) return false
     }
+    return null
+}
+
+/**
+ * 判断是否处于房间入口指定格数内
+ * @param creep 
+ * @returns 
+ */
+export function RoomInRange(thisPos: RoomPosition, disRoom: string, range: number): boolean {
+    let thisroom = thisPos.roomName
+    let direction = NextRoomDirection(thisroom, disRoom)
+    if (!direction) return false
+    if (!range || range <= 0 || range >= 49) return false
+    switch (direction) {
+        case "↑": {
+            return thisPos.y <= range ? true : false
+        }
+        case "↓": {
+            return thisPos.y >= (49 - range) ? true : false
+        }
+        case "←": {
+            return thisPos.x <= range ? true : false
+        }
+        case "→": {
+            return thisPos.x >= (49 - range) ? true : false
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
+/* 判断是否可以组队了  需要一个方块的位置都没有墙壁，而且坐标需要 2 -> 47 */
+export function identifyGarrison(creep: Creep): boolean {
+    if (creep.pos.x > 47 || creep.pos.x < 2 || creep.pos.y > 47 || creep.pos.y < 2) return false
+    for (var i = creep.pos.x; i < creep.pos.x + 2; i++)
+        for (var j = creep.pos.y; j < creep.pos.y + 2; j++) {
+            var thisPos = new RoomPosition(i, j, creep.room.name)
+            if (thisPos.lookFor(LOOK_TERRAIN)[0] == 'wall') {
+                return false
+            }
+            if (thisPos.GetStructureList(['spawn', 'constructedWall', 'rampart', 'observer', 'link', 'nuker', 'storage', 'tower', 'terminal', 'powerSpawn', 'extension']).length > 0) return false
+        }
     return true
 }
 
 /* 寻找前一级的爬 */
-export function findFollowData(creep:Creep):string {
+export function findFollowData(creep: Creep): string {
     if (!creep.memory.squad) return null
-    for (var i in creep.memory.squad)
-    {
-        if (creep.memory.squad[creep.name].index - creep.memory.squad[i].index == 1)
-        {
+    for (var i in creep.memory.squad) {
+        if (creep.memory.squad[creep.name].index - creep.memory.squad[i].index == 1) {
             return i
         }
     }
     return null
+}
+
+/* 没有房间名的字符串解压 例如 14/23 */
+export function unzipXandY(str: string): number[] | undefined {
+    var info = str.split('/')
+    return info.length == 2 ? [Number(info[0]), Number(info[1])] : undefined
 }

@@ -136,15 +136,30 @@ export default class PositionFunctionFindExtension extends RoomPosition {
         xs.forEach(
             x => ys.forEach(
                 y => {
-                    let pos=new RoomPosition(x, y, this.roomName)
-                    if (Game.rooms[this.roomName] && x != 0 && x != 49 && y != 0 && y != 49) {
-                        if (pos.look().length <= 1) result.push(pos)
+                    let pos = new RoomPosition(x, y, this.roomName)
+                    if (terrain.get(x, y) != TERRAIN_MASK_WALL && Game.rooms[this.roomName] && x != 0 && x != 49 && y != 0 && y != 49) {
+                        let look = pos.look()
+                        //console.log(JSON.stringify(look))
+                        for (let i of look) {
+                            if (i.deposit || i.creep || i.mineral || i.nuke || i.powerCreep || i.source || i.structure) return
+                        }
+                        result.push(pos)
                     }
-                    else result.push(pos)
                 }
             )
         )
         return result
+    }
+
+    /* 获取该位置n格内的敌对爬虫 */
+    public FindRangeCreep(num: number): Creep[] {
+        let creep_ = this.findInRange(FIND_CREEPS, num, {
+            filter: (creep) => {
+                return !isInArray(Memory.whitesheet, creep.owner.username)
+            }
+        })
+        if (creep_.length > 0) return creep_
+        return []
     }
 
     /** 
@@ -223,5 +238,28 @@ export default class PositionFunctionFindExtension extends RoomPosition {
         if (result.path.length <= 0) return null
         // 寻路结果压缩
         return result.path
+    }
+
+    /* 防御塔数据叠加 */
+    public AddTowerRangeData(target: StructureTower, tempData: ARH): void {
+        let xR = Math.abs(this.x - target.pos.x)
+        let yR = Math.abs(this.y - target.pos.y)
+        let distance = Math.max(xR, yR)
+        let attackNum: number; let repairNum: number; let healNum: number
+        if (distance <= 5) {
+            attackNum = 600; repairNum = 800; healNum = 400
+        }
+        else if (distance >= 20) {
+            attackNum = 150; repairNum = 200; healNum = 100
+        }
+        else {
+            /* 根据距离计算 */
+            attackNum = 600 - (distance - 5) * 30
+            repairNum = 800 - (distance - 5) * 40
+            healNum = 400 - (distance - 5) * 20
+        }
+        tempData.attack += attackNum
+        tempData.heal += healNum
+        tempData.repair += repairNum
     }
 }

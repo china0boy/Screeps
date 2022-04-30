@@ -4,7 +4,6 @@ interface Room {
     RoomMemoryInit():void
     RoomStructureInit():void
     RoomSpawnListInit():void
-    RoomGlobalStructure():void
 
     // spawn
     SpawnMain():void

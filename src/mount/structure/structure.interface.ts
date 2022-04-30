@@ -29,6 +29,7 @@ interface RoomMemory {
         level: number
     }
     pausePS?: boolean//powerSpawn的开关
+    energyPS: number //powerSpawn的限制最低能量
     // observer 内存
     observer: {
         // 上个 tick 已经 ob 过的房间名

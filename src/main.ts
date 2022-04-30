@@ -1,53 +1,42 @@
 /* error map */
-import { ErrorMapper } from './_errorMap/errorMapper'
-import { MemoryInit } from './module/global/init'
-/* 原型挂载 */
-import Mount from '@/mount'
-import RoomWork from '@/boot/roomWork'
-import CreepWork from '@/boot/creepWork'
-import { CreepNumStatistic } from './module/global/statistic'
-import { pixel } from './module/fun/pixel'
-import { InitShardMemory, InterShardRun } from './module/shard/base'
-import { ResourceDispatchTick } from './module/dispatch/resource'
-import RoomVisual from 'Visual'
-import { stateScanner } from './utils'
-import { SquadManager } from './module/squad/squard'
+import { createApp } from './module/framework'
+import { memoryInit } from './module/global/init'
+import {createGlobalExtension} from '@/mount'
+import {roomRunner} from '@/boot/roomWork'
+import {creepRunner} from '@/boot/creepWork'
+import { powerCreepRunner } from './boot/powercreepWork'
+import { creepRecycleAndStatistic } from './module/global/statistic'
+import { pixelManager } from './module/fun/pixel'
+import { ResourceDispatchDelayManager } from './module/dispatch/resource'
+import {layoutVisualMoudle} from 'Visual'
+import { squadWarMoudle } from './module/squad/squad'
+import { statMoudle } from './module/stat/stat'
+import { towerDataVisual } from './module/visual/visual'
+import { crossShardAppPlugin } from './module/shard/intershard'
 /**
  * 主运行函数
  */
-export const loop = ErrorMapper.wrapLoop(() => {
-    //let cpu1 = Game.cpu.getUsed()
-    /* Memory初始化 */
-    MemoryInit()
-    /* InterShard初始化 */
-    InitShardMemory()
-    /* 跨区记忆运行 */
-    InterShardRun()
-    /* 原型拓展挂载 */
-    Mount()
+ const app = createApp({ roomRunner,creepRunner,powerCreepRunner})
 
-    //let cpu2 = Game.cpu.getUsed()
-    /* 爬虫统计及死亡Memory回收 */
-    CreepNumStatistic()
-    /* 房间框架运行 */
-    RoomWork()
-    
-    //let cpu3 = Game.cpu.getUsed()
-    /* 爬虫运行 */
-    CreepWork()
-    SquadManager() // 四人小队框架
+ app.on(memoryInit)        // 记忆初始化
 
-    //let cpu4 = Game.cpu.getUsed()
-    /* 资源调度超时管理 */
-    ResourceDispatchTick()
-    /* 像素 */
-    pixel()
-    
-    // console.log(`cpu消耗统计:\n初始化及原型挂载:${cpu2-cpu1}\n房间框架运行:${cpu3-cpu2}\n爬虫运行:${cpu4-cpu3}\n总cpu:${cpu4}`)
+ app.on(createGlobalExtension())    // 原型拓展挂载
 
-    /* 布局画图 */
-    RoomVisual()
+ app.on(crossShardAppPlugin)        // 跨shard相关
 
-    /* 统计制表 */
-    stateScanner()
-})
+ app.on(creepRecycleAndStatistic)   // 爬虫记忆回收及数目统计
+
+ app.on(squadWarMoudle)             // 四人小队战斗框架
+ 
+ app.on(ResourceDispatchDelayManager) // 资源调度超时管理器
+
+ app.on(pixelManager)                 // 搓像素
+
+ app.on(layoutVisualMoudle)           // 房间布局可视化
+
+ app.on(towerDataVisual)              // 防御塔数据可视化
+
+ app.on(statMoudle)           //  数据统计模块
+
+ export const loop = app.run
+ 

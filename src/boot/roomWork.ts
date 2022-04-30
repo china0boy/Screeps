@@ -1,29 +1,28 @@
 import { ResourceDispatch } from "@/module/dispatch/resource"
-/* [通用]房间运行主程序 */
-export default () => {
+import { processRoomDataVisual } from "@/module/visual/visual"
 
-    if (!Memory.RoomControlData) Memory.RoomControlData = {}
-    for (var roomName in Memory.RoomControlData) {
-        let thisRoom = Game.rooms[roomName]
-        if (!thisRoom) continue
-        /* 房间核心 */
-        thisRoom.RoomInit()         // 房间数据初始化
-        thisRoom.RoomEcosphere()    // 房间状态、布局
-        thisRoom.SpawnMain()        // 定时、补员型孵化管理
+export const roomRunner = function (room: Room): void {
+    if (!room?.controller?.my) return
+    if (!Memory.RoomControlData[room.name]) return  // 非框架控制不运行
+    /* 房间核心 */
+    room.RoomInit()         // 房间数据初始化
+    room.RoomEcosphere()    // 房间状态、布局
+    room.SpawnMain()        // 常驻爬虫的孵化管理 [不涉及任务相关爬虫的孵化]
 
-        /* 房间运维 */
-        thisRoom.MissionManager()   // 任务管理器
+    /* 房间运维 */
+    room.MissionManager()   // 任务管理器
 
-        thisRoom.SpawnExecution()   // 孵化爬虫
+    room.SpawnExecution()   // 孵化爬虫
 
-        thisRoom.TowerWork()        // 防御塔工作
+    room.TowerWork()        // 防御塔工作
 
-        thisRoom.StructureMission() // terminal link factory 工作
+    room.StructureMission() // terminal link factory 工作
 
-        ResourceDispatch(thisRoom)      // 资源调度
+    ResourceDispatch(room)      // 资源调度
 
-        thisRoom.LevelMessageUpdate()        // 房间等级Memory信息更新
+    processRoomDataVisual(room)        // 房间可视化
 
-        thisRoom.LevelUpgradeCreep() //监控升级工任务动态数量孵化 和 监控发布挖化合物任务
-    }
+    room.LevelMessageUpdate()        // 房间等级Memory信息更新
+
+    room.LevelUpgradeCreep() //监控升级工任务动态数量孵化 和 监控发布挖化合物任务
 }

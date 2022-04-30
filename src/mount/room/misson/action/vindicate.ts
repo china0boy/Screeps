@@ -1,6 +1,5 @@
 import { avePrice, haveOrder, highestPrice, checkDispatch, checkSend } from "@/module/fun/funtion";
-import { Colorful, StatisticalResources } from "@/utils";
-import { times } from "lodash";
+import { Colorful, StatisticalResources, isInArray, GenerateAbility } from "@/utils";
 
 /* 房间原型拓展   --行为  --维护任务 */
 export default class RoomMissonVindicateExtension extends Room {
@@ -51,10 +50,19 @@ export default class RoomMissonVindicateExtension extends Room {
         }
     }
 
+    /* 普通冲级 */
+    public Task_Normal_upgrade(mission: MissionModel): void {
+        if (this.controller.level >= 8) { this.DeleteMission(mission.id); console.log(`房间${this.name}等级已到8级，删除任务!`); return }
+        if (!this.memory.StructureIdData.terminalID) return
+        if (!this.memory.StructureIdData.labs || this.memory.StructureIdData.labs.length <= 0) return
+        if (mission.LabBind && !this.Check_Lab(mission, 'transport', 'complex')) return   // boost
+    }
+
     /* 急速冲级 */
     public Task_Quick_upgrade(mission: MissionModel): void {
         if (this.controller.level >= 8) { this.DeleteMission(mission.id); console.log(`房间${this.name}等级已到8级，删除任务!`); return }
         if (!this.memory.StructureIdData.terminalID) return
+        if (!this.memory.StructureIdData.labs || this.memory.StructureIdData.labs.length <= 0) return
         /* 能量购买 */
         let terminal_ = Game.getObjectById(this.memory.StructureIdData.terminalID) as StructureTerminal
         if (!terminal_) return
@@ -73,7 +81,7 @@ export default class RoomMissonVindicateExtension extends Room {
             let avePrice = 0;
             let j = -1;
             for (let i = 0; i < history.length; i++) {
-                if (history[i].price > avePrice && history[i].price <= 4 && history[i].roomName != this.name) { avePrice = history[i].price + 0.001; }//符合条件
+                if (history[i].price > avePrice && history[i].price <= 5 && history[i].roomName != this.name) { avePrice = history[i].price + 0.001; }//符合条件
             }
 
             //* 清理过期订单 */
@@ -83,8 +91,6 @@ export default class RoomMissonVindicateExtension extends Room {
                     if (!order.active) delete Game.market.orders[j]
                 }
             }
-            /* 判断有无自己的订单 */
-            //let thisRoomOrder = Game.market.getAllOrders(order => order.type == ORDER_BUY && order.resourceType == 'energy' && order.roomName == this.name)//&& order.price >= avePrice - 0.5
             let thisOrder = Game.market.orders;
             let thisRoomOrder: Order;
             for (let i in thisOrder) {
@@ -118,17 +124,20 @@ export default class RoomMissonVindicateExtension extends Room {
         }
     }
 
-    /* 紧急援建 */
-    public Task_HelpBuild(mission: MissionModel): void {
-        if ((Game.time - global.Gtime[this.name]) % 9) return
-        if (mission.LabBind) {
-            if (!this.Check_Lab(mission, 'transport', 'complex')) return
+    /* 扩张援建任务 */
+    public Task_Expand(mission: MissionModel): void {
+        if (mission.Data.defend) {
+            global.MSB[mission.id] = {
+                'claim': GenerateAbility(0, 0, 10, 0, 0, 5, 1, 4),
+                'Ebuild': GenerateAbility(10, 10, 25, 0, 0, 5, 0, 0),
+                'Eupgrade': GenerateAbility(10, 10, 25, 0, 0, 5, 0, 0)
+            }
         }
     }
 
-    /* 紧急支援 */
-    public Task_HelpDefend(mission: MissionModel): void {
-        // if ((Game.time - global.Gtime[this.name]) % 9) return
+    /* 紧急援建 */
+    public Task_HelpBuild(mission: MissionModel): void {
+        if ((Game.time - global.Gtime[this.name]) % 9) return
         if (mission.LabBind) {
             if (!this.Check_Lab(mission, 'transport', 'complex')) return
         }
@@ -139,6 +148,48 @@ export default class RoomMissonVindicateExtension extends Room {
         // if ((Game.time - global.Gtime[this.name]) % 9) return
         if (mission.LabBind) {
             if (!this.Check_Lab(mission, 'transport', 'complex')) return
+        }
+    }
+
+    /* 资源转移任务 */
+    public Task_Resource_transfer(mission: MissionModel): void {
+        if ((Game.time - global.Gtime[this.name]) % 25) return
+        let storage_ = this.storage
+        let terminal_ = this.terminal
+        if (!storage_ || !terminal_) {
+            this.DeleteMission(mission.id)
+            return
+        }
+        if (this.MissionNum('Structure', '资源传送') > 0) return //有传送任务就先不执行
+        if (storage_.store.getUsedCapacity('energy') + terminal_.store.getUsedCapacity('energy') < 150000) return   // 仓库资源太少不执行
+        // 不限定资源代表除了能量和ops之外所有资源都要转移
+        if (!mission.Data.rType) {
+            for (var i in storage_.store) {
+                if (isInArray(['energy', 'ops'], i)) continue
+                let missNum = (storage_.store[i] >= 50000) ? 50000 : storage_.store[i]
+                let sendTask = this.Public_Send(mission.Data.disRoom, i as ResourceConstant, missNum)
+                if (this.AddMission(sendTask))
+                    return
+
+            }
+            // 代表已经没有资源了
+            this.DeleteMission(mission.id)
+            return
+        }
+        else {
+            let rType = mission.Data.rType as ResourceConstant
+            let num = mission.Data.num as number
+            if (num <= 0 || storage_.store.getUsedCapacity(rType) + terminal_.store.getUsedCapacity(rType) <= 0)   // 数量或存量小于0 就删除任务
+            {
+                this.DeleteMission(mission.id)
+                return
+            }
+            let missNum = (num >= 50000) ? 50000 : num
+            if (missNum > storage_.store.getUsedCapacity(rType) + terminal_.store.getUsedCapacity(rType)) missNum = storage_.store.getUsedCapacity(rType) + terminal_.store.getUsedCapacity(rType)
+            let sendTask = this.Public_Send(mission.Data.disRoom, rType, missNum)
+            if (sendTask && this.AddMission(sendTask)) {
+                mission.Data.num -= missNum
+            }
         }
     }
 }

@@ -254,16 +254,7 @@ export function getOppositeDirection(direction: DirectionConstant): DirectionCon
 
 /* 打印指定颜色 */
 type Colors = 'red' | 'blue' | 'green' | 'yellow' | 'orange' | 'purple' | 'brown' | 'pink'
-const colors: { [name in Colors]: string } = {
-  red: '#ef9a9a',     //红色
-  green: '#6b9955',   //绿色
-  yellow: '#c5c599',  //黄色
-  blue: '#8dc5e3',    //蓝色
-  orange: '#ff9d00',  //橙色
-  purple: '#800080',  //紫色
-  pink: '	#FF69B4',   //粉色
-  brown: '#8B4513',   //棕色
-}
+
 export function Colorful(content: string, colorName: Colors | string = null, bolder: boolean = false): string {
   const colorStyle = colorName ? `color: ${colors[colorName] ? colors[colorName] : colorName};` : ''
   const bolderStyle = bolder ? 'font-weight: bolder;' : ''
@@ -322,6 +313,51 @@ export function StatisticalResources(resource: ResourceConstant): number {
   }
   return num;
 }
+
+/**
+ * 递归计算商品合成成本
+ */
+export function computationalExpense(type: CommodityConstant | MineralConstant | "energy" | "G", num: number, cost?: {}) {
+  if (cost == undefined) cost = {}
+  if (COMMODITIES[type].level) {
+    for (let i in COMMODITIES[type].components) {
+      if (i == 'energy') continue
+      let data = num * COMMODITIES[type].components[i] / COMMODITIES[type].amount;
+      cost[i] ? cost[i] += data : cost[i] = data
+      if (COMMODITIES[i].level) cost = computationalExpense(i as "energy" | CommodityConstant, data, cost);
+    }
+  }
+  else return `错误:${type} 无等级`
+  return cost
+}
+
+/**
+ * 判断是否是中央房
+ */
+export function nineRoom(roomName: string): boolean {
+  let parsed = (/^[WE]([0-9]+)[NS]([0-9]+)$/.exec(roomName));
+  let x = Number(parsed[1]) % 10;
+  let y = Number(parsed[2]) % 10;
+  return (x >= 4 && x <= 6 && y >= 4 && y <= 6)
+}
+
+/**
+ * 查找最近的我的房间
+ */
+export function minDistanceRoom(roomName1: string, level: number = 0): string {
+  let roomName: string;
+  for (let name in Game.rooms) {
+    if (!Game.rooms[name] || (level && Game.rooms[name].controller && Game.rooms[name].controller.level < level)) continue
+    if (roomName) {
+      let a = Game.map.getRoomLinearDistance(roomName1, name)
+      let b = Game.map.getRoomLinearDistance(roomName1, roomName)
+      roomName = a >= b ? roomName : name
+    }
+    else roomName = name;
+  }
+  return roomName
+}
+
 /**
  * 全局统计信息扫描器
  * 负责搜集关于 cpu、memory、GCL、GPL 的相关信息
@@ -531,4 +567,32 @@ export const createElement = {
     // 压缩成一行
     return parts.join('')
   }
+}
+
+export const red = (content: string , bold?: boolean) => Colorful(content, 'red' ,bold)
+
+export const colors = {
+  slate: '#cbd5e1',
+  gray: '#d1d5db',
+  zinc: '#d4d4d8',
+  neutral: '#d4d4d4',
+  stone: '#d6d3d1',
+  red: '#fca5a5',     //红色
+  orange: '#fdba74',  //橙色
+  amber: '#fcd34d',
+  yellow: '#fde047',  //黄色
+  lime: '#bef264',
+  green: '#86efac',   //绿色
+  emerald: '#6ee7b7',
+  teal: '#5eead4',
+  cyan: '#67e8f9',
+  sky: '#7dd3fc',
+  blue: '#93c5fd',    //蓝色
+  indigo: '#a5b4fc',
+  violet: '#c4b5fd',
+  purple: '#d8b4fe',
+  fuchsia: '#f0abfc',
+  pink: '#f9a8d4',   //粉色
+  rose: '#fda4af',
+  brown: '#8B4513',   //棕色
 }

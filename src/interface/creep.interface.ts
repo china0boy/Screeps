@@ -12,10 +12,12 @@ interface CreepMemory {
     /* 每个爬虫都必须有该记忆，方便boost */
     boostData:BoostData   
     /* 目标Id */
+    carId?:string
     targetID?:string
     containerID?:string
     adaption?:boolean
     taskRB?:string
+    msb?:boolean
 }
 
 interface BoostData{

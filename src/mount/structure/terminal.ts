@@ -7,14 +7,14 @@ import { avePrice, haveOrder, highestPrice } from "@/module/fun/funtion"
 export default class terminalExtension extends StructureTerminal {
     public ManageMission(): void {
         if (this.room.MissionNum('Creep', '急速冲级') > 0) return   // 急速冲级状态下停止terminal功能
-        var allmyTask = []
-        for (var task of this.room.memory.Misson['Structure']) {
+        let allmyTask: MissionModel[] = []
+        for (let task of this.room.memory.Misson['Structure']) {
             if (!task.structure) continue
             if (isInArray(task.structure, this.id)) {
                 allmyTask.push(task)
             }
         }
-        let thisTask = null
+        let thisTask: MissionModel = null
         /* 按照优先级排序 */
         if (allmyTask.length >= 1)
             allmyTask.sort(compare('level'))
@@ -26,7 +26,7 @@ export default class terminalExtension extends StructureTerminal {
             if (!thisTask) return
         }
         if (thisTask.delayTick < 99995)
-            thisTask.delayTick--
+            thisTask.processing = true
         switch (thisTask.name) {
             case "资源传送": { this.ResourceSend(thisTask); break }
             case "资源购买": { this.ResourceDeal(thisTask); break }
@@ -40,11 +40,11 @@ export default class terminalExtension extends StructureTerminal {
         this.RsourceMemory()
         // terminal资源平衡
         if (Game.time % 7) return
-        let storage_ = global.Stru[this.room.name]['storage'] as StructureStorage
-        if (!storage_) { console.log(`找不到global.Stru['${this.room.name}']['storage]!`); return }
-        var anytype = Object.keys(this.store)
+        let storage_ = this.room.storage
+        if (!storage_) { return }
+        let anytype = Object.keys(this.store)
         for (let i in this.room.memory.TerminalData) if (i) anytype = _.uniq([...anytype, i])//把所有资源遍历一遍
-        for (var i of anytype) {
+        for (let i of anytype) {
             if (this.room.RoleMissionNum('manage', '物流运输') >= 1) return
             let num = this.store[i]     // 数量
             if (!this.room.memory.TerminalData[i] || !this.room.memory.TerminalData[i].num)  // terminalData里没有该数据
@@ -61,7 +61,7 @@ export default class terminalExtension extends StructureTerminal {
                 }
             }
         }
-        for (var i of anytype) {
+        for (let i of anytype) {
             if (this.room.RoleMissionNum('manage', '物流运输') >= 1) return
             if (!this.room.memory.TerminalData[i] || !this.room.memory.TerminalData[i].fill) continue
             let num = this.store.getUsedCapacity(i as ResourceConstant)
@@ -84,8 +84,8 @@ export default class terminalExtension extends StructureTerminal {
      * */
     public RsourceMemory(): void {
         /* terminal自身资源管理 */
-        var terminalData = this.room.memory.TerminalData
-        for (var i in terminalData) {
+        let terminalData = this.room.memory.TerminalData
+        for (let i in terminalData) {
             /* 数量小于0就删除数据，节省memory */
             if (terminalData[i].num <= 0) delete terminalData[i]
         }
@@ -95,46 +95,90 @@ export default class terminalExtension extends StructureTerminal {
      * 资源买卖函数 只买能量、挂单、卖 (不deal买资源)
      */
     public ResourceMarket(): void {
-        if ((Game.time - global.Gtime[this.room.name]) % 27) return
-        //* 清理过期订单 */
-        if (Object.keys(Game.market.orders).length > 40) {
-            for (let j in Game.market.orders) {
-                let order = Game.market.getOrderById(j)
-                if (!order.remainingAmount) Game.market.cancelOrder(j)
-            }
-        }
-        // 能量自动购买区 [与MarketData无关] storage内能量小于200000时自动购买
-        let storage_ = global.Stru[this.room.name]['storage'] as StructureStorage
-        if (!storage_) { console.log(`找不到global.Stru['${this.room.name}']['storage]!`); return }
-        if (storage_.store.getUsedCapacity('energy') + this.store.getUsedCapacity('energy') < 200000) {
-            //购买能量
-            this.OrderEnergy('energy', 50000, 4);
-        }
-        /* 仓库资源过于饱和就卖掉能量 */
-        if (storage_.store.getFreeCapacity() < 50000) {
-            /* 如果仓库饱和(小于200k空间)，而且仓库能量超过400K,就卖能量 */
-            if (storage_.store.getFreeCapacity() < 200000 && storage_.store.getUsedCapacity('energy') > 350000) {
-                if (!this.room.memory.market) this.room.memory.market = {}
-                if (!this.room.memory.market['deal']) this.room.memory.market['deal'] = []
-                var bR = true
-                for (var od of this.room.memory.market['deal']) {
-                    if (od.rType == 'energy')
-                        bR = false
+        //if ((Game.time - global.Gtime[this.room.name]) % 27) return
+        let storage_ = this.room.storage
+        if (!storage_) { return }
+        if ((Game.time - global.Gtime[this.room.name]) % 27 == 0) {
+            //* 清理过期订单 */
+            if (Object.keys(Game.market.orders).length > 40) {
+                for (let j in Game.market.orders) {
+                    let order = Game.market.getOrderById(j)
+                    if (!order.remainingAmount) Game.market.cancelOrder(j)
                 }
-                if (bR) {
-                    /* 下达自动deal的任务 */
-                    this.room.memory.market['deal'].push({ rType: 'energy', num: 100000 })
+            }
+            // 能量自动购买区 [与MarketData无关] storage内能量小于200000时 优先从别的房间能量多的房间获取，获取不到就购买能量
+            if (Game.market.credits >= 10000000 && storage_.store.getUsedCapacity('energy') + this.store.getUsedCapacity('energy') < 200000) {
+                /* 先从能量多的房间获取能量，获取不到就购买 */
+                let toRoom: Room;
+                for (let name in Memory.RoomControlData) {
+                    let room = Game.rooms[name];
+                    if (room && room.controller.my && room != this.room) {
+                        let storage = room.storage;
+                        if (storage && storage.store.energy >= 300000) {
+                            if (toRoom) {
+                                if (storage.store.energy > toRoom.storage.store.energy) toRoom = room
+                            }
+                            else toRoom = room
+                        }
+                    }
+                }
+                if (toRoom) {
+                    if (this.room.MissionNum('Structure', '资源传送') <= 0) {
+                        if (toRoom.AddMission(this.room.Public_Send(this.pos.roomName, 'energy', 50000))) console.log(Colorful(`房间${this.pos.roomName}能量太少 房间${toRoom.name}-->${this.pos.roomName}资源: energy 传送挂载成功! 数量: 50000`, 'orange', true))
+                    }
+                }
+                else {
+                    //购买能量
+                    this.OrderEnergy('energy', 50000, 5);
+                }
+            }
+
+            /* 仓库资源过于饱和就卖掉能量 或者转移*/
+            if (storage_.store.getFreeCapacity() < 100000 && storage_.store.getCapacity() >= storage_.store.getUsedCapacity()) {
+                /* 先转移到空间大的房间 */
+                if (storage_.store.energy >= 300000) {
+                    let toRoom: Room;
+                    for (let name in Memory.RoomControlData) {
+                        let room = Game.rooms[name];
+                        if (room && room.controller.my && room != this.room) {
+                            let storage = room.storage;
+                            if (storage && storage.store.getFreeCapacity() >= 200000) {
+                                if (toRoom) {
+                                    if (storage.store.getFreeCapacity() > toRoom.storage.store.getFreeCapacity()) toRoom = room
+                                }
+                                else toRoom = room
+                            }
+                        }
+                    }
+                    if (toRoom && this.room.MissionNum('Structure', '资源传送') <= 0) {
+                        if (this.room.AddMission(this.room.Public_Send(toRoom.name, 'energy', 50000))) console.log(Colorful(`房间${this.pos.roomName}资源太多 房间${this.pos.roomName}-->${toRoom.name}资源: energy 传送挂载成功! 数量: 50000`, 'orange', true))
+                    }
+                }
+                /* 如果仓库饱和(小于 空间)，而且仓库能量超过  ,就卖能量 */
+                if (storage_.store.getFreeCapacity() < 40000 && storage_.store.energy > 500000) {
+                    if (!this.room.memory.market) this.room.memory.market = {}
+                    if (!this.room.memory.market['deal']) this.room.memory.market['deal'] = []
+                    let bR = true
+                    for (let od of this.room.memory.market['deal']) {
+                        if (od.rType == 'energy')
+                            bR = false
+                    }
+                    if (bR) {
+                        /* 下达自动deal的任务 */
+                        this.room.memory.market['deal'].push({ rType: 'energy', num: 100000, price: 100 })
+                    }
                 }
             }
         }
         // 其他类型资源的交易 【考虑到已经有了资源调度模块的存在，这里主要是卖】
         LoopA:
-        for (var t in this.room.memory.market) {
+        for (let t in this.room.memory.market) {
             // deal类型
             if (t == 'deal') {
+                if (this.cooldown || Game.time % 5) return
                 if (this.store.getUsedCapacity('energy') < 50000) continue LoopA // terminal空闲资源过少便不会继续
                 LoopB:
-                for (var i of this.room.memory.market['deal']) {
+                for (let i of this.room.memory.market['deal']) {
                     if (i.rType != 'energy') {
                         this.room.memory.TerminalData[i.rType] = { num: i.unit ? i.unit : 5000, fill: true }
                     }
@@ -142,44 +186,58 @@ export default class terminalExtension extends StructureTerminal {
                     if (i.num <= 0) {
                         if (i.rType != 'energy')
                             delete this.room.memory.TerminalData[i.rType]
-                        var index = this.room.memory.market['deal'].indexOf(i)
+                        let index = this.room.memory.market['deal'].indexOf(i)
                         this.room.memory.market['deal'].splice(index, 1)
                         continue LoopB
                     }
                     if (this.cooldown) continue LoopA   // 冷却模式下进行不了其他deal了
-                    let a = 1000, b = 30000;
-                    COMMODITIES[i.rType] && COMMODITIES[i.rType].level ? a = 0 : a//防止商品单搜不到
-                    var orders = Game.market.getAllOrders(order => order.resourceType == i.rType && i.price <= order.price &&
+                    let a = 1000, b = 30000;//a<=单子的资源数量<=b
+                    (COMMODITIES[i.rType] && COMMODITIES[i.rType].level) ? a = 0 : a//防止商品单搜不到
+                    let orders = Game.market.getAllOrders(order => order.resourceType == i.rType && i.price <= order.price &&
                         order.type == ORDER_BUY && order.amount >= a && order.amount <= b)
                     if (orders.length <= 0) continue LoopB
                     /* 按价格从低到高排列 */
-                    var newOrderList = orders.sort(compare('price'))
-                    // 倒数第二 没有就倒数第一
-                    var thisDealOrder = newOrderList.length > 1 ? newOrderList[newOrderList.length - 2] : newOrderList[newOrderList.length - 1]
+                    let newOrderList = orders.sort(compare('price'))
+                    // 倒数第1
+                    if (newOrderList.length <= 0) continue LoopB
+                    let thisDealOrder = newOrderList[newOrderList.length - 1]
                     if (!thisDealOrder) continue LoopB
                     if (storage_.store.getUsedCapacity(i.rType) <= 0 && !this.store[i.rType] && this.room.RoleMissionNum('manage', '物流运输') <= 0) {
                         if (i.rType != 'energy')
                             delete this.room.memory.TerminalData[i.rType]
-                        var index = this.room.memory.market['deal'].indexOf(i)
+                        let index = this.room.memory.market['deal'].indexOf(i)
                         this.room.memory.market['deal'].splice(index, 1)
                         continue LoopB
                     }
                     if (thisDealOrder.amount >= this.store.getUsedCapacity(i.rType)) {
-                        Game.market.deal(thisDealOrder.id, this.store.getUsedCapacity(i.rType), this.room.name)
-                        i.num -= this.store.getUsedCapacity(i.rType)
+                        if (i.num > this.store.getUsedCapacity(i.rType)) {
+                            Game.market.deal(thisDealOrder.id, this.store.getUsedCapacity(i.rType), this.room.name)
+                            i.num -= this.store.getUsedCapacity(i.rType)
+                        }
+                        else {
+                            Game.market.deal(thisDealOrder.id, i.num, this.room.name)
+                            i.num = 0
+                        }
                         break LoopA
                     }
                     else {
-                        Game.market.deal(thisDealOrder.id, thisDealOrder.amount, this.room.name)
-                        i.num -= thisDealOrder.amount
+                        if (i.num > thisDealOrder.amount) {
+                            Game.market.deal(thisDealOrder.id, thisDealOrder.amount, this.room.name)
+                            i.num -= thisDealOrder.amount
+                        }
+                        else {
+                            Game.market.deal(thisDealOrder.id, i.num, this.room.name)
+                            i.num = 0
+                        }
                         break LoopA
                     }
                 }
             }
             // order类型
             else if (t == 'order') {
+                if ((Game.time - global.Gtime[this.room.name]) % 27) return
                 LoopC:
-                for (var l of this.room.memory.market['order']) {
+                for (let l of this.room.memory.market['order']) {
                     if (l.rType != 'energy') {
                         this.room.memory.TerminalData[l.rType] = { num: l.unit ? l.unit : 5000, fill: true }
                     }
@@ -214,7 +272,7 @@ export default class terminalExtension extends StructureTerminal {
                             if (l.rType != 'energy')
                                 delete this.room.memory.TerminalData[l.rType]
                             console.log(Colorful(`[market] 房间${this.room.name}订单ID:${l.id},rType:${l.rType}的删除订单!`, 'blue'))
-                            var index = this.room.memory.market['order'].indexOf(l)
+                            let index = this.room.memory.market['order'].indexOf(l)
                             this.room.memory.market['order'].splice(index, 1)
                             continue LoopC
                         }
@@ -270,17 +328,21 @@ export default class terminalExtension extends StructureTerminal {
             if (task.Data.num <= 0 || task.Data.num == undefined) this.room.DeleteMission(task.id)
             if (this.room.RoleMissionNum('manage', '物流运输') > 0) return // manage爬虫有任务时就不管
             // 路费
-            var wastage = Game.market.calcTransactionCost(task.Data.num, this.room.name, task.Data.disRoom)
+            let wastage = Game.market.calcTransactionCost(task.Data.num, this.room.name, task.Data.disRoom)
             /* 如果非能量资源且路费不够，发布资源搬运任务，优先寻找storage */
-            var storage_ = global.Stru[this.room.name]['storage'] as StructureStorage
+            let storage_ = this.room.storage
+            if (!storage_) if (!storage_) {
+                this.room.DeleteMission(task.id)
+                return
+            }
             // terminal的剩余资源
-            var remain = this.store.getFreeCapacity()
+            let remain = this.store.getFreeCapacity()
             /* 路费判断 */
             if (wastage > this.store.getUsedCapacity('energy')) {
                 /* 只有在能量富裕的情况下才会允许进入下一阶段 */
                 if (storage_ && (storage_.store.getUsedCapacity('energy') + this.store.getUsedCapacity('energy') - 5000) > wastage && remain > (wastage - this.store.getUsedCapacity('energy'))) {
                     /* 下布搬运任务 */
-                    var thisTask = this.room.Public_Carry({ 'manage': { num: 1, bind: [] } }, 40, this.room.name, storage_.pos.x, storage_.pos.y, this.room.name, this.pos.x, this.pos.y, 'energy', wastage - this.store.getUsedCapacity('energy'))
+                    let thisTask = this.room.Public_Carry({ 'manage': { num: 1, bind: [] } }, 40, this.room.name, storage_.pos.x, storage_.pos.y, this.room.name, this.pos.x, this.pos.y, 'energy', wastage - this.store.getUsedCapacity('energy'))
                     this.room.AddMission(thisTask)
                     return
                 }
@@ -289,7 +351,7 @@ export default class terminalExtension extends StructureTerminal {
                 return
             }
             /* 资源判断 */
-            var cargoNum: number = task.Data.rType == 'energy' ? this.store.getUsedCapacity(task.Data.rType) - wastage : this.store.getUsedCapacity(task.Data.rType)
+            let cargoNum: number = task.Data.rType == 'energy' ? this.store.getUsedCapacity(task.Data.rType) - wastage : this.store.getUsedCapacity(task.Data.rType)
             console.log(
                 Colorful(`                     资源传送任务监控中\n`, 'blue') +
                 Colorful(`———————————————————————————————————————————————————————————\n`, 'blue') +
@@ -307,7 +369,7 @@ export default class terminalExtension extends StructureTerminal {
                 }
                 if (MaxStore && storage_ && (storage_.store.getUsedCapacity(task.Data.rType) + this.store.getUsedCapacity(task.Data.rType)) >= (task.Data.num - MaxStore) && remain > task.Data.num - cargoNum) {
                     /* 下布搬运任务 */
-                    var thisTask = this.room.Public_Carry({ 'manage': { num: 1, bind: [] } }, 40, this.room.name, storage_.pos.x, storage_.pos.y, this.room.name, this.pos.x, this.pos.y, task.Data.rType, task.Data.num - cargoNum)
+                    let thisTask = this.room.Public_Carry({ 'manage': { num: 1, bind: [] } }, 40, this.room.name, storage_.pos.x, storage_.pos.y, this.room.name, this.pos.x, this.pos.y, task.Data.rType, task.Data.num - cargoNum)
                     this.room.AddMission(thisTask)
                     return
                 }
@@ -338,48 +400,66 @@ export default class terminalExtension extends StructureTerminal {
      */
     public ResourceDeal(task: MissionModel): void {
         if ((Game.time - global.Gtime[this.room.name]) % 10) return
-        if (this.cooldown || this.store.getUsedCapacity('energy') < 50000) return
+        if (this.cooldown) return
         if (!task.Data) { this.room.DeleteMission(task.id); return }
+        let Data = task.Data;
         let money = Game.market.credits
-        if (money <= 0 || task.Data.num > 50000) { this.room.DeleteMission(task.id); return }
-        let rType = task.Data.rType
-        let num = task.Data.num
-        var HistoryList = Game.market.getHistory(rType)
-        let HistoryLength = HistoryList.length;
-        if (HistoryLength < 3) { console.log("资源购买出错"); return }
-        var allNum: number = 0
-        for (var iii = HistoryLength - 3; iii < HistoryLength; iii++) {
-            allNum += HistoryList[iii].avgPrice
-        }
-        var avePrice = allNum / 3     // 平均价格 [近3天]
-        // 获取该资源的平均价格
-        var maxPrice = avePrice + (task.Data.range ? task.Data.range : 50)  // 范围
-        /* 在市场上寻找 */
-        var orders = Game.market.getAllOrders(order => order.resourceType == rType &&
-            order.type == ORDER_SELL && order.price <= maxPrice)
-        if (orders.length <= 0) return
-        /* 寻找价格最低的 */
-        var newOrderList = orders.sort(compare('price'))
-        for (var ii of newOrderList) {
-            if (ii.price > maxPrice) return
-            if (ii.amount >= num) {
-                if (Game.market.deal(ii.id, num, this.room.name) == OK) {
-                    this.room.DeleteMission(task.id)
+        if (money <= 0) { this.room.DeleteMission(task.id); return }
+        let rType = Data.rType
+        let num = Data.num
+        if (Data.type == 'deal') {
+            if (this.store.getUsedCapacity('energy') < 50000) return
+            let HistoryList = Game.market.getHistory(rType)
+            let HistoryLength = HistoryList.length;
+            if (HistoryLength < 3) { console.log(`市场资源${rType}的订单太少，无法购买!`); return }
+            let allNum: number = 0
+            for (let iii = HistoryLength - 3; iii < HistoryLength; iii++) {
+                allNum += HistoryList[iii].avgPrice
+            }
+            let avePrice = allNum / 3     // 平均价格 [近3天]
+            // 获取该资源的平均价格
+            let maxPrice = avePrice + (task.Data.range ? task.Data.range : 50)  // 范围
+            /* 在市场上寻找 */
+            let orders = Game.market.getAllOrders(order => order.resourceType == rType &&
+                order.type == ORDER_SELL && order.price <= maxPrice)
+            if (orders.length <= 0) return
+            /* 寻找价格最低的 */
+            let newOrderList = orders.sort(compare('price'))
+            for (let ii of newOrderList) {
+                if (ii.price > maxPrice) return
+                if (ii.amount >= num) {
+                    if (Game.market.deal(ii.id, num, this.room.name) == OK) {
+                        this.room.DeleteMission(task.id)
+                        return
+                    }
+                    else return
+                }
+                else {
+                    if (Game.market.deal(ii.id, ii.amount, this.room.name) == OK)
+                        task.Data.num -= ii.amount
                     return
                 }
-                else return
-            }
-            else {
-                if (Game.market.deal(ii.id, ii.amount, this.room.name) == OK)
-                    task.Data.num -= ii.amount
-                return
             }
         }
+        else if (Data.type == 'sell') {
+            let thisRoomOrder: Order;
+            for (let i in Game.market.orders) {
+                let Order = Game.market.orders[i];
+                if (Order.roomName == this.room.name && Order.type == 'buy' && Order.resourceType == Data.rType && Order.remainingAmount <= 0) { thisRoomOrder = Order; break; }
+            }
+            if (thisRoomOrder) {
+                this.room.DeleteMission(task.id);
+                Game.market.cancelOrder(thisRoomOrder.id)
+                return
+            }
+            else this.OrderEnergy(Data.rType, Data.num, task.Data.maxPrice)
+        } else this.room.DeleteMission(task.id);
+
     }
 
 
     /**
-     * 创建市场最高购买订单 
+     * 动态创建市场最高购买订单 
      * @param type 资源类型
      * @param num 购买数量
      * @param max 接受最大价格
@@ -399,6 +479,7 @@ export default class terminalExtension extends StructureTerminal {
             let Order = thisOrder[i];
             if (Order.roomName == this.room.name && Order.type == 'buy' && Order.resourceType == type && Order.remainingAmount > 0) { thisRoomOrder = Order; break; }
         }
+        if (avePrice <= 0) avePrice = 0.001;
         /* 没有就创建订单 或者添加容量 ，有就更新最高价格*/
         if (!thisRoomOrder) {
             for (let i in thisOrder) {

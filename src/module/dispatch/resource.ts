@@ -2,15 +2,16 @@
 
 import { t1, t2, t3 } from "@/constant/ResourceConstant"
 import { Colorful, isInArray } from "@/utils"
-import { avePrice, haveOrder, checkLabBindResource, highestPrice } from "../fun/funtion"
+import { AppLifecycleCallbacks } from "../framework/types"
+import { avePrice, checkDispatch, checkLabBindResource, checkSend, DispatchNum, haveOrder, highestPrice } from "../fun/funtion"
 
 
 // 主调度函数
 export function ResourceDispatch(thisRoom: Room): void {
     if ((Game.time - global.Gtime[thisRoom.name]) % 15) return
     // 处理订单前检查
-    let storage_ = global.Stru[thisRoom.name]['storage'] as StructureStorage
-    let terminal_ = global.Stru[thisRoom.name]['terminal'] as StructureTerminal
+    let storage_ = thisRoom.storage
+    let terminal_ = thisRoom.terminal
     if (thisRoom.controller.level < 6 || !storage_ || !terminal_) return
     if (thisRoom.MissionNum('Structure', '资源传送') >= 1) return    // 如果房间有资源传送任务，则不执行
     // ResourceLimit更新
@@ -51,31 +52,31 @@ export function ResourceDispatch(thisRoom: Room): void {
                     console.log(Colorful(`[资源调度] 房间${thisRoom.name}需求资源[${i.rType}]无法调度,将进行购买! 购买方式为${i.mtype},购买数量:${i.num}`, 'yellow'))
                     // 能量 ops
                     if (isInArray(['ops', 'energy'], i.rType)) {
-                        let task = thisRoom.Public_Buy(i.rType, i.num, 5, 10);
+                        let task = thisRoom.Public_Buy('deal', i.rType, i.num, 5, 10);
                         if (task) { thisRoom.AddMission(task); i.delayTick = 0 }; continue
                     }
                     // 原矿 中间化合物
                     else if (isInArray(['X', 'L', 'H', 'O', 'Z', 'K', 'U', 'G', 'OH', 'ZK', 'UL'], i.rType)) {
-                        let task = thisRoom.Public_Buy(i.rType, i.num, 10, 30);
+                        let task = thisRoom.Public_Buy('deal', i.rType, i.num, 10, 30);
                         if (task) { thisRoom.AddMission(task); i.delayTick = 0 }; continue
                     }
                     else if (isInArray(t3, i.rType)) {
-                        let task = thisRoom.Public_Buy(i.rType, i.num, 50, 150);
+                        let task = thisRoom.Public_Buy('deal', i.rType, i.num, 50, 150);
                         if (task) { thisRoom.AddMission(task); i.delayTick = 0 }; continue
                     }
                     // power
                     else if (i.rType == 'power') {
-                        let task = thisRoom.Public_Buy(i.rType, i.num, 20, 70);
+                        let task = thisRoom.Public_Buy('deal', i.rType, i.num, 20, 70);
                         if (task) { thisRoom.AddMission(task); i.delayTick = 0 }; continue
                     }
                     // t1 t2
                     else if (isInArray(t2, i.rType) || isInArray(t1, i.rType)) {
-                        let task = thisRoom.Public_Buy(i.rType, i.num, 20, 65);
+                        let task = thisRoom.Public_Buy('deal', i.rType, i.num, 20, 65);
                         if (task) { thisRoom.AddMission(task); i.delayTick = 0 }; continue
                     }
                     // 其他商品类资源 bar类资源
                     else {
-                        let task = thisRoom.Public_Buy(i.rType, i.num, 50, 200);
+                        let task = thisRoom.Public_Buy('deal', i.rType, i.num, 50, 200);
                         if (task) { thisRoom.AddMission(task); i.delayTick = 0 }; continue
                     }
                 }
@@ -123,7 +124,7 @@ export function ResourceDispatchTick(): void {
     for (let i of Memory.ResourceDispatchData) {
         // 超时将删除调度信息
         if (!i.delayTick || i.delayTick <= 0 || i.num <= 0 || !i.rType) {
-            console.log(Colorful(`[资源调度]房间${i.sourceRoom}的[${i.rType}]资源调度删除!原因:调度任务已部署|超时|无效调度`,'pink'))
+            console.log(Colorful(`[资源调度]房间${i.sourceRoom}的[${i.rType}]资源调度删除!原因:调度任务已部署|超时|无效调度`, 'pink'))
             let index = Memory.ResourceDispatchData.indexOf(i)
             Memory.ResourceDispatchData.splice(index, 1)
         }
@@ -142,12 +143,16 @@ export function ResourceDispatchTick(): void {
     }
 }
 
+export const ResourceDispatchDelayManager: AppLifecycleCallbacks = {
+    tickEnd: ResourceDispatchTick
+}
+
 // 调度信息更新器  ResourceLimit 建议放global里
 export function ResourceLimitUpdate(thisRoom: Room): void {
     global.ResourceLimit[thisRoom.name] = {}       // 初始化
     global.ResourceLimit[thisRoom.name]['energy'] = 350000
     for (var i of t3) global.ResourceLimit[thisRoom.name][i] = 8000    // 所有t3保存8000基础量，以备应急
-    for (var b of ['X', 'L', 'Z', 'U', 'K', 'O', 'H']) global.ResourceLimit[thisRoom.name][b] = 15000 // 所有基础资源保存15000的基础量
+    for (var b of ['X', 'L', 'Z', 'U', 'K', 'O', 'H', 'ops']) global.ResourceLimit[thisRoom.name][b] = 15000 // 所有基础资源保存15000的基础量
     // 监测boost
     if (Object.keys(thisRoom.memory.RoomLabBind).length > 0) {
         for (var l in thisRoom.memory.RoomLabBind) {
@@ -190,5 +195,62 @@ export function ResourceLimitUpdate(thisRoom: Room): void {
                 global.ResourceLimit[thisRoom.name][obj.rType] = global.ResourceLimit[thisRoom.name][obj.rType] > obj.num ? global.ResourceLimit[thisRoom.name][obj.rType] : obj.num
             }
         }
-    // 监测工厂相关
+    // 检测传送任务
+    if (thisRoom.MissionNum('Structure', '资源传送') > 0) {
+        for (var sobj of thisRoom.memory.Misson['Structure']) {
+            if (sobj.name == '资源传送') {
+                let sobj_rType = sobj.Data.rType
+                let sobj_num = sobj.Data.num
+                if (!global.ResourceLimit[thisRoom.name][sobj_rType]) global.ResourceLimit[thisRoom.name][sobj_rType] = sobj_num
+                else {
+                    global.ResourceLimit[thisRoom.name][sobj_rType] = global.ResourceLimit[thisRoom.name][sobj_rType] > sobj_num ? global.ResourceLimit[thisRoom.name][sobj_rType] : sobj_num
+                }
+            }
+        }
+    }
+}
+
+
+/* --------------隔离区---------------- */
+
+/**
+ * 判断某种类型化合物是否还需要调度
+ * 1. 如果有mtype，即有该资源的资源购买任务的，则不再需要进行调度
+ * 2. 如果有关该房间的资源调度信息过多，则不再需要进行调度
+ * 3. 如果已经存在该资源的调度信息了，则不再需要进行调度
+ * 4. 如果已经发现传往该房间的资源传送任务了，则不再需要进行调度
+*/
+export function identifyDispatch(thisRoom: Room, resource_: ResourceConstant, num: number, disNum: number = 1, mtype?: 'deal' | 'order'): boolean {
+    // 先判断是否已经存在该房间的调度了
+    if (mtype) {
+        if (Game.market.credits < 1000000) return false
+        if (mtype == 'deal' && thisRoom.MissionNum('Structure', '资源购买') > 0) return false // 存在资源购买任务的情况下，不执行资源调度
+        if (mtype == 'order' && haveOrder(thisRoom.name, resource_, 'buy')) return false  // 如果是下单类型 已经有单就不进行资源调度
+    }
+    if (DispatchNum(thisRoom.name) >= disNum) return false // 资源调度数量过多则不执行资源调度
+    if (checkDispatch(thisRoom.name, resource_)) return false  // 已经存在调用信息的情况
+    if (checkSend(thisRoom.name, resource_)) return false  // 已经存在其它房间的传送信息的情况
+    return true
+}
+
+/**
+* 判断某种类型的函数是否可以调度
+* 1. 如果发现有房间有指定数量的某类型资源，则返回 can 代表可调度
+* 2. 如果没有发现其他房间有送往该房间资源的任务，则返回 running 代表已经有了调度任务了
+* 3. 如果没有发现调度大厅存在该类型的调度任务，则返回 running 代表已经有了调度任务了
+* 4. 以上情况都不符合，返回 no 代表不可调度
+*/
+export function ResourceCanDispatch(thisRoom: Room, resource_: ResourceConstant, num: number): "running" | "no" | "can" {
+    if (checkDispatch(thisRoom.name, resource_)) return "running"// 有调度信息
+    if (checkSend(thisRoom.name, resource_)) return "running" // 有传送信息
+    for (let i in Memory.RoomControlData) {
+        if (i == thisRoom.name) continue
+        if (Game.rooms[i] && Game.rooms[i].controller && Game.rooms[i].controller.my) {
+            let storage_ = Game.rooms[i].storage
+            if (!storage_) continue
+            let limit = global.ResourceLimit[i][resource_] ? global.ResourceLimit[i][resource_] : 0
+            if (storage_.store.getUsedCapacity(resource_) - limit > num) return "can"
+        }
+    }
+    return "no"    // 代表房间内没有可调度的资源
 }
