@@ -203,6 +203,13 @@ export class factoryExtension extends StructureFactory {
                 Factory.dataProduce[type].num -= COMMODITIES[type].amount //api里的自带的查询合成数量
             }
             return true
+        } else if (a == -6) {
+            for (let j in COMMODITIES[type].components) {//根据要合成的原料添加资源平衡
+                if (!Factory.factoryData[j]) {
+                    let num = 4900
+                    this.CreatingResourceBalance(j as CommodityConstant | MineralConstant | "energy" | "G", num);
+                }
+            }
         }
 
         return false
@@ -267,13 +274,34 @@ export class factoryExtension extends StructureFactory {
         if (!Factory.produce[type]) this.add(type as CommodityConstant | MineralConstant | "energy" | "G");//添加合成
 
         for (let i in COMMODITIES[type].components)
-            if (this.store[i] < COMMODITIES[type].components[i]) return false
+            if (this.store[i] < COMMODITIES[type].components[i]) {
+                if (this.store[i] == 0) {
+                    for (let j in COMMODITIES[type].components) {//根据要合成的原料添加资源平衡
+                        if (!Factory.factoryData[j]) {
+                            let num = COMMODITIES[type].components[j]
+                            if (COMMODITIES[type].level < 4)
+                                num *= 4
+                            this.CreatingResourceBalance(j as CommodityConstant | MineralConstant | "energy" | "G", num);
+                        }
+                    }
+                }
+                return false
+            }
         let a = this.produce(type)//合成
         if (a == 0) {
             if (Factory.dataProduce[type]) {//如果有单个物品合成就减少数量，没有的话就无脑合
                 Factory.dataProduce[type].num -= COMMODITIES[type].amount //api里的自带的查询合成数量
             }
             return true
+        } else if (a == -6) {
+            for (let j in COMMODITIES[type].components) {//根据要合成的原料添加资源平衡
+                if (!Factory.factoryData[j]) {
+                    let num = COMMODITIES[type].components[j]
+                    if (COMMODITIES[type].level < 4)
+                        num *= 4
+                    this.CreatingResourceBalance(j as CommodityConstant | MineralConstant | "energy" | "G", num);
+                }
+            }
         }
         //console.log(`${this.room.name}: ${type} : ${a}`)
         if (a == ERR_BUSY && Factory.level == COMMODITIES[type].level && Game.powerCreeps[`${this.room.name}/queen/${Game.shard.name}`])

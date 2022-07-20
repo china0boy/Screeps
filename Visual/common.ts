@@ -1,4 +1,5 @@
 import dev from './dev'
+import syc from './syc'
 import RoomVisual from './RoomVisual'
 export const drawByConfig = function (str: string) {
 
@@ -9,6 +10,11 @@ export const drawByConfig = function (str: string) {
         xx = -25;
         yy = -25;
         data = dev;
+    }
+    if (str == 'syc') {
+        xx = -25;
+        yy = -25;
+        data = syc;
     }
     let flag = Game.flags[str];
     if (!flag) {

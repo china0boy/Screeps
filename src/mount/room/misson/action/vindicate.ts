@@ -38,13 +38,14 @@ export default class RoomMissonVindicateExtension extends Room {
                 Memory.ResourceDispatchData.push(dispatchTask);
             }
         }
+        if (this.RoleMissionNum('transport', '物流运输') >= 1) return
         if (nuker.store.getUsedCapacity('G') < 5000 && storage_.store.getUsedCapacity('G') >= 5000) {
             var thisTask = this.Public_Carry({ 'transport': { num: 1, bind: [] } }, 40, this.name, storage_.pos.x, storage_.pos.y, this.name, nuker.pos.x, nuker.pos.y, 'G', 5000 - nuker.store.getUsedCapacity('G'))
             this.AddMission(thisTask)
             return
         }
         if (nuker.store.getUsedCapacity('energy') < 300000 && storage_.store.getUsedCapacity('energy') > 130000) {
-            var thisTask = this.Public_Carry({ 'transport': { num: 1, bind: [] } }, 40, this.name, storage_.pos.x, storage_.pos.y, this.name, nuker.pos.x, nuker.pos.y, 'energy', 300000 - nuker.store.getUsedCapacity('energy'))
+            var thisTask = this.Public_Carry({ 'transport': { num: 2, bind: [] } }, 40, this.name, storage_.pos.x, storage_.pos.y, this.name, nuker.pos.x, nuker.pos.y, 'energy', 300000 - nuker.store.getUsedCapacity('energy'))
             this.AddMission(thisTask)
             return
         }
@@ -61,10 +62,10 @@ export default class RoomMissonVindicateExtension extends Room {
     /* 急速冲级 */
     public Task_Quick_upgrade(mission: MissionModel): void {
         if (this.controller.level >= 8) { this.DeleteMission(mission.id); console.log(`房间${this.name}等级已到8级，删除任务!`); return }
-        if (!this.memory.StructureIdData.terminalID) return
+        if (!this.terminal) return
         if (!this.memory.StructureIdData.labs || this.memory.StructureIdData.labs.length <= 0) return
         /* 能量购买 */
-        let terminal_ = Game.getObjectById(this.memory.StructureIdData.terminalID) as StructureTerminal
+        let terminal_ = this.terminal
         if (!terminal_) return
         if (!mission.Data.standed) mission.Data.standed = true
         /* 把升级把数量设置为0 */
@@ -79,9 +80,8 @@ export default class RoomMissonVindicateExtension extends Room {
             /* 计算最高价格 */
             let history = Game.market.getAllOrders({ type: ORDER_BUY, resourceType: 'energy' });
             let avePrice = 0;
-            let j = -1;
             for (let i = 0; i < history.length; i++) {
-                if (history[i].price > avePrice && history[i].price <= 5 && history[i].roomName != this.name) { avePrice = history[i].price + 0.001; }//符合条件
+                if (history[i].price > avePrice && history[i].price <= 7 && history[i].roomName != this.name) { avePrice = history[i].price + 0.001; }//符合条件
             }
 
             //* 清理过期订单 */

@@ -8,36 +8,29 @@ export default class CreepMissonBaseExtension extends Creep {
         if (!this.memory.MissionData) this.memory.MissionData = {}
         /* 中央爬的无缝衔接 */
         if (this.memory.role == 'manage' && this.room.controller.my && this.room.controller.level == 8) {
+            this.room.memory.SpawnConfig.manage.num = 1;
             if (Memory.RoomControlData[this.memory.belong]) {
                 let center = Memory.RoomControlData[this.memory.belong].center
-                if (this.pos.x != center[0] && this.pos.y != center[1]) {
+                if (this.pos.x != center[0] || this.pos.y != center[1]) {
                     this.goTo(new RoomPosition(center[0], center[1], this.memory.belong), 0)
                     return;
                 }
             }
-            if (this.ticksToLive <= 190) this.room.memory.SpawnConfig.manage.num = 2;
-            else this.room.memory.SpawnConfig.manage.num = 1;
             if (this.store.getUsedCapacity()) this.memory.standed = true;
             else this.memory.standed = false
         }
-        /* 生命低于50就将资源上交 */
-        if (this.ticksToLive < 50 && (isInArray(['transport', 'manage'], this.memory.role))) {
+        /* 生命低于10就将资源上交 */
+        if (this.ticksToLive < 10 && (isInArray(['transport', 'manage'], this.memory.role))) {
             let storage_ = Game.getObjectById(Game.rooms[this.memory.belong].memory.StructureIdData.storageID) as StructureStorage
-            if (!storage_) return
-            if (this.store.getUsedCapacity() > 0) {
-                for (let i in this.store) {
-                    if (this.transfer_(storage_, i as ResourceConstant) == OK) {
-                        if (this.memory.role == 'manage') this.room.memory.SpawnConfig.manage.num = 1;
-                        this.suicide();
+            if (storage_) {
+                if (this.store.getUsedCapacity() > 0) {
+                    for (let i in this.store) {
+                        if (this.transfer_(storage_, i as ResourceConstant) == OK) this.suicide();
                     }
-                    return
                 }
+                else { this.suicide(); }
+                return
             }
-            else {
-                if (this.memory.role == 'manage') this.room.memory.SpawnConfig.manage.num = 1;
-                this.suicide();
-            }
-            return
         }
 
         if (Object.keys(this.memory.MissionData).length <= 0) {
@@ -62,15 +55,27 @@ export default class CreepMissonBaseExtension extends Creep {
                     thisTaskList.push(Stask)
             }
             if (thisTaskList.length <= 0) {
+                //主动防御的unboost
+                if (this.memory.role == 'defend-attack' || this.memory.role == 'defend-range' || this.memory.role == 'defend-douAttack' || this.memory.role == 'defend-douHeal') {
+                    if (Game.rooms[this.memory.belong].memory.state == 'peace') {
+                        if (this.ticksToLive <= 30) {
+                            if (!this.unBoost()) this.suicide()
+                        }
+                        return
+                    }
+                }
+
                 /* 没任务就处理剩余资源 */
                 if (this.room.name != this.memory.belong) return
                 let st = this.store
                 if (!st) return
                 for (let i of Object.keys(st)) {
-                    let storage_ = Game.rooms[this.memory.belong].storage ? Game.rooms[this.memory.belong].storage : Game.rooms[this.memory.belong].terminal;
-                    if (!storage_) return
+                    let storage_ = Game.rooms[this.memory.belong].storage;
+                    let terminal_ = Game.rooms[this.memory.belong].terminal;
+                    let structure_ = storage_ ? (terminal_ ? (storage_.store.getFreeCapacity() ? storage_ : terminal_) : storage_) : (terminal_ ? terminal_ : null)
+                    if (!structure_) return
                     this.say("🛒")
-                    if (this.transfer(storage_, i as ResourceConstant) == ERR_NOT_IN_RANGE) this.goTo(storage_.pos, 1)
+                    if (this.transfer(structure_, i as ResourceConstant) == ERR_NOT_IN_RANGE) this.goTo(structure_.pos, 1)
                     return
                 }
                 return

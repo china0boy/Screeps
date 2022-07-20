@@ -59,17 +59,44 @@ export function getDistance1(po1: RoomPosition, po2: RoomPosition): number {
   return Math.max(Math.abs(po1.x - po2.x), Math.abs(po1.y - po2.y))
 }
 
-/* 计算attack部件伤害 */
+/* 计算爬伤害 */
 export function AttackNum(creep: Creep): number {
   let unBody = 0;
   for (let body of creep.body) {
-    if (body.type = 'attack') {
-      if (body.boost) unBody += BOOSTS['attack'][body.boost].attack * 30;
+    if (body.type == 'attack') {
+      if (body.boost) unBody += 30 * BOOSTS['attack'][body.boost].attack;
       else unBody += 30
+    }
+    if (body.type == 'ranged_attack') {
+      if (body.boost) unBody += 12 * BOOSTS['ranged_attack'][body.boost].rangedAttack;
+      else unBody += 12
     }
   }
   return unBody
 }
+/* 计算爬能抗的伤害 */
+export function ToughNum(creep: Creep): number {
+  let healNum = 0;
+  let toughNum = 0;
+  for (let body of creep.body) {
+    if (body.type == 'heal') {
+      if (body.boost) healNum += 12 * BOOSTS['heal'][body.boost].heal;
+      else healNum += 12
+    }
+  }
+  for (let body of creep.body) {
+    if (body.type == 'tough') {
+      if (body.boost) toughNum += 100 / BOOSTS['tough'][body.boost].damage;
+      else toughNum += 100
+    }
+    else toughNum += 100
+    healNum -= 100;
+    if (healNum < 100) break
+  }
+  toughNum += healNum
+  return toughNum
+}
+
 
 /* 生成爬虫指定体型 */
 export function GenerateAbility(work?: number, carry?: number, move?: number, attack?: number,
@@ -286,7 +313,7 @@ export function unzipPosition(str: string): RoomPosition | undefined {
 export function posFindClosestByRange(structurePos: RoomPosition, type?: ResourceConstant): any {
   let targetStructure: any = structurePos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
     filter: (structure: StructureWithStore) => {
-      return filter_structure(structure, [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_LAB, STRUCTURE_TERMINAL, STRUCTURE_TOWER, STRUCTURE_STORAGE, STRUCTURE_FACTORY, STRUCTURE_CONTAINER, STRUCTURE_POWER_SPAWN]) && (structure.store.getUsedCapacity('energy') || structure.store.getUsedCapacity(type))
+      return filter_structure(structure, [STRUCTURE_EXTENSION, STRUCTURE_SPAWN, STRUCTURE_LAB, STRUCTURE_TERMINAL, STRUCTURE_TOWER, STRUCTURE_STORAGE, STRUCTURE_FACTORY, STRUCTURE_CONTAINER, STRUCTURE_POWER_SPAWN, STRUCTURE_LINK]) && (structure.store.getUsedCapacity('energy') || structure.store.getUsedCapacity(type))
     }
   }) as StructureWithStore
   if (!targetStructure) {
@@ -569,7 +596,7 @@ export const createElement = {
   }
 }
 
-export const red = (content: string , bold?: boolean) => Colorful(content, 'red' ,bold)
+export const red = (content: string, bold?: boolean) => Colorful(content, 'red', bold)
 
 export const colors = {
   slate: '#cbd5e1',

@@ -25,8 +25,8 @@ export default class PowerCreepMisson extends Room {
         this.enhance_tower()
         this.enhance_source()
         this.enhance_mineral()
-        //this.enhance_factory()
         //this.enhance_powerspawn()
+        //this.enhance_factory()
     }
     /* 挂载增强storage的任务 适用于queen类型pc */
     public enhance_storage(): void {
@@ -37,18 +37,17 @@ export default class PowerCreepMisson extends Room {
         let pc = Game.powerCreeps[`${this.name}/queen/${Game.shard.name}`]
         if (!pc || !pc.powers[PWR_OPERATE_STORAGE] || pc.powers[PWR_OPERATE_STORAGE].cooldown) return
         if (!storage_.effects) storage_.effects = []
-        if ((storage_.store.getFreeCapacity() <= 30000 && !isOPWR(storage_)) || (storage_.store.getUsedCapacity() >= 1000000 && storage_.effects.length && storage_.effects[0].ticksRemaining <= 40) && this.MissionNum('PowerCreep', '仓库扩容') <= 0) {
+        if (((storage_.store.getFreeCapacity() <= 30000 && !isOPWR(storage_)) || (storage_.store.getUsedCapacity() >= 1000000 && storage_.effects.length && storage_.effects[0].ticksRemaining <= 40)) && this.MissionNum('PowerCreep', '仓库扩容') <= 0) {
             /* 发布任务 */
             var thisTask: MissionModel = {
                 name: "仓库扩容",
-                delayTick: 40,
+                delayTick: 60,
                 range: 'PowerCreep',
             }
             thisTask.CreepBind = { 'queen': { num: 1, bind: [] } }
             this.AddMission(thisTask)
         }
     }
-
     /* 挂载增强lab的任务 适用于queen类型pc */
     public enhance_lab(): void {
         if ((Game.time - global.Gtime[this.name]) % 10) return
@@ -73,7 +72,7 @@ export default class PowerCreepMisson extends Room {
         if (list.length <= 0) return
         var thisTask: MissionModel = {
             name: "合成加速",
-            delayTick: 40,
+            delayTick: 50,
             range: 'PowerCreep',
             Data: {
                 lab: list
@@ -104,7 +103,7 @@ export default class PowerCreepMisson extends Room {
             /* 发布任务 */
             var thisTask: MissionModel = {
                 name: "塔防增强",
-                delayTick: 40,
+                delayTick: 50,
                 range: 'PowerCreep',
                 Data: {
                     tower: towers_list
@@ -125,7 +124,7 @@ export default class PowerCreepMisson extends Room {
         if (this.energyAvailable < this.energyCapacityAvailable * 0.1 && this.MissionNum('PowerCreep', '扩展填充') <= 0) {
             var thisTask: MissionModel = {
                 name: "扩展填充",
-                delayTick: 30,
+                delayTick: 20,
                 range: 'PowerCreep',
                 Data: {
                 }
@@ -167,7 +166,7 @@ export default class PowerCreepMisson extends Room {
         if (!storage_) return
         let pc = Game.powerCreeps[`${this.name}/queen/${Game.shard.name}`]
         if (!pc || !pc.powers[PWR_OPERATE_FACTORY] || pc.powers[PWR_OPERATE_FACTORY].cooldown) return
-        if (this.MissionNum("PowerCreep", '工厂合成') > 0) return
+        if (this.MissionNum("PowerCreep", '工厂强化') > 0) return
         var thisTask: MissionModel = {
             name: "工厂强化",
             delayTick: 50,
@@ -182,13 +181,13 @@ export default class PowerCreepMisson extends Room {
     public enhance_powerspawn(): void {
         if (this.memory.switch.StopEnhancePowerSpawn) return
         var storage_ = this.storage
-        if (!storage_ || !this.memory.pausePS || (this.memory.energyPS && storage_.store.energy <= 1.2 * this.memory.energyPS)) return
+        if (!storage_ || this.memory.pausePS || (this.memory.energyPS && storage_.store.energy <= 1.2 * this.memory.energyPS)) return
         let pc = Game.powerCreeps[`${this.name}/queen/${Game.shard.name}`]
         if (!pc || !pc.powers[PWR_OPERATE_POWER] || pc.powers[PWR_OPERATE_POWER].cooldown) return
-        if (this.MissionNum("PowerCreep", 'power升级') > 0) return
+        if (this.MissionNum("PowerCreep", 'power强化') > 0) return
         var thisTask: MissionModel = {
             name: "power强化",
-            delayTick: 40,
+            delayTick: 50,
             range: 'PowerCreep',
             Data: {
             }
@@ -218,7 +217,7 @@ export default class PowerCreepMisson extends Room {
         if (source_.length <= 0 || this.MissionNum("PowerCreep", 'source强化') > 0) return
         var thisTask: MissionModel = {
             name: "source强化",
-            delayTick: 40,
+            delayTick: 50,
             range: 'PowerCreep',
             Data: {
                 source_: source_
@@ -239,7 +238,7 @@ export default class PowerCreepMisson extends Room {
         if (!mineral_ || !mineral_.mineralAmount || this.MissionNum("PowerCreep", 'mineral强化') > 0) return
         var thisTask: MissionModel = {
             name: "mineral强化",
-            delayTick: 40,
+            delayTick: 50,
             range: 'PowerCreep',
             Data: {
             }

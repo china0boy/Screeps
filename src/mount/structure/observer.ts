@@ -31,11 +31,6 @@ export class ObserverExtension extends StructureObserver {
         if (this.room.memory.observer.checkRoomName) this.searchRoom()
         else this.obRoom()
     }
-    /*
-        public onBuildComplete(): void {
-            this.room.memory.observerId = this.id
-        }
-    */
     /**
      * 在房间内执行搜索
      * 该方法会搜索房间中的 deposits 和 power bank，一旦发现自动插旗
@@ -50,6 +45,15 @@ export class ObserverExtension extends StructureObserver {
             return
         }
         // this.log(`搜索房间 ${room.name}`)
+
+        // 更新旗子
+        const Falg = room.find(FIND_FLAGS)
+        if (Falg.length) {
+            Falg.forEach(falg => {
+                //防止插到空地上
+                if (falg.name.indexOf(this.room.name) != -1 && falg.pos.look().length <= 2) falg.remove()
+            })
+        }
 
         // 还没插旗的话就继续查找 deposit
         if (memory.depositNumber < memory.depositMax) {
@@ -289,7 +293,7 @@ export class ObserverConsole extends ObserverExtension {
      * 用户操作 - 重启 observer
      */
     public on(): string {
-        if (!this.room.memory.observer) return `[${this.room.name} observer] 未启用`
+        if (!this.room.memory.observer) { this.init(); return `[${this.room.name} observer] 未启用` }
 
         delete this.room.memory.observer.pause
 

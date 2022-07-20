@@ -183,6 +183,10 @@ export default class CreepMoveExtension extends Creep {
     public goTo(target: RoomPosition, range: number = 1, flee: boolean = false): CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET {
         //  var a = Game.cpu.getUsed()
         if (this.memory.moveData == undefined) this.memory.moveData = {}
+        if (target.roomName != this.room.name) {
+            Game.map.visual.line(this.pos, target, { color: '#ffffff', lineStyle: 'dashed' });
+            Game.map.visual.text(`${this.memory.MissionData ? this.memory.MissionData.name : null}|${this.name}`, this.pos, { color: '#ffffff', fontSize: 5 });
+        }
         // 确认目标没有变化，如果变化了就重新规划路线
         var targetPosTag: string
         //防止骑墙导致目标一直变化导致的重新寻路
@@ -288,6 +292,7 @@ export default class CreepMoveExtension extends Creep {
         if (!shardData || shardData == []) {
             if (shard == Game.shard.name) {
                 this.goTo(target, range)
+                this.say(`前往${target.roomName}`)
             }
             else {
                 if (!this.memory.protalRoom)
@@ -373,8 +378,10 @@ export default class CreepMoveExtension extends Creep {
             // 到达目标shard
             if (!nextShardRoom && Game.shard.name == this.memory.targetShard) {
                 this.goTo(target, range)
+                this.say(`前往${target.roomName}`)
                 return
             }
+            this.say(`前往传送门${nextShardRoom.roomName}/${nextShardRoom.x}/${nextShardRoom.y}`)
             // 没到达
             if (!nextShardRoom) {
                 this.say('找不到nextShardRoom')
@@ -717,6 +724,106 @@ export default class CreepMoveExtension extends Creep {
         }
         var b = Game.cpu.getUsed()
         //this.say(`b-a`)
+        return goResult
+    }
+
+    // 一体机寻路
+    public findPath_aio(target: RoomPosition, range: number): string | null {
+        /* 全局路线存储 */
+        if (!global.routeCache) global.routeCache = {}
+        if (!this.memory.moveData) this.memory.moveData = {}
+        this.memory.moveData.index = 0
+        const routeKey = `${this.standardizePos(this.pos)} ${this.standardizePos(target)}`
+        /* 路线查找 */
+        const result = PathFinder.search(this.pos, { pos: target, range: range }, {
+            plainCost: 2,
+            swampCost: 10,
+            maxOps: 600,
+            roomCallback: roomName => {
+                // 在全局绕过房间列表的房间 false
+                if (Memory.bypassRooms && Memory.bypassRooms.includes(roomName)) return false
+                const room = Game.rooms[roomName]
+                // 没有视野的房间只观察地形
+                if (!room) return
+                // 有视野的房间
+                let costs = new PathFinder.CostMatrix
+                /* 设置主动防御范围 */
+                if (room.name == this.memory.belong) {
+                    /* 将房间边界设置为255 */
+                    for (var x = 0; x < 50; x++)
+                        for (var y = 0; y < 50; y++) {
+                            if (isInArray([0, 49], x) || isInArray([0, 49], y)) {
+                                costs.set(x, y, 255)
+                            }
+                        }
+                }
+                // 将道路的cost设置为2，无法行走的建筑设置为255
+                room.find(FIND_STRUCTURES).forEach(struct => {
+                    if (struct.structureType === STRUCTURE_ROAD) {
+                        costs.set(struct.pos.x, struct.pos.y, 1)
+                    }
+                    else if (struct.structureType !== STRUCTURE_CONTAINER &&
+                        (struct.structureType !== STRUCTURE_RAMPART || !struct.my))
+                        costs.set(struct.pos.x, struct.pos.y, 255)
+                })
+                room.find(FIND_MY_CONSTRUCTION_SITES).forEach(cons => {
+                    if (cons.structureType != 'road' && cons.structureType != 'rampart' && cons.structureType != 'container')
+                        costs.set(cons.pos.x, cons.pos.y, 255)
+                })
+                room.find(FIND_HOSTILE_CREEPS).forEach(creep => {
+                    if (parts(creep, 'attack')) {
+                        for (var i = creep.pos.x - 3; i < creep.pos.x + 4; i++)
+                            for (var j = creep.pos.y - 3; j < creep.pos.y + 4; j++)
+                                if (i > 0 && i < 49 && j > 0 && j < 49) {
+                                    costs.set(i, j, 16)
+                                }
+                    }
+                    else if (parts(creep, 'ranged_attack')) {
+                        for (var i = creep.pos.x - 3; i < creep.pos.x + 4; i++)
+                            for (var j = creep.pos.y - 3; j < creep.pos.y + 4; j++)
+                                if (i > 0 && i < 49 && j > 0 && j < 49) {
+                                    costs.set(i, j, 15)
+                                }
+                    }
+                })
+                /* 防止撞到其他虫子造成堵虫 */
+                room.find(FIND_HOSTILE_CREEPS).forEach(creep => {
+                    costs.set(creep.pos.x, creep.pos.y, 255)
+                })
+                room.find(FIND_MY_CREEPS).forEach(creep => {
+                    costs.set(creep.pos.x, creep.pos.y, 255)
+                })
+                return costs
+            }
+        })
+        // 寻路异常返回null
+        if (result.path.length <= 0) return null
+        // 寻路结果压缩
+        var route = this.serializeFarPath(result.path)
+        if (!result.incomplete) global.routeCache[routeKey] = route
+        return route
+    }
+
+    /* 一体机移动 */
+    public goTo_aio(target: RoomPosition, range: number = 1): CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET {
+        if (this.memory.moveData == undefined) this.memory.moveData = {}
+        // 确认目标没有变化，如果变化了就重新规划路线
+        this.memory.moveData.path = this.findPath_aio(target, range)
+        // 还为空的话就是没有找到路径
+        if (!this.memory.moveData.path) {
+            delete this.memory.moveData.path
+            return OK
+        }
+        // 使用缓存进行移动
+        const goResult = this.goByPath()
+        // 如果发生撞停或者参数异常，说明缓存可能存在问题，移除缓存
+        if (goResult === ERR_INVALID_TARGET) {
+            delete this.memory.moveData
+        }
+        else if (goResult != OK && goResult != ERR_TIRED) {
+            this.say(`异常码：${goResult}`)
+        }
+        var b = Game.cpu.getUsed()
         return goResult
     }
 

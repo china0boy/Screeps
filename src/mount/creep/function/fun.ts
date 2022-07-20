@@ -102,7 +102,7 @@ export default class CreepFunctionExtension extends Creep {
 
     public repair_(distination: Structure): void {
         if (this.repair(distination) == ERR_NOT_IN_RANGE) {
-            this.goTo(distination.pos, 1)
+            this.goTo(distination.pos, 3)
             this.memory.standed = false
         }
         //else
@@ -141,6 +141,7 @@ export default class CreepFunctionExtension extends Creep {
                     if (b.type == body) s++
                 }
                 if (!disLab.mineralType) return false
+                if (thisRoomMisson.LabBind[tempID] != disLab.mineralType) return false
                 if (!this.pos.isNearTo(disLab)) this.goTo(disLab.pos, 1)
                 else {
                     for (var i of this.body) {
@@ -166,9 +167,9 @@ export default class CreepFunctionExtension extends Creep {
         }
         if (!unBody) return false
         if (this.store.getUsedCapacity()) this.transfer_(this.room.storage ? this.room.storage : this.room.terminal, Object.keys(this.store)[0] as ResourceConstant);
-        if (Game.rooms[this.memory.belong].memory.StructureIdData.UnBoostId) {//找到挨着的小罐子和lab
-            let container = Game.getObjectById(Game.rooms[this.memory.belong].memory.StructureIdData.UnBoostId) as StructureContainer;
-            if (!container) { delete Game.rooms[this.memory.belong].memory.StructureIdData.UnBoostId; return true }
+        if (Game.rooms[this.memory.unBoostRoom].memory.StructureIdData.UnBoostId) {//找到挨着的小罐子和lab
+            let container = Game.getObjectById(Game.rooms[this.memory.unBoostRoom].memory.StructureIdData.UnBoostId) as StructureContainer;
+            if (!container) { delete Game.rooms[this.memory.unBoostRoom].memory.StructureIdData.UnBoostId; return true }
             if (getDistance1(this.pos, container.pos) == 0) {
                 let creep_ = this;
                 let lab = this.pos.findClosestByRange(FIND_MY_STRUCTURES, { filter: function (object) { return object.structureType == STRUCTURE_LAB && object.cooldown < creep_.ticksToLive - 4 && getDistance1(object.pos, container.pos) <= 1; } }) as StructureLab

@@ -241,7 +241,7 @@ export function Squadaction(SquadData:Squad):void{
             var woundCreep:Creep
             for (var wc in SquadData)
             {
-                if ( Game.creeps[wc] && !woundCreep && Game.creeps[wc].hits < Game.creeps[wc].hitsMax)
+                if ( Game.creeps[wc] && !woundCreep && Game.creeps[wc].hits < Game.creeps[wc].hitsMax-100)
                 woundCreep = Game.creeps[wc]
                 if (Game.creeps[wc] && woundCreep)
                 {

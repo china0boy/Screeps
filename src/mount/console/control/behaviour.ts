@@ -40,6 +40,17 @@ export default {
             }
             return Colorful(`[terminal] 房间${roomName}-->${disRoom}资源${rType}传送 不明原因删除失败！`, 'red', true)
         },
+        //添加资源过多自动转移能量房间
+        add(...roomName: string[]): string {
+            if (!Memory.sendRoom) Memory.sendRoom = []
+            Memory.sendRoom = _.uniq([...Memory.sendRoom, ...roomName])
+            return `${roomName} 已添加  已有房间${Memory.sendRoom}`
+        },
+        remove(...roomName: string[]): string {
+            if (!Memory.sendRoom) Memory.sendRoom = []
+            Memory.sendRoom = _.difference(Memory.sendRoom, roomName)
+            return `${roomName} 已删除  已有房间${Memory.sendRoom}`
+        },
         /* 查看目前房间/全局的资源传送任务 */
         show(roomName?: string): string {
             var roomList: string[] = []
@@ -332,6 +343,7 @@ export default {
             myRoom.memory.StructureIdData.labInspect['raw1'] = result.raw1
             myRoom.memory.StructureIdData.labInspect['raw2'] = result.raw2
             myRoom.memory.StructureIdData.labInspect['com'] = result.com
+
             var thisTask = myRoom.public_Compound(num, res)
             if (thisTask === null) return `[lab] 挂载合成任务失败!`
             if (myRoom.AddMission(thisTask))
@@ -356,6 +368,14 @@ export default {
             if (!resourceComDispatch[res]) return `不存在资源${res}!`
             if (Object.keys(myRoom.memory.ComDispatchData).length > 0) return `[lab] 房间${roomName} 已经存在资源合成调度数据`
             myRoom.memory.ComDispatchData = {}
+            //初始化
+            myRoom.memory.StructureIdData.labInspect = {}
+            let result = RecognizeLab(roomName)
+            if (result == null) return `[lab] 房间${roomName}初始化合成lab信息失败!`
+            myRoom.memory.StructureIdData.labInspect['raw1'] = result.raw1
+            myRoom.memory.StructureIdData.labInspect['raw2'] = result.raw2
+            myRoom.memory.StructureIdData.labInspect['com'] = result.com
+
             for (var i of resourceComDispatch[res]) {
                 myRoom.memory.ComDispatchData[i] = { res: i, dispatch_num: num }
             }

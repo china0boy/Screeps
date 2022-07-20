@@ -28,15 +28,24 @@ export default class CreepMissonWarExtension extends Creep {
         if (!disFlag) {
             var clostStructure = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES, {
                 filter: (struc) => {
-                    return !isInArray([STRUCTURE_CONTROLLER, STRUCTURE_WALL], struc.structureType)
+                    return !isInArray(['controller', 'storage', 'terminal', 'rampart'], struc.structureType)
                 }
             })
             if (clostStructure) {
                 clostStructure.pos.createFlag(`dismantle_${generateID()}`, COLOR_WHITE)
                 return
             }
-            else
+            else {
+                let clostStru = this.pos.findClosestByPath(FIND_STRUCTURES, {
+                    filter: (str) => {
+                        return str.structureType == 'constructedWall' || str.structureType == 'rampart'
+                    }
+                })
+                if (clostStru) {
+                    if (this.dismantle(clostStru) == ERR_NOT_IN_RANGE) this.goTo(clostStru.pos, 1)
+                }
                 return
+            }
         }
         let stru = disFlag.pos.lookFor(LOOK_STRUCTURES)[0]
         if (stru) {
@@ -469,12 +478,12 @@ export default class CreepMissonWarExtension extends Creep {
             if (!this.BoostCheck(['move', 'heal', 'tough'])) return
         }
         if (!this.memory.double) {
-            if (this.memory.role == 'double-heal') {
+            if (this.memory.role == 'defend-douHeal') {
                 /* 由heal来进行组队 */
                 if (Game.time % 7 == 0) {
                     var disCreep = this.pos.findClosestByRange(FIND_MY_CREEPS, {
                         filter: (creep) => {
-                            return creep.memory.role == 'double-attack' && !creep.memory.double
+                            return creep.memory.role == 'defend-douAttack' && !creep.memory.double
                         }
                     })
                     if (disCreep) {
@@ -492,7 +501,8 @@ export default class CreepMissonWarExtension extends Creep {
             if (!Game.creeps[this.memory.double]) return
             if (this.fatigue || Game.creeps[this.memory.double].fatigue) return
             if (Game.creeps[this.memory.double] && !this.pos.isNearTo(Game.creeps[this.memory.double]) && (!isInArray([0, 49], this.pos.x) && !isInArray([0, 49], this.pos.y)))
-                return/* 确保在自己房间 */
+                return
+            /* 确保在自己房间 */
             if (this.room.name != this.memory.belong) {
                 this.goTo(new RoomPosition(24, 24, this.memory.belong), 23)
             }
@@ -519,12 +529,14 @@ export default class CreepMissonWarExtension extends Creep {
                 })
                 if (creeps && !isInArray([0, 49], creeps.pos.x) && !isInArray([0, 49], creeps.pos.y)) {
                     if (this.attack(creeps) == ERR_NOT_IN_RANGE) this.goTo(creeps.pos, 1)
+                    else if (this.attack(creeps) == OK) {
+                        this.optTower('attack', creeps)
+                    }
                 }
                 if (this.pos.x >= 48 || this.pos.x <= 1 || this.pos.y >= 48 || this.pos.y <= 1) {
                     this.moveTo(new RoomPosition(Memory.RoomControlData[this.memory.belong].center[0], Memory.RoomControlData[this.memory.belong].center[1], this.memory.belong))
                 }
             }
-
         }
         else {
             if (this.hitsMax - this.hits > 600) this.optTower('heal', this)
@@ -537,12 +549,13 @@ export default class CreepMissonWarExtension extends Creep {
                     var caption_hp = Game.creeps[this.memory.double].hits
                     var this_hp = this.hits
                     if (this_hp == this.hitsMax && caption_hp == Game.creeps[this.memory.double].hitsMax) this.heal(Game.creeps[this.memory.double])
-                    if (caption_hp < this_hp) {
-                        this.heal(Game.creeps[this.memory.double])
-                    }
-                    else {
+                    if (this_hp < caption_hp) {
                         this.heal(this)
                     }
+                    else {
+                        this.heal(Game.creeps[this.memory.double])
+                    }
+
                     let otherCreeps = this.pos.findInRange(FIND_MY_CREEPS, 3, { filter: (creep) => { return creep.hits < creep.hitsMax - 300 } })
                     if (otherCreeps[0] && this.hits == this.hitsMax && Game.creeps[this.memory.double].hits == Game.creeps[this.memory.double].hitsMax) {
                         if (otherCreeps[0].pos.isNearTo(this))
@@ -569,7 +582,7 @@ export default class CreepMissonWarExtension extends Creep {
             /* 说明到达指定房间，并到达合适位置了 */
             /* 添加战争框架控制信息 */
             if (!Memory.squadMemory) Memory.squadMemory = {}
-            if (!squadID) { this.say("找不到squardID!"); return }
+            if (!squadID) { return }
             if (!Memory.squadMemory[squadID]) {
                 Memory.squadMemory[squadID] = {
                     creepData: this.memory.squad,

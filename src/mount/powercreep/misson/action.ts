@@ -59,12 +59,15 @@ export default class PowerCreepMissonAction extends PowerCreep {
             return
         }
         else {
-            if (this.usePower(PWR_OPERATE_STORAGE, storage_) == OK)
+            let a = this.usePower(PWR_OPERATE_STORAGE, storage_)
+            if (a == OK) {
                 if (Game.rooms[this.memory.belong].GainMission(this.memory.MissionData.id)) {
                     Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id)
                     this.memory.MissionData = {}
                 }
                 else this.memory.MissionData = {}
+            }
+            else console.log(`${this} : ${a} `)
         }
     }
 
@@ -113,8 +116,8 @@ export default class PowerCreepMissonAction extends PowerCreep {
         for (var id of this.memory.MissionData.Data.lab) {
             var lab_ = Game.getObjectById(id) as StructureTower
             if (!isOPWR(lab_)) {
-                if (!this.pos.isNearTo(lab_)) {
-                    this.goTo(lab_.pos, 1)
+                if (!this.pos.inRangeTo(lab_.pos, 3)) {
+                    this.goTo(lab_.pos, 3)
                 }
                 else {
                     if (this.usePower(PWR_OPERATE_LAB, lab_) == OK)
@@ -204,12 +207,15 @@ export default class PowerCreepMissonAction extends PowerCreep {
             return
         }
         else {
-            if (this.usePower(PWR_OPERATE_FACTORY, factory_) == OK)
+            let a = this.usePower(PWR_OPERATE_FACTORY, factory_)
+            if (a == OK) {
                 if (Game.rooms[this.memory.belong].GainMission(this.memory.MissionData.id)) {
                     Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id)
                     this.memory.MissionData = {}
                 }
                 else this.memory.MissionData = {}
+            }
+            else console.log(`${this} : ${a} `)
         }
     }
 

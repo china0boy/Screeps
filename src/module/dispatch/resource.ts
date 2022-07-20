@@ -152,7 +152,7 @@ export function ResourceLimitUpdate(thisRoom: Room): void {
     global.ResourceLimit[thisRoom.name] = {}       // 初始化
     global.ResourceLimit[thisRoom.name]['energy'] = 350000
     for (var i of t3) global.ResourceLimit[thisRoom.name][i] = 8000    // 所有t3保存8000基础量，以备应急
-    for (var b of ['X', 'L', 'Z', 'U', 'K', 'O', 'H', 'ops']) global.ResourceLimit[thisRoom.name][b] = 15000 // 所有基础资源保存15000的基础量
+    for (var b of ['ops']) global.ResourceLimit[thisRoom.name][b] = 15000 // 所有基础资源保存15000的基础量
     // 监测boost
     if (Object.keys(thisRoom.memory.RoomLabBind).length > 0) {
         for (var l in thisRoom.memory.RoomLabBind) {

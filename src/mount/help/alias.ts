@@ -71,6 +71,14 @@ export default [
                                 functionName: 'frame.del'
                             },
                             {
+                                title: '经济模式:',
+                                describe: '8级房升级工控制',
+                                params: [
+                                    { name: 'roomName', desc: '我的房间' },
+                                ],
+                                functionName: 'frame.economy'
+                            },
+                            {
                                 title: '修改房间运营爬的数量:',
                                 describe: '爬的类型: harvest carry upgrade build  transport repair',
                                 params: [
@@ -82,11 +90,10 @@ export default [
                             },
                             {
                                 title: '修改某任务爬虫的数量:',
-                                describe: '阿巴阿巴阿巴',
                                 params: [
                                     { name: 'roomName', desc: '我的房间' },
                                     { name: 'id', desc: '任务的id' },
-                                    { name: 'role', desc: '（不清楚）' },
+                                    { name: 'role', desc: '爬的身份' },
                                     { name: 'num', desc: '爬的个数' },
                                 ],
                                 functionName: 'spawn.Mnum'
@@ -125,7 +132,7 @@ export default [
                         api: [
                             {
                                 title: '墙体维护:',
-                                describe: '例: repair.set("W1N1","global",1,"XLH2O" ',
+                                describe: '例: repair.set("W1N1","global",1,"XLH2O")',
                                 params: [
                                     { name: 'roomName', desc: '我的房间名' },
                                     { name: 'rtype', desc: 'global(维修最低血量墙) special(维修棋子下的墙---没写完)' },
@@ -567,35 +574,6 @@ export default [
                                 functionName: 'market.look'
                             },
                             {
-                                title: '初始化终端资源平衡:',
-                                describe: '例: terminal.init("W1N1")',
-                                params: [
-                                    { name: 'roomName', desc: '我的房间名' },
-                                    { name: 'num', desc: '平衡数量 (默认5000)' },
-                                    { name: 'fill', desc: 'ture:低于就拿 flase:高于就放 (默认ture)' },
-                                ],
-                                functionName: 'terminal.init'
-                            },
-                            {
-                                title: '添加终端资源平衡:',
-                                describe: '例: terminal.add("W1N1","X")',
-                                params: [
-                                    { name: 'roomName', desc: '我的房间名' },
-                                    { name: 'type', desc: '资源类型' },
-                                    { name: 'num', desc: '平衡数量 (默认5000)' },
-                                    { name: 'fill', desc: 'ture:低于就拿 flase:高于就放 (默认ture)' },
-                                ],
-                                functionName: 'terminal.add'
-                            },
-                            {
-                                title: 'lab初始化 (新造的lab必须初始化):',
-                                describe: '例: lab.init("W1N1")',
-                                params: [
-                                    { name: 'roomName', desc: '我的房间' },
-                                ],
-                                functionName: 'lab.init'
-                            },
-                            {
                                 title: '化合物合成:',
                                 describe: '例: lab.compound("W1N1","OH",1000)',
                                 params: [
@@ -606,8 +584,8 @@ export default [
                                 functionName: 'lab.compound'
                             },
                             {
-                                title: '化合物合成修改:',
-                                describe: '例: lab.dispatch("W1N1","OH",1000)',
+                                title: '多级化合物合成:',
+                                describe: '例: lab.dispatch("W1N1","OH",1000) (用不了，不知道为什么，太辣鸡了)',
                                 params: [
                                     { name: 'roomName', desc: '我的房间' },
                                     { name: 'type', desc: '资源类型' },

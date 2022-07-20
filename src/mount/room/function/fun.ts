@@ -8,63 +8,6 @@ export default class RoomFunctionFindExtension extends Room {
         return this.find(FIND_STRUCTURES, { filter: { structureType: sc } })
     }
 
-    /* 任务lab绑定数据生成便捷函数 */
-    // public Bind_Lab(rTypes:ResourceConstant[]):MissonLabBind | null{
-    //     var result:MissonLabBind = {}
-    //     var tempList = []
-    //     LoopA:
-    //     for (var i of rTypes)
-    //     {
-    //         /* 计算是否已经存在相关lab */
-    //         for (var occ_lab_id in this.memory.RoomLabBind)
-    //         {
-    //             if (this.memory.RoomLabBind[occ_lab_id].rType == i && !this.memory.RoomLabBind[occ_lab_id].occ)
-    //             {
-    //                 result[occ_lab_id] = i
-    //                 continue LoopA
-    //             }
-    //         }
-    //         LoopB:
-    //         for (var all_lab_id of this.memory.StructureIdData.labs)
-    //         {
-    //             var occ_lab = Object.keys(this.memory.RoomLabBind)
-    //             if (!isInArray(occ_lab,all_lab_id) && !isInArray(tempList,all_lab_id))
-    //             {
-    //                 var thisLab = Game.getObjectById(all_lab_id) as StructureLab
-    //                 if (!thisLab)
-    //                 {
-    //                     var index = this.memory.StructureIdData.labs.indexOf(all_lab_id)
-    //                     this.memory.StructureIdData.labs.splice(index,1)
-    //                     continue LoopB
-    //                 }
-    //                 if (thisLab.store)
-    //                 {
-    //                     if (Object.keys(thisLab.store).length <= 1)
-    //                     {
-    //                         result[all_lab_id] = i
-    //                         tempList.push(all_lab_id)
-    //                         continue LoopA
-    //                     }
-    //                     else if (Object.keys(thisLab.store).length == 1)
-    //                     {
-    //                         if (thisLab.store['energy'] > 0)
-    //                         {
-    //                             result[all_lab_id] = i
-    //                             tempList.push(all_lab_id)
-    //                             continue LoopA
-    //                         }
-    //                         continue LoopB
-    //                     }
-    //                     else if (Object.keys(thisLab.store).length > 1)
-    //                     continue LoopB
-    //                 }
-    //             }
-    //         }
-    //         return null
-    //     }
-    //     return result
-    // }
-
     /* -----------------------lab优化区----------------------------(测试中) */
 
     /* 任务过程中，实时更新占用lab 例如有lab被占用了或者其他情况  */
@@ -163,7 +106,7 @@ export default class RoomFunctionFindExtension extends Room {
                     if (this.memory.RoomLabBind[i].type == miss.LabMessage[rType])
                         return 'normal' // 正常运转
                     else {
-                        console.log(` this.memory.RoomLabBind[i].type: ${this.memory.RoomLabBind[i].type} == miss.LabMessage[rType] : ${miss.LabMessage[rType]}`)
+                        //console.log(` this.memory.RoomLabBind[i].type: ${this.memory.RoomLabBind[i].type} == miss.LabMessage[rType] : ${miss.LabMessage[rType]}`)
                         return 'unbind'
                     }
 
@@ -201,7 +144,7 @@ export default class RoomFunctionFindExtension extends Room {
                 }
             }
         }
-        console.log(rType)
+        //console.log(rType)
         return 'unbind' // 代表未绑定
     }
 
@@ -242,7 +185,7 @@ export default class RoomFunctionFindExtension extends Room {
             }
         }
         /* boost unboost的lab */
-        if (isInArray(['boost', 'unboost'], miss.LabMessage[rType])) {
+        if (isInArray(['boost', 'unboost'], miss.LabMessage[rType]) && this.memory.StructureIdData.labs) {
             /* 寻找未占用的lab */
             LoopB:
             for (let lab_id of this.memory.StructureIdData.labs) {
@@ -424,7 +367,7 @@ export default class RoomFunctionFindExtension extends Room {
 
     /* 等级信息更新 */
     public LevelMessageUpdate(): void {
-        if (this.controller.level > this.memory.originLevel)
+        if (this.controller.level > this.memory.originLevel || Game.time % 1000 == 0)
             this.memory.originLevel = this.controller.level
     }
 
@@ -449,17 +392,23 @@ export default class RoomFunctionFindExtension extends Room {
         if (this.controller.my) {
             //控制升级工数量
             if (this.controller.level == 8) {
-                if (this.controller.ticksToDowngrade <= 100000) {
-                    if (this.memory.SpawnConfig.upgrade.num == 0) this.memory.SpawnConfig.upgrade.num = 1;
+                if (!this.memory.economy) {
+                    if (this.memory.SpawnConfig.upgrade.num != 1) this.memory.SpawnConfig.upgrade.num = 1;
                 }
                 else {
-                    if (this.memory.SpawnConfig.upgrade.num) this.memory.SpawnConfig.upgrade.num = 0;
+                    if (this.controller.ticksToDowngrade <= 100000) {
+                        if (this.memory.SpawnConfig.upgrade.num == 0) this.memory.SpawnConfig.upgrade.num = 1;
+                    }
+                    else {
+                        if (this.memory.SpawnConfig.upgrade.num) this.memory.SpawnConfig.upgrade.num = 0;
+                    }
                 }
             }
             else {
                 if (this.controller.level >= 4) {
                     for (var i of this.memory.Misson['Creep'])
                         if (i.name == '急速冲级') {
+                            this.memory.SpawnConfig.upgrade.num=0
                             return
                         }
                     let storage = this.storage;

@@ -151,7 +151,7 @@ export default class DefendWarExtension extends Room {
         }
         else if (enemys.length > 2 && enemys.length < 5)       // 3-4
         {
-            defend_plan = { 'attack': 1, 'double': 1, 'range': 0 }
+            defend_plan = { 'attack': 1, 'double': 0 }
         }
         else if (enemys.length >= 5 && enemys.length < 8)   // 5-7
         {

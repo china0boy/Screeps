@@ -32,6 +32,9 @@ export default class NormalWarExtension extends Room {
             body = bodyFree({ 'tough': 11, 'ranged_attack': 6, 'move': 4, 'heal': 23 })
             body.push.apply(body, bodyFree({ 'move': 6 }))
         }
+        if (mission.Data.level == 3) {
+            body = bodyFree({ 'tough': 1,'ranged_attack': 8, 'heal': 1, 'move': 10 })
+        }
         if (mission.Data.level == 10) {
             body = bodyFree({ 'tough': 1, 'ranged_attack': 1, 'move': 1, 'heal': 1 })
         }

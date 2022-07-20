@@ -201,7 +201,6 @@ export default class RoomMissonPublish extends Room {
             level: 10,
             Data: {},
         }
-        var comList = ['XZHO2', 'XUH2O']
         thisTask.CreepBind = {}
         thisTask.CreepBind['defend-attack'] = { num: num, bind: [] }
         thisTask.LabMessage = { 'XZHO2': 'boost', 'XUH2O': 'boost' }
@@ -217,7 +216,6 @@ export default class RoomMissonPublish extends Room {
             level: 10,
             Data: {}
         }
-        var comList = ['XZHO2', 'XKHO2']
         thisTask.CreepBind = {}
         thisTask.CreepBind['defend-range'] = { num: num, bind: [] }
         thisTask.LabMessage = { 'XZHO2': 'boost', 'XKHO2': 'boost' }
@@ -233,7 +231,6 @@ export default class RoomMissonPublish extends Room {
             level: 10,
             Data: {}
         }
-        var comList = ['XZHO2', 'XLHO2', 'XUH2O', 'XGHO2']
         thisTask.CreepBind = {}
         thisTask.CreepBind['defend-douAttack'] = { num: num, bind: [] }
         thisTask.CreepBind['defend-douHeal'] = { num: num, bind: [] }
@@ -274,7 +271,7 @@ export default class RoomMissonPublish extends Room {
         thisTask.reserve = true
         thisTask.CreepBind = { 'rush': { num: num > 2 ? 2 : num, bind: [] } }
         if (boostType) {
-            thisTask.LabMessage = { boostType: 'boost' }
+            thisTask.LabMessage = { [boostType]: 'boost' }
         }
         return thisTask
     }
@@ -292,7 +289,7 @@ export default class RoomMissonPublish extends Room {
         thisTask.reserve = true
         thisTask.CreepBind = { 'rush': { num: num, bind: [] } }
         if (boostType && isInArray(['GH', 'GH2O', 'XGH2O'], boostType)) {
-            thisTask.LabMessage = { boostType: 'boost' }
+            thisTask.LabMessage = { [boostType]: 'boost' }
         }
         return thisTask
     }
@@ -446,7 +443,8 @@ export default class RoomMissonPublish extends Room {
         }
         thisTask.reserve = true
         thisTask.CreepBind = { 'AIO': { num: num, bind: [], interval: time ? time : 1000, MSB: true }, }
-        thisTask.LabMessage = { 'XZHO2': 'boost', 'XGHO2': 'boost', 'XLHO2': 'boost', 'XKHO2': 'boost' }
+        if (level != 3)
+            thisTask.LabMessage = { 'XZHO2': 'boost', 'XGHO2': 'boost', 'XLHO2': 'boost', 'XKHO2': 'boost' }
         return thisTask
     }
 
@@ -593,20 +591,20 @@ export default class RoomMissonPublish extends Room {
         var thisTask: MissionModel = {
             name: 'dp_harvest',
             range: 'Creep',
-            delayTick: 10000,
+            delayTick: 50000,
             level: 12,
             Data: {
                 myroomname: myroomname,
                 FlagName: FlagName,
                 transferCreepName: transferCreepName,
-                boost:boost,
+                boost: boost,
             },
             maxTime: 5//同时存在任务数
         }
         thisTask.reserve = true
         thisTask.CreepBind = { 'dp_harvest': { num: num, bind: [], interval: time ? time : 1000 }, }
-        if(boost){
-            thisTask.LabMessage={boost:'boost'}
+        if (boost) {
+            thisTask.LabMessage = { boost: 'boost' }
         }
         return thisTask
     }
@@ -614,7 +612,7 @@ export default class RoomMissonPublish extends Room {
         var thisTask: MissionModel = {
             name: 'dp_transfer',
             range: 'Creep',
-            delayTick: 10000,
+            delayTick: 50000,
             level: 12,
             Data: {
                 myroomname: myroomname,

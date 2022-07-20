@@ -2,7 +2,7 @@ import { AppLifecycleCallbacks } from '../src/module/framework/types';
 
 import { drawByConfig } from './common'
 export function layoutVisual(): void {
-    for (let name of ['dev']) {
+    for (let name of ['dev', 'syc']) {
         let flag = Game.flags[name];
         if (flag) {
             drawByConfig(flag.name);

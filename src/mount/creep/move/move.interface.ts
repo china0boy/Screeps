@@ -5,7 +5,7 @@ interface Creep {
     // 寻找不允许对穿的爬虫的位置
     getStandedPos(): RoomPosition[]
     // 通用寻路
-    findPath(target: RoomPosition, range: number,flee?:boolean): string | null
+    findPath(target: RoomPosition, range: number, flee?: boolean): string | null
     // 使用压缩数据移动
     goByPath(): CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET
     // 通用移动
@@ -19,11 +19,13 @@ interface Creep {
     //寻找我和目标之间路径是否完整 ture为完整路径
     PathFinders(target: RoomPosition, range: number, bool?: boolean): boolean
     // 跨shard移动
-    arriveTo(target: RoomPosition, range: number, shard: shardName,shardData?:shardRoomData[]): void
-    updateShardAffirm():void
+    arriveTo(target: RoomPosition, range: number, shard: shardName, shardData?: shardRoomData[]): void
+    updateShardAffirm(): void
     serializeFarPath(positions: RoomPosition[]): string
     goTo_defend(target: RoomPosition, range: number): CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET
     findPath_defend(target: RoomPosition, range: number): string | null
+    // 战争相关移动
+    goTo_aio(target: RoomPosition, range: number): CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET
 }
 
 /* 爬虫移动记忆 */
@@ -54,24 +56,24 @@ interface CreepMemory {
     // 禁用自己对穿
     disableCross?: boolean
     // 跨多个shard数据
-    shardAffirm?:shardAffirmData[]
+    shardAffirm?: shardAffirmData[]
 }
 
 type shardName = "shard0" | "shard1" | "shard2" | "shard3"
-interface shardRoomData{
-    shard:shardName,    // 星门所在shard
-    roomName:string,        // 星门所处的房间
-    disShardName?:shardName
+interface shardRoomData {
+    shard: shardName,    // 星门所在shard
+    roomName: string,        // 星门所处的房间
+    disShardName?: shardName
     // disRoomName:string,     // 星门通向的房间
-    x:number,
-    y:number
+    x: number,
+    y: number
 }
-interface shardAffirmData{
-    shardName:shardName,    // 星门所在shard
-    disShardName:shardName  // 星门通向shard
-    roomName:string,        // 星门所处的房间
-    disRoomName:string,     // 星门通向的房间
-    affirm:boolean,
-    x:number,
-    y:number
+interface shardAffirmData {
+    shardName: shardName,    // 星门所在shard
+    disShardName: shardName  // 星门通向shard
+    roomName: string,        // 星门所处的房间
+    disRoomName: string,     // 星门通向的房间
+    affirm: boolean,
+    x: number,
+    y: number
 }

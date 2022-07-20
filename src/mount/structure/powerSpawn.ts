@@ -1,5 +1,6 @@
-import { colorful } from '@/utils'
+import { colorful, getDistance1, isInArray } from '@/utils'
 import { createHelp } from '../help/help'
+import { getAllEffects } from '../powercreep/misson/constant';
 
 /**
  * PowerSpawn 拓展
@@ -21,7 +22,7 @@ export class PowerSpawnExtension extends StructurePowerSpawn {
         this.processPower()
         if (Game.time % 4) return
         // 发布强化powerSpawn任务
-        if (Game.powerCreeps[`${this.room.name}/queen/${Game.shard.name}`] && this.room.storage && this.room.storage.store.power >= 6000) this.room.enhance_powerspawn()
+        if (Game.powerCreeps[`${this.room.name}/queen/${Game.shard.name}`] && !isInArray(getAllEffects(this), PWR_OPERATE_POWER) && this.room.storage && this.room.storage.store.power >= 6000) this.room.enhance_powerspawn()
         // 剩余 power 不足且 storage 内 power 充足
         if (!this.keepResource(RESOURCE_POWER, 10, this.room.storage, 100)) return
         // 剩余energy 不足且 storage 内 energy 充足
@@ -41,10 +42,12 @@ export class PowerSpawnExtension extends StructurePowerSpawn {
         if (this.store[resource] >= amount || source.store[resource] < sourceLimit) return true
 
         // 检查来源是否符合规则，符合则发布资源转移任务
-        if (this.room.RoleMissionNum('manage', '物流运输') > 1) return
-        let thisTask = this.room.Public_Carry({ 'manage': { num: 1, bind: [] } }, 10, this.room.name, source.pos.x, source.pos.y, this.room.name, this.pos.x, this.pos.y, resource, this.store.getFreeCapacity(resource))
+        let center = Memory.RoomControlData[this.pos.roomName].center
+        let pos = new RoomPosition(center[0], center[1], this.pos.roomName);
+        let role = getDistance1(pos, this.pos) > 1 ? 'transport' : 'manage'
+        if (this.room.RoleMissionNum(role, '物流运输') > 1) return false
+        let thisTask = this.room.Public_Carry({ [role]: { num: 1, bind: [] } }, 20, this.room.name, source.pos.x, source.pos.y, this.room.name, this.pos.x, this.pos.y, resource, this.store.getFreeCapacity(resource))
         this.room.AddMission(thisTask)
-
         return false
     }
 }

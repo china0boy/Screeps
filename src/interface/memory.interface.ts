@@ -7,6 +7,7 @@ interface Memory {
     ResourceDispatchData: RDData[]
     outMineData: { [roomName: string]: OutMineData }
     VisualLevel: 'blank' | 'low' | 'medium' | 'high'  //可视化模式
+    sendRoom?:string[]//资源过多发送资源的房间
 }
 
 interface RDData {

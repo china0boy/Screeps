@@ -133,7 +133,7 @@
          sourceShard:req.sourceShard,
          type:req.type,
          data:req.data,
-         delay:100,
+         delay:20,
      }
      return true
  }
@@ -168,7 +168,7 @@
              sourceShard:comData.sourceShard,
              type:comData.type,
              data:comData.data,
-             delay:100,
+             delay:50,
          }
          if (comData.type == 1)
          {
@@ -176,7 +176,7 @@
          }
          else if (comData.type == 2)
          {
-             Data['mission'][comData.data['id']] = {MemoryData:comData.data['MemoryData'],delay:(comData.memorydelay?comData.memorydelay:5000),state:0}
+             Data['mission'][comData.data['id']] = {MemoryData:comData.data['MemoryData'],delay:(comData.memorydelay?comData.memorydelay:100),state:0}
          }
          else if (comData.type == 3)
          {
@@ -251,7 +251,7 @@
      ResponseShard()
      ConfirmShard()
      DeleteShard()
-     InterShardMemory.setLocal(JSON.stringify(global.intershardData))
+     //InterShardMemory.setLocal(JSON.stringify(global.intershardData))
  }
 
  /* 保存跨shard信息 */

@@ -158,7 +158,7 @@ export default class RoomMissonBehaviourExtension extends Room {
             }
         /* 资源调度 */
         var needResource: ResourceConstant[] = [misson.Data.raw1, misson.Data.raw2]
-        if (this.MissionNum('Structure', '资源购买') > 0) return // 存在资源购买任务的情况下，不执行资源调度
+        if (this.MissionNum('Structure', '资源购买') > 1) return // 存在资源购买任务的情况下，不执行资源调度
         if (DispatchNum(this.name) >= 2) return // 资源调度数量过多则不执行资源调度
         for (var resource_ of needResource) {
             // 原矿 资源调用
@@ -169,7 +169,7 @@ export default class RoomMissonBehaviourExtension extends Room {
                 let dispatchTask: RDData = {
                     sourceRoom: this.name,
                     rType: resource_,
-                    num: 10000,
+                    num: 9800,
                     delayTick: 200,
                     conditionTick: 35,
                     buy: false,
@@ -186,10 +186,10 @@ export default class RoomMissonBehaviourExtension extends Room {
                 let dispatchTask: RDData = {
                     sourceRoom: this.name,
                     rType: resource_,
-                    num: 1000,
+                    num: 4900,
                     delayTick: 100,
                     conditionTick: 25,
-                    buy: true,
+                    buy: false,
                     mtype: 'deal'
                 }
                 Memory.ResourceDispatchData.push(dispatchTask)

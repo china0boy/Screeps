@@ -209,15 +209,15 @@ export function carry_(creep_: Creep): void {
 // 升级工
 export function upgrade_(creep_: Creep): void {
     if (!Game.rooms[creep_.memory.belong]) return
-    if (creep_.ticksToLive <= 1) {
+    if (creep_.ticksToLive <= 2) {
         let target = Game.getObjectById(creep_.memory.targetID) as StructureStorage
+        creep_.upgrade_()
         if (target) creep_.transfer_(target, 'energy')
         return;
     }
     creep_.workstate('energy')
     if (creep_.memory.working) {
         creep_.upgrade_()
-        delete creep_.memory.targetID
     }
     else {
         if (Game.flags[`${creep_.memory.belong}/ruin`]) {
@@ -270,6 +270,7 @@ export function upgrade_(creep_: Creep): void {
         else {
             let target = Game.getObjectById(creep_.memory.targetID) as StructureStorage
             if (target) creep_.withdraw_(target, 'energy')
+            else delete creep_.memory.targetID
         }
     }
     if (Game.time % 20 == 0) {

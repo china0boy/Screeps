@@ -34,7 +34,7 @@ export default class linkExtension extends StructureLink {
         if (this.store.getUsedCapacity('energy') < 700) {
             /* 如果有传送任务但是没有足够能量，只要是centerlink就下达搬运任务 */
             if (this.room.memory.StructureIdData.center_link == this.id) {
-                let storage = this.room.terminal
+                let storage = this.room.storage
                 if (!storage) return
                 if (this.room.Check_Carry('manage', storage.pos, this.pos, 'energy')) {
                     var thisTask = this.room.Public_Carry({ 'manage': { num: 1, bind: [] } }, 20, this.room.name, storage.pos.x, storage.pos.y, this.room.name, this.pos.x, this.pos.y, 'energy', this.store.getFreeCapacity())

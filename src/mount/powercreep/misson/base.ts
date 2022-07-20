@@ -107,7 +107,7 @@ export default class PowerCreepMissonBase extends PowerCreep {
     public OpsPrepare(): boolean {
         var storage_ = Game.rooms[this.memory.belong].storage
         var terminal_ = Game.rooms[this.memory.belong].terminal
-        var structure = storage_ && storage_.store.ops ? storage_ : terminal_ && terminal_.store.ops ? terminal_ : null
+        var structure = storage_ && terminal_ ? (storage_.store.ops >= terminal_.store.ops ? storage_ : terminal_) : storage_ ? (storage_.store.ops ? storage_ : null) : terminal_ ? (terminal_.store.ops ? terminal_ : null) : null
         if (!structure) {
             if (storage_ || terminal_) {
                 // 资源调度
@@ -144,8 +144,8 @@ export default class PowerCreepMissonBase extends PowerCreep {
             if (structure.store.getUsedCapacity('ops') < 2500) {
                 // 资源调度
                 let room_ = Game.rooms[this.memory.belong]
-                if (room_.MissionNum('Structure', '资源购买') <= 0)
-                    if (DispatchNum(room_.name) < 2 && !checkSend(room_.name, 'ops') && !checkDispatch(room_.name, 'ops'))   // 已经存在其它房间的传送信息的情况
+                if (room_.MissionNum('Structure', '资源购买') <= 3)
+                    if (DispatchNum(room_.name) < 5 && !checkSend(room_.name, 'ops') && !checkDispatch(room_.name, 'ops'))   // 已经存在其它房间的传送信息的情况
                     {
                         console.log(Colorful(`[资源调度] 房间${this.memory.belong}没有足够的资源[${'ops'}],将执行资源调度!`, 'yellow'))
                         let dispatchTask: RDData = {

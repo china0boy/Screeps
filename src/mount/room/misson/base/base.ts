@@ -335,7 +335,11 @@ export default class RoomMissonFrameExtension extends Room {
             if (misson.CreepBind) {
                 for (var role in misson.CreepBind) {
                     let memData = {}
-                    if (!RoleData[role]) { console.log(`${role} 未注册,请先注册才能孵化`); return }
+                    if (!RoleData[role]) {
+                        console.log(`${this.name} : ${role} 未注册,请先注册才能孵化`);
+                        this.DeleteMission(misson.id);
+                        return
+                    }
                     if (RoleData[role].mem) memData = RoleData[role].mem
                     /* 间隔型 */
                     if (misson.CreepBind[role].interval) {
@@ -408,8 +412,8 @@ export default class RoomMissonFrameExtension extends Room {
                     else return false
                 }
                 else {
-                    var terminalNum = terminal.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant)
-                    var storageNum = storage.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant)
+                    var terminalNum = terminal ? terminal.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant) : 0
+                    var storageNum = storage ? storage.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant) : 0
                     tank_ = terminalNum > storageNum ? terminal : storage
                 }
             }
@@ -452,7 +456,7 @@ export default class RoomMissonFrameExtension extends Room {
                     return false
                 var roleData: BindData = {}
                 roleData[role] = { num: 1, bind: [] }
-                var carryTask = this.Public_Carry(roleData, 45, this.name, tank_.pos.x, tank_.pos.y, this.name, disLab.pos.x, disLab.pos.y, misson.LabBind[i] as ResourceConstant, 2000)
+                var carryTask = this.Public_Carry(roleData, 45, this.name, tank_.pos.x, tank_.pos.y, this.name, disLab.pos.x, disLab.pos.y, misson.LabBind[i] as ResourceConstant, 1600)
                 this.AddMission(carryTask)
                 return false
             }

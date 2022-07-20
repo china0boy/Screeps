@@ -109,6 +109,11 @@ export const createApp = function (opt: Partial<CreateOptions> = {}) {
      */
     const run = function (): void {
         if (showCpuCost) console.log(`—————————— Game.time ${Game.time} ——————————`)
+        // 判断是否该shard有有效房间
+        let switch_ = false
+        for (let i in Game.rooms) if (Game.rooms[i].controller && Game.rooms[i].controller.my) { switch_ = true; break }
+        if (!switch_) _memoryCacher = undefined
+        if (Game.shard.name == 'shard1') { _run(); return }
         // 有内存缓存的话就包裹一下，否则就直接运行
         if (_memoryCacher) _memoryCacher(_run)
         else _run()

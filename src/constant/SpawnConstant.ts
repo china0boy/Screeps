@@ -30,12 +30,12 @@ export const RoleData: SpawnConstantData = {
     'dismantle': { num: 0, ability: [25, 0, 25, 0, 0, 0, 0, 0], level: 11, mark: "拆家" },
     'rush': { num: 0, ability: [10, 2, 5, 0, 0, 0, 0, 0], level: 11, mark: "升级" },
     'truck': { num: 0, ability: [0, 10, 10, 0, 0, 0, 0, 0], level: 12, mark: "顺丰" },
-    'claim': { num: 0, ability: [0, 0, 1, 0, 0, 0, 1, 0], level: 10, mark: "扩张" },
+    'claim': { num: 0, ability: [0, 0, 10, 0, 0, 0, 1, 0], level: 10, mark: "扩张" },
     'Ebuild': { num: 0, ability: [1, 1, 2, 0, 0, 0, 0, 0], level: 13, mark: "援建" },
     'Eupgrade': { num: 0, ability: [1, 1, 2, 0, 0, 0, 0, 0], level: 13, mark: "援建" },
-    'double-attack': { num: 0, ability: [0, 0, 10, 28, 0, 0, 0, 12], level: 10, mark: "双", must: true },
-    'double-heal': { num: 0, ability: [0, 0, 10, 0, 0, 28, 0, 12], level: 10, mark: "双", must: true },
-    'double-work': { num: 0, ability: [28, 0, 10, 0, 0, 0, 0, 12], level: 10, mark: "双", must: true },
+    'double-attack': { num: 0, ability: [0, 0, 10, 27, 0, 0, 0, 13], level: 10, mark: "双", must: true },
+    'double-heal': { num: 0, ability: [0, 0, 10, 0, 0, 27, 0, 13], level: 10, mark: "双", must: true },
+    'double-work': { num: 0, ability: [27, 0, 10, 0, 0, 0, 0, 13], level: 10, mark: "双", must: true },
     'pb_attack': { num: 0, ability: [0, 0, 20, 20, 0, 0, 0, 0], level: 11, mark: "pb" },
     'pb_heal': { num: 0, ability: [0, 0, 25, 0, 0, 25, 0, 0], level: 11, mark: "pb" },
     'pb_transfer': { num: 0, ability: [0, 32, 16, 0, 0, 0, 0, 0], level: 12, mark: "pb" },
@@ -46,7 +46,7 @@ export const RoleData: SpawnConstantData = {
     'sig': { num: 0, ability: [0, 0, 1, 0, 0, 0, 0, 0], level: 20, mark: "签名" },
     'loot': { num: 1, ability: [0, 25, 25, 0, 0, 0, 0, 0], adaption: true, level: 11, mark: "掠夺者" },
     'AIO': { num: 0, ability: [0, 0, 1, 0, 0, 0, 0, 0], level: 5, mark: "一体机", must: true },
-    'carryShard':{num: 0, ability: [0, 0, 1, 0, 0, 0, 0, 0], level: 5, mark: "跨shard运输" },
+    'carryShard': { num: 0, ability: [0, 0, 1, 0, 0, 0, 0, 0], level: 5, mark: "跨shard运输" },
     /* 外矿 */
     'out-claim': { num: 0, ability: [0, 0, 2, 0, 0, 0, 2, 0], adaption: true, level: 11, mark: "🟣" },
     'out-harvest': { num: 0, ability: [4, 2, 4, 0, 0, 0, 0, 0], level: 12, mark: "外挖" },
@@ -94,9 +94,9 @@ export const RoleLevelData = {
         3: { bodypart: [4, 4, 4, 0, 0, 0, 0, 0], num: 3 },//[3,3,6,0,0,0,0,0]
         4: { bodypart: [5, 5, 5, 0, 0, 0, 0, 0], num: 2 },//[4,4,8,0,0,0,0,0]
         5: { bodypart: [7, 7, 7, 0, 0, 0, 0, 0], num: 2 },//[4, 4, 8, 0, 0, 0, 0, 0]
-        6: { bodypart: [5, 2, 5, 0, 0, 0, 0, 0], num: 2 },
-        7: { bodypart: [10, 2, 10, 0, 0, 0, 0, 0], num: 2 },
-        8: { bodypart: [1, 1, 1, 0, 0, 0, 0, 0], num: 1 },
+        6: { bodypart: [16, 2, 4, 0, 0, 0, 0, 0], num: 1 },
+        7: { bodypart: [20, 2, 5, 0, 0, 0, 0, 0], num: 1 },
+        8: { bodypart: [15, 15, 15, 0, 0, 0, 0, 0], num: 1 },
     },
     'build': {
         1: { bodypart: [1, 1, 2, 0, 0, 0, 0, 0], num: 1 },

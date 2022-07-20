@@ -90,7 +90,7 @@ export default {
         disaio(roomName: string, FlagName: string, num: number = 1, level: number = 2, time?: number, shard?: string, shardData: shardRoomData[] = null): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[war] 不存在房间${roomName}`
-            if (level != 1 && level != 2 && level != 10) return `level 只限  1 或者 2`
+            if (level != 1 && level != 2 && level != 3 && level != 10) return `level 只限  1 或者 2 或者 3`
             let task = thisRoom.Public_AIO(FlagName, num, level, shard, time)
             if (thisRoom.AddMission(task)) {
                 if (shardData) task.Data.shardData = shardData
@@ -493,7 +493,7 @@ export default {
     /* 全局资源传送 */
     give: {
         set(roomName: string, rType: ResourceConstant, num: number, pass?: boolean): string {
-            if (num > 200000) return `[give] 资源数量太多!不能挂载全局资源传送任务!`
+            if (num > 300000) return `[give] 资源数量太多!不能挂载全局资源传送任务!`
             if (!Game.rooms[roomName] && !pass) {
                 // 不是自己房间需要确认
                 return `[give] 未授权的传送命令,目标房间非自己房间!`
@@ -509,7 +509,6 @@ export default {
                 delayTick: 1500,
                 conditionTick: 500,
                 buy: false,
-                mtype: 'deal'    // 可以删了
             }
             Memory.ResourceDispatchData.push(dispatchTask)
             return `[give] 全局资源传送任务发布,房间${roomName},资源类型${rType},数量${num}`
