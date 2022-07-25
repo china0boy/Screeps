@@ -469,7 +469,7 @@ export default class CreepMissonActionExtension extends Creep {
         let data = missionData.Data
         if (this.room.name == this.memory.belong) {
             if (this.memory.role == 'double-attack') {
-                if (!this.BoostCheck(['attack', 'move', 'tough'])) return
+                if (!this.BoostCheck(['attack', 'move', 'tough', 'ranged_attack'])) return
             }
             else if (this.memory.role == 'double-heal') {
                 if (!this.BoostCheck(['heal', 'move', 'tough'])) return
@@ -502,12 +502,22 @@ export default class CreepMissonActionExtension extends Creep {
             }
             return
         }
-        else { if (!Game.creeps[this.memory.double]) delete this.memory.double }
         this.memory.crossLevel = 15;
         if (this.pos.roomName != Flag.pos.roomName) data.runRoom = this.pos.roomName
 
         if (this.memory.role == 'double-attack') {
-            if (!Game.creeps[this.memory.double]) return
+            if (!Game.creeps[this.memory.double]) {
+                let Attack: Creep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS, { filter: function (creep) { return !Memory.whitesheet.includes(creep.owner.username) } });
+                if (!Attack) return
+                if (getDistance1(Attack.pos, this.pos) > 1) {
+                    this.goTo(Attack.pos, 1)
+                }
+                else {
+                    this.attack(Attack);
+                    this.move(this.pos.getDirectionTo(Attack))
+                }
+                return
+            }
             let creep_ = Game.creeps[this.memory.double];//配对爬
             if (this.getActiveBodyparts('tough') <= 6 && data.runRoom) {
                 this.goTo(new RoomPosition(24, 24, data.runRoom), 22)
@@ -515,15 +525,15 @@ export default class CreepMissonActionExtension extends Creep {
             }
             if (this.pos.roomName != Flag.pos.roomName) {
                 if (this.hits < this.hitsMax) {
-                    let Attack: Creep | AnyOwnedStructure = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS, { filter: function (creep) { return !Memory.whitesheet.includes(creep.owner.username) } });
-                    if (!Attack) Attack = this.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, { filter: function (structure) { return structure.structureType != 'controller' && !Memory.whitesheet.includes(structure.owner.username) } });
+                    let Attack: Creep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS, { filter: function (creep) { return !Memory.whitesheet.includes(creep.owner.username) } });
                     if (Attack && getDistance1(Attack.pos, this.pos) < 5) missionData.Attackid = Attack.id;
                 }
                 if (missionData.Attackid) {
-                    let attackcreep = Game.getObjectById(missionData.Attackid) as Creep | AnyOwnedStructure;
+                    let attackcreep = Game.getObjectById(missionData.Attackid) as Creep;
                     if (!attackcreep || getDistance1(attackcreep.pos, this.pos) >= 5) delete missionData.Attackid;
                     else {
-                        if (this.attack(attackcreep) == ERR_NOT_IN_RANGE) this.goTo(attackcreep.pos, 1);
+                        if (getDistance1(this.pos, creep_.pos) <= 1)
+                            this.handle_attack(attackcreep)
                         return;
                     }
                 }
@@ -595,7 +605,9 @@ export default class CreepMissonActionExtension extends Creep {
                         let Attack_creep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS, { filter: function (creep) { return !Memory.whitesheet.includes(creep.owner.username) } });
                         if (Attack_creep) {
                             if (this.PathFinders(Attack_creep.pos, 1, true)) {
-                                if (this.attack(Attack_creep) == ERR_NOT_IN_RANGE && a && b) this.goTo(Attack_creep.pos, 1)
+                                if (a && b) {
+                                    this.handle_attack(Attack_creep)
+                                }
                                 else { if (!this.fatigue && creep_.fatigue) this.goTo(creep_.pos, 1); }
                             }
                             else data.wall = this.handle_wall_rampart(Attack_creep, 1);
@@ -670,7 +682,6 @@ export default class CreepMissonActionExtension extends Creep {
             }
         }
         if (this.memory.role == 'double-heal') {
-            if (!Game.creeps[this.memory.double]) return
             let creep_ = Game.creeps[this.memory.double];//配对爬
             if (creep_) {
                 this.handle_heal(creep_)
@@ -692,6 +703,31 @@ export default class CreepMissonActionExtension extends Creep {
                 else this.heal(this)
             }
         }
+    }
+
+    /**红球的攻击行为*/
+    public handle_attack(attackCreeps: Creep): boolean {
+        if (attackCreeps) {
+            let a = getDistance1(this.pos, attackCreeps.pos)//红球与敌人距离
+            if (a > 1) {
+                if (attackCreeps.getActiveBodyparts('attack') && a == 3) {
+                    //等一手先打heal在舔脸
+                }
+                else this.goTo(attackCreeps.pos, 1);
+                if (a <= 3) {
+                    let healCreeps = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS, { filter: function (creep) { return creep.getActiveBodyparts('heal') && !Memory.whitesheet.includes(creep.owner.username) } });
+                    if (getDistance1(this.pos, healCreeps.pos) <= 3) {
+                        this.rangedAttack(healCreeps);
+                        this.goTo(attackCreeps.pos, 1);
+                    }
+                }
+            }
+            else {//贴脸追的打
+                this.attack(attackCreeps);
+                this.move(this.pos.getDirectionTo(attackCreeps))
+            }
+        }
+        return false
     }
 
     //紧急援建
@@ -1019,9 +1055,8 @@ export default class CreepMissonActionExtension extends Creep {
                     }
                 }
             }
-
-            this.handle_heal();
         }
+        this.handle_heal();
     }
 
     /**风筝单个有attack敌人，没有就贴脸攻击*/
@@ -1054,28 +1089,28 @@ export default class CreepMissonActionExtension extends Creep {
     public handle_ranged_attacks(): boolean {
         let creeps = this.pos.findInRange(FIND_HOSTILE_CREEPS, 4, { filter: function (creep) { return !Memory.whitesheet.includes(creep.owner.username) } });
         if (creeps.length > 1) {
-            let attaceCreeps = [];
+            let attackCreeps = [];
             //伤害总和
             let sum = 0;
             let r = 2;//半径
             if (creeps.length >= 2) r = 3
             if (creeps.length >= 4) r = 4
             for (let creep of creeps) {//计算逃跑线路
-                if (getDistance1(this.pos, creep.pos) <= r && creep.getActiveBodyparts('attack')) attaceCreeps.push({ x: creep.pos.x, y: creep.pos.y })
+                if (getDistance1(this.pos, creep.pos) <= r && creep.getActiveBodyparts('attack')) attackCreeps.push({ x: creep.pos.x, y: creep.pos.y })
                 sum += AttackNum(creep);
             }
 
             if (sum >= ToughNum(this)) {//有危险爬就逃跑，没有就攻击
                 this.say('看不见走位走位👀', true)
                 let x = 0, y = 0;//算中点
-                for (let pos of attaceCreeps) {
+                for (let pos of attackCreeps) {
                     x += pos.x;
                     y += pos.y;
 
                 }
                 if (x != 0 && y != 0) {//有就逃跑
-                    x /= attaceCreeps.length;
-                    y /= attaceCreeps.length;
+                    x /= attackCreeps.length;
+                    y /= attackCreeps.length;
                     let run = new RoomPosition(x, y, this.pos.roomName)
                     this.goTo(run, r + 5, true);
                     for (let i = 0; i < creeps.length; i++) {
@@ -1118,7 +1153,7 @@ export default class CreepMissonActionExtension extends Creep {
     /**优先治疗参数爬 */
     public handle_heal(healcreep?: Creep, bool: boolean = true): boolean {
         if (healcreep) {
-            if (this.hits >= this.hitsMax - 100) {
+            if (this.hits >= this.hitsMax - 200) {
                 let distance = getDistance1(this.pos, healcreep.pos);
                 if (distance <= 1) this.heal(healcreep);
                 else {

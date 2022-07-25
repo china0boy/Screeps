@@ -78,23 +78,24 @@ export function AttackNum(creep: Creep): number {
 export function ToughNum(creep: Creep): number {
   let healNum = 0;
   let toughNum = 0;
+  let a = 0;
   for (let body of creep.body) {
     if (body.type == 'heal') {
       if (body.boost) healNum += 12 * BOOSTS['heal'][body.boost].heal;
-      else healNum += 12
+      else healNum += 12;
+      a = 1;
     }
   }
   for (let body of creep.body) {
     if (body.type == 'tough') {
       if (body.boost) toughNum += 100 / BOOSTS['tough'][body.boost].damage;
-      else toughNum += 100
+      else toughNum += 100;
     }
-    else toughNum += 100
-    healNum -= 100;
-    if (healNum < 100) break
+    if (healNum > 100) healNum -= 100;
+    if (healNum < 100 && a) break;
   }
-  toughNum += healNum
-  return toughNum
+  toughNum += healNum;
+  return toughNum;
 }
 
 

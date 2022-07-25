@@ -310,12 +310,13 @@ export default [
                             },
                             {
                                 title: '控制器攻击:',
-                                describe: '一直攻击控制器 例: war.control("W1N1","W1N2",1,800)',
+                                describe: '一直攻击控制器 例: war.control("W1N1","W1N2",1,1,800)',
                                 params: [
                                     { name: 'roomName', desc: '我的房间名' },
                                     { name: 'disRoom', desc: '目标房间' },
                                     { name: 'body', desc: '1 为大球攻击 2为小球预订 (默认1)' },
-                                    { name: 'interval', desc: '出生间隔 (默认800)' },
+                                    { name: 'num', desc: '数量 (默认1)' },
+                                    { name: 'interval', desc: '出生间隔 (默认1000)' },
                                     { name: 'shard', desc: 'shardname (默认同一shard)' },
                                     { name: 'shardData', desc: '多次跨shard参数 (默认没有)' },
                                 ],

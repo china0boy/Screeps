@@ -9,7 +9,7 @@ interface Room {
     Public_quick(num: number, boostType: ResourceConstant | null): MissionModel
     Public_expand(disRoom: string, shard: shardName, num: number, cnum?: number, time?: number,defend?:boolean): MissionModel
     Public_support(disRoom: string, sType: 'double', shard: shardName, num: number, boost: boolean): MissionModel
-    Public_control(disRoom: string, body: number, interval: number, shard: shardName): MissionModel
+    Public_control(disRoom: string, body: number, num: number, interval: number, shard: shardName): MissionModel
     Public_helpBuild(disRoom: string, num: number, shard?: string, time?: number): MissionModel
     Public_sig(disRoom: string, text: string, shard?: string): MissionModel
     Public_loot(sourceFlagName: string, targetStructureId: string, num: number): MissionModel

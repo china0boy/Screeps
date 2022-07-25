@@ -180,7 +180,7 @@ export default {
             }
             return colorful(`[war] 房间${roomName}-(${shard})->${disRoom}|[${rType}]紧急支援任务删除失败`, 'red')
         },
-        control(roomName: string, disRoom: string, body: number = 1, interval: number = 800, shard: shardName = Game.shard.name as shardName, shardData: shardRoomData[] = null): string {
+        control(roomName: string, disRoom: string, body: number = 1, num: number = 1, interval: number = 1000, shard: shardName = Game.shard.name as shardName, shardData: shardRoomData[] = null): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[war] 不存在房间${roomName}`
             for (var oi of thisRoom.memory.Misson['Creep'])
@@ -188,7 +188,7 @@ export default {
                     return `[war] 房间${roomName}已经存在去往${disRoom}(${shard})的该类型任务了!`
                 }
             if (body != 1 && body != 2) return `body 只限1或者2`;
-            let task = thisRoom.Public_control(disRoom, body, interval, shard)
+            let task = thisRoom.Public_control(disRoom, body, num, interval, shard)
             if (thisRoom.AddMission(task)) {
                 if (shardData) task.Data.shardData = shardData
                 return colorful(`[war] 房间${roomName}挂载控制攻击任务成功 -> ${disRoom}`, 'green')

@@ -63,7 +63,7 @@ export default class RoomMissonVindicateExtension extends Room {
     public Task_Quick_upgrade(mission: MissionModel): void {
         if (this.controller.level >= 8) { this.DeleteMission(mission.id); console.log(`房间${this.name}等级已到8级，删除任务!`); return }
         if (!this.terminal) return
-        if (!this.memory.StructureIdData.labs || this.memory.StructureIdData.labs.length <= 0) return
+        if (mission.Data.boost && (!this.memory.StructureIdData.labs || this.memory.StructureIdData.labs.length <= 0)) return
         /* 能量购买 */
         let terminal_ = this.terminal
         if (!terminal_) return

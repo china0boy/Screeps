@@ -64,6 +64,7 @@ export default class CreepMissonWarExtension extends Creep {
         if (!missionData) return
         let id = missionData.id
         let data = missionData.Data
+        if (data.biao) return
         if (this.room.name != data.disRoom || Game.shard.name != data.shard) {
             this.arriveTo(new RoomPosition(24, 24, data.disRoom), 20, data.shard, data.shardData)
         }
@@ -72,7 +73,39 @@ export default class CreepMissonWarExtension extends Creep {
             if (!control) { this.say('无控制器'); return }
             if (!this.pos.isNearTo(control)) this.goTo(control.pos, 1)
             else {
-                if (this.reserveController(control) == -7) this.attackController(control)
+                if (!control.my) {//不是我的控制器
+                    if (control.owner.username) {//有占有者就攻击
+                        if (control.upgradeBlocked > 1) return//有冷却等待
+                        if (this.ticksToLive <= 3 || Game.time % 10 == 0) {//一起攻击
+                            let creeps = this.pos.findInRange(FIND_MY_CREEPS, 2, { filter: function (object) { return object.getActiveBodyparts('claim'); } })
+                            if (creeps.length >= data.num || this.ticksToLive <= 3) {
+                                for (let i of creeps) {
+                                    i.attackController(control)
+                                    i.suicide()
+                                    i.memory.MissionData.Data.biao = true
+                                }
+                                this.attackController(control)
+                                this.suicide()
+                            }
+                        }
+                    }//没有就预订
+                    else this.reserveController(control)
+                }
+                else {//是就预订
+                    this.reserveController(control)
+                }
+
+                if (data.interval >= 1000 && Game.rooms[this.memory.belong]) {//无缝连接
+                    let mission = Game.rooms[this.memory.belong].GainMission(id)
+                    if (!mission) return
+                    if (data.body == 1) {
+                        mission.CreepBind['claim-attack'].interval = 400 + this.ticksToLive
+                    }
+                    if (data.body == 2) {
+                        mission.CreepBind['out-claim'].interval = 400 + this.ticksToLive
+                    }
+                    data.interval = 400 + this.ticksToLive
+                }
             }
         }
     }

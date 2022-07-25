@@ -33,7 +33,7 @@ export const RoleData: SpawnConstantData = {
     'claim': { num: 0, ability: [0, 0, 10, 0, 0, 0, 1, 0], level: 10, mark: "扩张" },
     'Ebuild': { num: 0, ability: [1, 1, 2, 0, 0, 0, 0, 0], level: 13, mark: "援建" },
     'Eupgrade': { num: 0, ability: [1, 1, 2, 0, 0, 0, 0, 0], level: 13, mark: "援建" },
-    'double-attack': { num: 0, ability: [0, 0, 10, 27, 0, 0, 0, 13], level: 10, mark: "双", must: true },
+    'double-attack': { num: 0, ability: [0, 0, 10, 24, 3, 0, 0, 13], level: 10, mark: "双", must: true },
     'double-heal': { num: 0, ability: [0, 0, 10, 0, 0, 27, 0, 13], level: 10, mark: "双", must: true },
     'double-work': { num: 0, ability: [27, 0, 10, 0, 0, 0, 0, 13], level: 10, mark: "双", must: true },
     'pb_attack': { num: 0, ability: [0, 0, 20, 20, 0, 0, 0, 0], level: 11, mark: "pb" },

@@ -239,7 +239,7 @@ export default class RoomMissonPublish extends Room {
     }
 
     /* 控制器攻击 */
-    public Public_control(disRoom: string, body: number, interval: number, shard: shardName): MissionModel {
+    public Public_control(disRoom: string, body: number, num: number, interval: number, shard: shardName): MissionModel {
         var thisTask: MissionModel = {
             name: '控制攻击',
             range: 'Creep',
@@ -248,13 +248,16 @@ export default class RoomMissonPublish extends Room {
             Data: {
                 disRoom: disRoom,
                 shard: shard,
+                num: num,
+                body: body,
+                interval:interval,
             },
         }
         thisTask.reserve = true
         if (body == 1)
-            thisTask.CreepBind = { 'claim-attack': { num: 1, interval: interval, bind: [] } }
+            thisTask.CreepBind = { 'claim-attack': { num: num, interval: interval, bind: [] } }
         if (body == 2)
-            thisTask.CreepBind = { 'out-claim': { num: 1, interval: interval, bind: [] } }
+            thisTask.CreepBind = { 'out-claim': { num: num, interval: interval, bind: [] } }
         return thisTask
     }
 
@@ -284,6 +287,7 @@ export default class RoomMissonPublish extends Room {
             delayTick: 99999,
             level: 10,
             Data: {
+                boost: boostType ? true : false
             },
         }
         thisTask.reserve = true
@@ -382,7 +386,7 @@ export default class RoomMissonPublish extends Room {
         thisTask.reserve = true
         if (type == 'attack') {
             thisTask.CreepBind = { 'double-attack': { num: num, bind: [], interval: time ? time : 1000 }, 'double-heal': { num: num, bind: [], interval: time ? time : 1000 } }
-            thisTask.LabMessage = { 'XZHO2': 'boost', 'XUH2O': 'boost', 'XLHO2': 'boost', 'XGHO2': 'boost' }
+            thisTask.LabMessage = { 'XZHO2': 'boost', 'XUH2O': 'boost', 'XLHO2': 'boost', 'XGHO2': 'boost', 'XKHO2': 'boost' }
         }
         if (type == 'work') {
             thisTask.CreepBind = { 'double-work': { num: num, bind: [], interval: time ? time : 1000 }, 'double-heal': { num: num, bind: [], interval: time ? time : 1000 } }
