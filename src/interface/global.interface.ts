@@ -24,7 +24,18 @@ declare module NodeJS {
         AveCpu?:number
         Repairlist?:{[roomName:string]:string[]}
         Adaption?:any
+        roomStructsData?: {
+            roomName?: string,
+            storagePos?: { x: number, y: number },
+            labPos?: { x: number, y: number },
+            structMap?: StructMap,
+            structMaplv?: string[],
+        } | null
     }
+}
+
+interface StructMap {
+    [key: string]: [number, number][]
 }
 
 interface globalStrcutureData {

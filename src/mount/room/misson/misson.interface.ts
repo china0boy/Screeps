@@ -46,6 +46,7 @@ interface Room {
     Task_carry_shard(mission: MissionModel): void
     Task_Normal_upgrade(mission: MissionModel): void
     Task_Expand(mission: MissionModel): void
+    Task_pb_dp(mission: MissionModel):void
 }
 
 interface RoomMemory {

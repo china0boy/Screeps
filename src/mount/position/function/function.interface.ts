@@ -13,3 +13,8 @@ interface RoomPosition {
     FindRangeCreep(num:number):Creep[]
     AddTowerRangeData(target:StructureTower,tempData:ARH):void
 }
+
+interface RoomLayout {
+    x:number,
+    y:number,
+ }

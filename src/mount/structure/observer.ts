@@ -107,16 +107,16 @@ export class ObserverExtension extends StructureObserver {
 
             // 更新数量
             memory.pbNumber += 1
+
+            const pbBoost = memory.boost.pb;
             // 计算应该发布的采集小组数量，最高两组
-            const groupNumber = target.pos.getSourceVoid().length > 1 ? 2 : 1
+            const groupNumber = pbBoost ? 1 : target.pos.getSourceVoid().length > 1 ? 2 : 1
 
             // 发布 attacker 和 healer，搬运者由 attacker 在后续任务中自行发布
             //const attackerName = `${targetFlagName} attacker`
-            const healerName = `${targetFlagName} healer`
-
+            const attackName = `${targetFlagName} healer`
             // 添加采集小组
-            let attack = this.room.public_pb_attack(this.room.name, targetFlagName, healerName, groupNumber, time)
-            //let heal = this.room.public_pb_heal(this.room.name, targetFlagName, healerName, groupNumber, time)            || !this.room.AddMission(heal)
+            let attack = this.room.public_pb_attack(this.room.name, targetFlagName, attackName, groupNumber, time, pbBoost)
             if (!this.room.AddMission(attack)) { console.log(Colorful(`房间${this.room.name} -> ${target.pos.roomName}:挂载挖pb失败 `, 'red')); memory.pbNumber--; }
         }
         else if (target instanceof Deposit) {
@@ -128,8 +128,8 @@ export class ObserverExtension extends StructureObserver {
             // 发布采集者，他会自行完成剩下的工作
             //const harvestName = `${targetFlagName} harvest`
             const transferName = `${targetFlagName} transfer`
-            const harvestBoost = memory.boost.harvest;
-            let harvest = this.room.public_dp_harvest(this.room.name, targetFlagName, transferName, 1, time, harvestBoost);
+            const dpBoost = memory.boost.dp;
+            let harvest = this.room.public_dp_harvest(this.room.name, targetFlagName, transferName, 1, time, dpBoost);
             let transfer = this.room.public_dp_transfer(this.room.name, targetFlagName, transferName, 1, time);
             if (!this.room.AddMission(harvest) || !this.room.AddMission(transfer)) { console.log(Colorful(`房间${this.room.name} -> ${target.pos.roomName}:挂载挖dp失败 `, 'red')); memory.depositNumber--; }
             else target.pos.createFlag(targetFlagName)
@@ -331,9 +331,10 @@ export class ObserverConsole extends ObserverExtension {
      * 用户操作 - 是否boost
      * 暂时只支持挖dp_harvest
      */
-    public boost(role: string, resource: Resource): string {
+    public boost(role: string, resource: string): string {
         if (!role) return `请填入角色类型`;
-        this.room.memory.observer.boost[role] = resource;
+        if (resource == 't0') delete this.room.memory.observer.boost[role]
+        else this.room.memory.observer.boost[role] = resource;
         return `boost: ${this.room.name} -> ${role}:${resource}`;
     }
 
@@ -362,8 +363,8 @@ export class ObserverConsole extends ObserverExtension {
                 {
                     title: '修改boost',
                     params: [
-                        { name: 'role', desc: '角色类型: harvest (暂时只有这一种boost)' },
-                        { name: 'resource', desc: 'boost这个所需要的化合物' }
+                        { name: 'role', desc: '角色类型: dp pb' },
+                        { name: 'resource', desc: 'boost这个所需要的化合物 (t1 t2 t3)' }
                     ],
                     functionName: 'boost'
                 },

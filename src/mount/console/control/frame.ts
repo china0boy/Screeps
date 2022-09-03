@@ -54,7 +54,7 @@ export default {
     },
     frame:
     {
-        add(roomName: string, plan: 'man' | 'dev', x: number, y: number): string {
+        add(roomName: string, plan: 'man' | 'dev'| 'hoho' | 'auto63', x: number, y: number): string {
             let thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[frame] 不存在房间${roomName}`
             Memory.RoomControlData[roomName] = { arrange: plan, center: [x, y] }

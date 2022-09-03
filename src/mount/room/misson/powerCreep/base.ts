@@ -144,9 +144,10 @@ export default class PowerCreepMisson extends Room {
         if (this.MissionNum("PowerCreep", '虫卵强化') > 0) return
         // 在战争时期、对外战争时期，启动
         var ssss = false
-        let list = ['攻防一体', '双人小队', '四人小队', '紧急支援']
+        let list = ['攻防一体', '双人小队', '四人小队', '紧急支援', '一体机']
         for (let i of list) if (this.MissionNum('Creep', i) > 0) ssss = true
         if (this.memory.state == 'war' && this.memory.switch.AutoDefend) ssss = true
+        if (this.memory.SpawnList.length >= 2) ssss = true
         if (ssss) {
             var thisTask: MissionModel = {
                 name: "虫卵强化",

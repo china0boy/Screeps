@@ -1,6 +1,6 @@
-import { devPlanConstant } from "@/constant/PlanConstant"
+import { devPlanConstant, hohoPlanConstant, teaPlanConstant } from "@/constant/PlanConstant"
 import { ObserverConsole } from "@/mount/structure/observer"
-import { Colorful, isInArray } from "@/utils"
+import { Colorful, isInArray, unzipLayout } from "@/utils"
 
 /* 房间原型拓展   --内核  --房间生态 */
 export default class RoomCoreEcosphereExtension extends Room {
@@ -21,8 +21,24 @@ export default class RoomCoreEcosphereExtension extends Room {
             let LayOutPlan = Memory.RoomControlData[this.name].arrange
             switch (LayOutPlan) {
                 case 'man': { break; }
-                case 'hoho': { break; }
+                case 'hoho': { this.RoomRuleLayout(level, hohoPlanConstant); break; }
+                case 'tea': { this.RoomRuleLayout(level, teaPlanConstant); break; }
                 case 'dev': { this.RoomRuleLayout(level, devPlanConstant); break; }
+                case 'auto63': {
+                    /*检查是否有已经保存的布局信息*/
+                    if (!Memory.RoomControlData[this.name].structMap) {
+                        console.log(`[LayoutVisual63] 房间${this.name}63布局尚未录入`)
+                    } else {
+                        let _Constant = [];
+                        let structMap_length = Memory.RoomControlData[this.name].structMap.length;
+                        for (let i = 0; i < structMap_length; i++) {
+                            _Constant.push(unzipLayout(Memory.RoomControlData[this.name].structMap[i]))
+                        }
+                        console.log('63布局详情')
+                        console.log(JSON.stringify(_Constant))
+                        this.RoomRuleautoLayout(level, _Constant); break;
+                    }
+                }
             }
             /* link */
             if (level == 5)                 // 5级1个source的Link
@@ -71,11 +87,15 @@ export default class RoomCoreEcosphereExtension extends Room {
             }
         }
         /* 自动重建 */
-        if (Game.shard.name == 'shard3') { if (Game.time % 25) return }
-        else { if (Game.time % 5) return }
-        if (this.memory.state == 'peace') {
+        if (Game.shard.name == 'shard3') {
+            if (Game.time % 25) return
             /* cpu过少就不进行自动重建 */
             if (Game.cpu.bucket < 4000) return
+        }
+        else {
+            if (Game.time % 5) return
+        }
+        if (this.memory.state == 'peace') {
             /* 仅仅在和平情况下才会打开自动重建 */
             // 寻找所有属于我的建筑的数量 -1是去除controller 包含所有非控制器的我方建筑、我方建筑工地、该房间内的道路，container
             let currentNum = this.find(FIND_MY_STRUCTURES).length + this.find(FIND_MY_CONSTRUCTION_SITES).length + this.find(FIND_STRUCTURES, { filter: (structure) => { return structure.structureType == STRUCTURE_CONTAINER || structure.structureType == STRUCTURE_ROAD } }).length - 1
@@ -106,22 +126,22 @@ export default class RoomCoreEcosphereExtension extends Room {
             // 仅检测城墙、spawn、仓库、终端、实验室的数量，检测到缺损就自动开启安全模式
             let currentNum = this.find(FIND_MY_STRUCTURES, {
                 filter: (structure) => {
-                    return isInArray(['rampart', 'spawn', 'storage', 'terminal', 'lab', 'extension'], structure.structureType)
+                    return isInArray(['rampart', 'spawn', 'storage', 'terminal', 'lab'], structure.structureType)
                 }
             }).length
             currentNum += this.find(FIND_MY_CONSTRUCTION_SITES, {
                 filter: (cons) => {
-                    return isInArray(['rampart', 'spawn', 'storage', 'terminal', 'lab', 'extension'], cons.structureType)
+                    return isInArray(['rampart', 'spawn', 'storage', 'terminal', 'lab'], cons.structureType)
                 }
             }).length
             let memoryNum = 0
             console.log('currentNum:', currentNum)
             for (var index in this.memory.distribution) {
-                if (isInArray(['rampart', 'spawn', 'storage', 'terminal', 'lab', 'extension'], index)) {
+                if (isInArray(['rampart', 'spawn', 'storage', 'terminal', 'lab'], index)) {
                     memoryNum += this.memory.distribution[index].length
                 }
             }
-            console.log("memoryNum:", memoryNum)
+            //console.log("memoryNum:", memoryNum)
             if (currentNum < memoryNum) {
                 /* 说明出问题了 */
                 this.controller.activateSafeMode()
@@ -295,6 +315,39 @@ export default class RoomCoreEcosphereExtension extends Room {
         let obs = Game.getObjectById(this.memory.StructureIdData.ObserverID) as StructureObserver
         if (obs) {
             obs.work();
+        }
+    }
+
+    public RoomRuleautoLayout(level: number, map: BluePrint): void {
+        // let center_point: RoomPosition = null
+        // let centerList = Memory.RoomControlData[this.name].center
+        // center_point = new RoomPosition(centerList[0], centerList[1], this.name)
+        for (let obj of map) {
+            if (level >= obj.level) {
+                let new_point = new RoomPosition(obj.x, obj.y, this.name)
+                // 忽略越界位置
+                if (new_point.x >= 49 || new_point.x <= 0 || new_point.y >= 49 || new_point.y <= 0) continue
+                // 墙壁不建造东西
+                if (new_point.lookFor(LOOK_TERRAIN)[0] == 'wall') continue
+                let posOcp: boolean = false
+                let new_point_structures = new_point.lookFor(LOOK_STRUCTURES)
+                if (new_point_structures.length > 0)
+                    for (let j of new_point_structures) {
+                        if (j.structureType == obj.structureType) posOcp = true
+                    }
+                if (new_point && new_point.lookFor(LOOK_CONSTRUCTION_SITES).length <= 0 && !posOcp) {
+                    let result = new_point.createConstructionSite(obj.structureType)
+                    if (result != 0) {
+                        let str = Colorful(`房间${this.name}创建工地${obj.structureType}失败! 位置: x=${obj.x}|y=${obj.y}`, 'orange', false)
+                        console.log(str)
+                    }
+                    else {
+                        let str = Colorful(`房间${this.name}创建工地${obj.structureType}成功! 位置: x=${obj.x}|y=${obj.y}`, 'green', false)
+                        console.log(str)
+                    }
+                }
+            }
+            else return // 不遍历无关建筑
         }
     }
 }

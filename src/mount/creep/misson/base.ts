@@ -57,6 +57,10 @@ export default class CreepMissonBaseExtension extends Creep {
             if (thisTaskList.length <= 0) {
                 //主动防御的unboost
                 if (this.memory.role == 'defend-attack' || this.memory.role == 'defend-range' || this.memory.role == 'defend-douAttack' || this.memory.role == 'defend-douHeal') {
+                    if (Game.flags[`${this.pos.roomName}/unBoost`]) {
+                        if (!this.unBoost()) this.suicide()
+                        return
+                    }
                     if (Game.rooms[this.memory.belong].memory.state == 'peace') {
                         if (this.ticksToLive <= 30) {
                             if (!this.unBoost()) this.suicide()

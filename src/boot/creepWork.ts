@@ -43,6 +43,6 @@ export const creepRunner = function (creep: Creep): void {
   {
     creep.ManageMisson()
   }
-  if (creep.hits < creep.hitsMax && creep.room.name == creep.memory.belong && creep.room.memory.state == 'peace')
+  if (creep.hits < creep.hitsMax && Memory.RoomControlData[creep.pos.roomName] && creep.room.memory.state == 'peace')
         creep.optTower('heal', creep);
 }

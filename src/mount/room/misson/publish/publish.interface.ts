@@ -7,7 +7,7 @@ interface Room {
     Public_dismantle(disRoom: string, num: number, interval?: number, boost?: boolean, shard?: shardName): MissionModel
     Check_Lab(misson: MissionModel, role: string, tankType: 'storage' | 'terminal' | 'complex')
     Public_quick(num: number, boostType: ResourceConstant | null): MissionModel
-    Public_expand(disRoom: string, shard: shardName, num: number, cnum?: number, time?: number,defend?:boolean): MissionModel
+    Public_expand(disRoom: string, shard: shardName, num: number, cnum?: number, time?: number, defend?: boolean): MissionModel
     Public_support(disRoom: string, sType: 'double', shard: shardName, num: number, boost: boolean): MissionModel
     Public_control(disRoom: string, body: number, num: number, interval: number, shard: shardName): MissionModel
     Public_helpBuild(disRoom: string, num: number, shard?: string, time?: number): MissionModel
@@ -16,7 +16,7 @@ interface Room {
     Public_AIO(FlagName: string, num: number, level: number, shard?: string, time?: number): MissionModel
     Public_doubleDismantle(FlagName: string, type: string, num: number, shard?: string, time?: number): MissionModel
     Public_Send(disRoom: string, rType: ResourceConstant, num: number): MissionModel
-    public_pb_attack(myroomname: string, FlagName: string, attackCreepName: string, num: number, time: number): MissionModel
+    public_pb_attack(myroomname: string, FlagName: string, attackCreepName: string, num: number, time: number, boost: ResourceConstant): MissionModel
     public_pb_transfer(myroomname: string, FlagName: string, pbroomname: string, pbx: number, pby: number, num: number, time: number): MissionModel
     public_dp_harvest(myroomname: string, FlagName: string, transferCreepName: string, num: number, time: number, boost: ResourceConstant): MissionModel
     public_dp_transfer(myroomname: string, FlagName: string, harvestCreepName: string, num: number, time: number): MissionModel
@@ -32,5 +32,5 @@ interface Room {
     public_squad(disRoom: string, shard: shardName, interval: number, RNum: number, ANum: number, DNum: number, HNum: number, AIONum: number, flag: string): MissionModel
     public_resource_transfer(disRoom: string, resource?: ResourceConstant, num?: number): MissionModel
     public_carry_shard(naFlagName: string, toFlagName: string, cnum: number, level: number, rtype: ResourceConstant, rnum: number, interval: number, nashardName: shardName, toshardName: shardName): MissionModel
-    public_normal(num:number,boostType:ResourceConstant | null):MissionModel
+    public_normal(num: number, boostType: ResourceConstant | null): MissionModel
 }

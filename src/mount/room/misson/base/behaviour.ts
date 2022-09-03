@@ -1,6 +1,6 @@
 import { ResourceCanDispatch } from "@/module/dispatch/resource"
 import { checkDispatch, checkSend, DispatchNum, resourceMap } from "@/module/fun/funtion"
-import { colorful, isInArray } from "@/utils"
+import { colorful, isInArray, StatisticalResources } from "@/utils"
 
 /* 房间原型拓展   --任务  --基本功能 */
 export default class RoomMissonBehaviourExtension extends Room {
@@ -160,40 +160,69 @@ export default class RoomMissonBehaviourExtension extends Room {
         var needResource: ResourceConstant[] = [misson.Data.raw1, misson.Data.raw2]
         if (this.MissionNum('Structure', '资源购买') > 1) return // 存在资源购买任务的情况下，不执行资源调度
         if (DispatchNum(this.name) >= 2) return // 资源调度数量过多则不执行资源调度
-        for (var resource_ of needResource) {
+        for (let resource_ of needResource) {
             // 原矿 资源调用
             if (storage_.store.getUsedCapacity(resource_) + terminal_.store.getUsedCapacity(resource_) < 10000 && isInArray(['H', 'O', 'K', 'L', 'X', 'U', 'Z'], resource_)) {
-                if (checkDispatch(this.name, resource_)) continue  // 已经存在调用信息的情况
-                if (checkSend(this.name, resource_)) continue  // 已经存在其它房间的传送信息的情况
-                console.log(colorful(`[资源调度]<lab com> 房间${this.name}没有足够的资源[${resource_}],将执行资源调度!`, 'yellow'))
-                let dispatchTask: RDData = {
-                    sourceRoom: this.name,
-                    rType: resource_,
-                    num: 9800,
-                    delayTick: 200,
-                    conditionTick: 35,
-                    buy: false,
-                    mtype: 'deal'
+                let num = StatisticalResources(resource_)
+                if (num >= 10000) {
+                    if (checkDispatch(this.name, resource_)) continue  // 已经存在调用信息的情况
+                    if (checkSend(this.name, resource_)) continue  // 已经存在其它房间的传送信息的情况
+                    console.log(colorful(`[资源调度]<lab com> 房间${this.name}没有足够的资源[${resource_}],将执行资源调度!`, 'yellow'))
+                    let dispatchTask: RDData = {
+                        sourceRoom: this.name,
+                        rType: resource_,
+                        num: 9800,
+                        delayTick: 200,
+                        conditionTick: 35,
+                        buy: false,
+                        mtype: 'deal'
+                    }
+                    Memory.ResourceDispatchData.push(dispatchTask)
+                    return
+                } else {
+                    let FactoryId = this.memory.StructureIdData.FactoryId as Id<StructureFactory>
+                    if (!FactoryId) return
+                    let numBar = 0
+                    let typeBar
+                    for (let j in COMMODITIES[resource_].components) {
+                        if (j != 'energy') {
+                            numBar = StatisticalResources(j as ResourceConstant)
+                            typeBar = j
+                        }
+                    }
+                    if (misson.Data.num >= 0) {
+                        let addNum = misson.Data.num / 10
+                        if (addNum / 5 <= numBar) {
+                            let Factory = Game.getObjectById(FactoryId)
+                            if (Factory && typeBar && !this.memory.Factory.factoryData[typeBar]) {
+                                Factory.addData(resource_ as CommodityConstant, addNum)
+                                console.log(colorful(`房间${this.name}没有足够的资源[${resource_}],将合成[${resource_}],数量[${addNum}]!`, 'yellow'))
+                            }
+                        }
+                    }
+
                 }
-                Memory.ResourceDispatchData.push(dispatchTask)
-                return
             }
             // 其他中间物 资源调用
             else if (storage_.store.getUsedCapacity(resource_) + terminal_.store.getUsedCapacity(resource_) < 500 && !isInArray(['H', 'O', 'K', 'L', 'X', 'U', 'Z'], resource_)) {
-                if (checkDispatch(this.name, resource_)) continue  // 已经存在调用信息的情况
-                if (checkSend(this.name, resource_)) continue  // 已经存在其它房间的传送信息的情况
-                console.log(colorful(`[资源调度]<lab com> 房间${this.name}没有足够的资源[${resource_}],将执行资源调度!`, 'yellow'))
-                let dispatchTask: RDData = {
-                    sourceRoom: this.name,
-                    rType: resource_,
-                    num: 4900,
-                    delayTick: 100,
-                    conditionTick: 25,
-                    buy: false,
-                    mtype: 'deal'
+                let num = StatisticalResources(resource_)
+                if (num >= 5000) {
+                    if (checkDispatch(this.name, resource_)) continue  // 已经存在调用信息的情况
+                    if (checkSend(this.name, resource_)) continue  // 已经存在其它房间的传送信息的情况
+                    console.log(colorful(`[资源调度]<lab com> 房间${this.name}没有足够的资源[${resource_}],将执行资源调度!`, 'yellow'))
+                    let dispatchTask: RDData = {
+                        sourceRoom: this.name,
+                        rType: resource_,
+                        num: 4900,
+                        delayTick: 100,
+                        conditionTick: 25,
+                        buy: false,
+                        mtype: 'deal'
+                    }
+                    Memory.ResourceDispatchData.push(dispatchTask)
+                    return
                 }
-                Memory.ResourceDispatchData.push(dispatchTask)
-                return
+                else console.log(colorful(`[资源调度]<lab com> 房间${this.name}没有足够的资源[${resource_}],请补充资源!`, 'orange'))
             }
         }
     }

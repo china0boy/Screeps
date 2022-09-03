@@ -186,7 +186,6 @@ export default class CreepMissonActionExtension extends Creep {
     // C计划
     public handle_planC(): void {
         let mission = this.memory.MissionData
-        // if (Game.rooms[mission.Data.disRoom] && !Game.rooms[mission.Data.disRoom].controller.safeMode) Game.rooms[mission.Data.disRoom].controller.activateSafeMode()
         if (this.memory.role == 'cclaim') {
             if (this.room.name != mission.Data.disRoom || Game.shard.name != mission.Data.shard) {
                 this.arriveTo(new RoomPosition(25, 25, mission.Data.disRoom), 20, mission.Data.shard)
@@ -249,9 +248,9 @@ export default class CreepMissonActionExtension extends Creep {
             this.arriveTo(new RoomPosition(24, 24, missionData.Data.disRoom), 20, missionData.Data.shard, missionData.Data.shardData)
             return
         }
-        if (!this.memory.arrived && Game.flags[`${this.memory.belong}/expand`] && Game.flags[`${this.memory.belong}/expand`].pos.roomName == this.room.name) {
-            if (!this.pos.isEqualTo(Game.flags[`${this.memory.belong}/expand`])) this.goTo(Game.flags[`${this.memory.belong}/expand`].pos, 0)
-            else this.memory.arrived = true
+        let GoFalg = Game.flags[`${this.memory.belong}/expand`]
+        if (GoFalg) {
+            if (!this.pos.isEqualTo(GoFalg)) this.goTo(GoFalg.pos, 0)
             return
         }
         this.workstate('energy')
@@ -278,7 +277,7 @@ export default class CreepMissonActionExtension extends Creep {
                 }
                 if (Game.rooms[this.room.name] && Game.rooms[this.room.name].memory.StructureIdData && Game.rooms[this.room.name].memory.StructureIdData.AtowerID) {
                     let towers = []
-                    Game.rooms[this.room.name].memory.StructureIdData.AtowerID.forEach((tower: Id<StructureTower>) => { if (Game.getObjectById(tower).store.getFreeCapacity('energy')) towers.push(Game.getObjectById(tower)) })
+                    Game.rooms[this.room.name].memory.StructureIdData.AtowerID.forEach((tower: Id<StructureTower>) => { if (Game.getObjectById(tower).store.getFreeCapacity('energy') > 100) towers.push(Game.getObjectById(tower)) })
                     if (towers.length && towers[0]) {
                         this.transfer_(towers[0], 'energy')
                         return
@@ -288,6 +287,14 @@ export default class CreepMissonActionExtension extends Creep {
                 if (store) {
                     this.transfer_(store, 'energy')
                     return
+                }
+                let Falg = Game.flags[`${this.pos.roomName}/build`]
+                if (Falg) {
+                    let rampart = this.pos.findClosestByRange(FIND_MY_STRUCTURES, { filter: function (structure) { return structure.structureType == 'rampart' && structure.hits < structure.hitsMax - 1000 } })
+                    if (rampart) {
+                        this.repair_(rampart);
+                        return
+                    }
                 }
                 this.upgrade_()
             }
@@ -318,21 +325,6 @@ export default class CreepMissonActionExtension extends Creep {
                     }
                 }
 
-                let harvestFlag = Game.flags[`${this.memory.belong}/HB/harvest`]
-                if (harvestFlag) {
-                    if (this.hits < this.hitsMax) {
-                        this.heal(this)
-                    }
-                    if (this.room.name != harvestFlag.pos.roomName) {
-                        this.goTo(harvestFlag.pos, 1)
-                    }
-                    else {
-                        let source = this.pos.findClosestByRange(FIND_SOURCES_ACTIVE)
-                        if (source) { this.harvest_(source) }
-                    }
-                    return
-                }
-
                 if (Game.time % 10 == 0 || this.pos.x == 0 || this.pos.x == 49 || this.pos.y == 0 || this.pos.y == 49) {
                     let source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)
                     if (source) missionData.sourceId = source.id
@@ -343,6 +335,22 @@ export default class CreepMissonActionExtension extends Creep {
                     this.harvest_(source)
                 }
                 else {
+                    let harvestFlag = Game.flags[`${this.memory.belong}/HB/harvest`]
+                    if (harvestFlag) {
+                        if (this.hits < this.hitsMax) {
+                            this.heal(this)
+                        }
+                        if (!this.pos.isEqualTo(harvestFlag)) {
+                            this.goTo(harvestFlag.pos, 0)
+                        }
+                        else {
+                            let source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)
+                            if (source) missionData.sourceId = source.id
+                            else delete missionData.sourceId
+                        }
+                        return
+                    }
+
                     let structure = posFindClosestByRange(this.pos, 'energy');
                     if (structure) this.withdraw_(structure, 'energy');
                 }
@@ -354,6 +362,14 @@ export default class CreepMissonActionExtension extends Creep {
                 if (this.room.controller.my && this.room.controller.upgradeBlocked) {
                     let cons = this.pos.findClosestByRange(FIND_MY_CONSTRUCTION_SITES)
                     if (cons) this.build_(cons)
+                }
+                let Falg = Game.flags[`${this.pos.roomName}/build`]
+                if (Falg) {
+                    let rampart = this.pos.findClosestByRange(FIND_MY_STRUCTURES, { filter: function (structure) { return structure.structureType == 'rampart' } })
+                    if (rampart) {
+                        this.repair_(rampart);
+                        return
+                    }
                 }
                 else this.upgrade_()
             }
@@ -384,21 +400,6 @@ export default class CreepMissonActionExtension extends Creep {
                     }
                 }
 
-                let harvestFlag = Game.flags[`${this.memory.belong}/HB/harvest`]
-                if (harvestFlag) {
-                    if (this.hits < this.hitsMax) {
-                        this.heal(this)
-                    }
-                    if (this.room.name != harvestFlag.pos.roomName) {
-                        this.goTo(harvestFlag.pos, 1)
-                    }
-                    else {
-                        let source = this.pos.findClosestByRange(FIND_SOURCES_ACTIVE)
-                        if (source) { this.harvest_(source) }
-                    }
-                    return
-                }
-
                 if (Game.time % 10 == 0 || this.pos.x == 0 || this.pos.x == 49 || this.pos.y == 0 || this.pos.y == 49) {
                     let source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)
                     if (source) missionData.sourceId = source.id
@@ -409,6 +410,21 @@ export default class CreepMissonActionExtension extends Creep {
                     this.harvest_(source)
                 }
                 else {
+                    let harvestFlag = Game.flags[`${this.memory.belong}/HB/harvest`]
+                    if (harvestFlag) {
+                        if (this.hits < this.hitsMax) {
+                            this.heal(this)
+                        }
+                        if (!this.pos.isEqualTo(harvestFlag)) {
+                            this.goTo(harvestFlag.pos, 0)
+                        }
+                        else {
+                            let source = this.pos.findClosestByPath(FIND_SOURCES_ACTIVE)
+                            if (source) missionData.sourceId = source.id
+                            else delete missionData.sourceId
+                        }
+                        return
+                    }
                     let structure = posFindClosestByRange(this.pos, 'energy');
                     if (structure) this.withdraw_(structure, 'energy');
                 }
@@ -1048,6 +1064,7 @@ export default class CreepMissonActionExtension extends Creep {
                         this.say('治疗')
                         this.goTo(Heal_creep.pos, 1);
                         this.handle_heal(Heal_creep);
+                        return
                     }
                     else {
                         this.say('没有发现敌人');
@@ -1278,6 +1295,7 @@ export default class CreepMissonActionExtension extends Creep {
         let myroom = Game.rooms[this.memory.belong];
         let flag = Game.flags[data.FlagName];
         if (!flag) { this.say(`找不到旗子:${data.FlagName}`); if (myroom.GainMission(id)) myroom.DeleteMission(id); }
+        if (data.boost && !this.BoostCheck(['attack', 'heal'])) return//检查boost
         if (this.memory.role == 'pb_transfer') {
             if (this.store.getUsedCapacity()) {
                 let storage = myroom.storage ? myroom.storage : myroom.terminal;
@@ -1446,6 +1464,7 @@ export default class CreepMissonActionExtension extends Creep {
         }
         if (this.memory.role == 'carryShard') {
             if (!this.store.getUsedCapacity()) data.biao = 0;
+            else data.biao = 1;
             this.heal(this);
             if (data.biao == 1) {//状态机
                 if (Game.shard.name != data.toshardName) {
@@ -1493,7 +1512,7 @@ export default class CreepMissonActionExtension extends Creep {
                 let naFlag = Game.flags[data.naFlagName];
                 if (!naFlag) { this.say(`找不到拿资源的Flag`); return }
                 if (this.pos.roomName != naFlag.pos.roomName) {
-                    this.arriveTo(naFlag.pos, 5, data.toshardName, data.shardData)
+                    this.arriveTo(naFlag.pos, 5, data.nashardName, data.shardData)
                     return
                 }
                 let store = data.num >= this.store.getFreeCapacity() ? this.store.getFreeCapacity() : data.num;//需要拿取的数量

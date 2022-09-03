@@ -23,6 +23,18 @@ const pluginDeploy = config && config.copyPath ?
                 dest: config.copyPath
             },
             {
+                src: 'src/module/layoutVisual/dynamic/algo_wasm_priorityqueue.wasm',
+                dest: config.copyPath
+            },
+            {
+                src: 'src/module/layoutVisual/dynamic/autoPlanner63.js',
+                dest: config.copyPath
+            },
+            // {
+            //     src: 'src/module/layoutVisual/dynamic/autoPlannerdu.js',
+            //     dest: config.copyPath
+            // },
+            {
                 src: 'dist/main.js.map',
                 dest: config.copyPath,
                 rename: name => name + '.map.js',
@@ -33,7 +45,9 @@ const pluginDeploy = config && config.copyPath ?
         verbose: true
     }) :
     // 更新 .map 到 .map.js 并上传
-    screeps({ config, dryRun: !config })
+    screeps({
+        config, dryRun: !config
+    })
 
 export default {
     // 源代码的入口是哪个文件
@@ -53,8 +67,21 @@ export default {
         // 模块化依赖
         commonjs(),
         // 编译 ts
-        typescript({ tsconfig: "./tsconfig.json" }), 
+        typescript({ tsconfig: "./tsconfig.json" }),
+        copy({
+            targets: [
+                {
+                    src: 'src/module/layoutVisual/dynamic/algo_wasm_priorityqueue.wasm',
+                    dest: 'dist'
+                },
+                {
+                    src: 'src/module/layoutVisual/dynamic/autoPlanner63.js',
+                    dest: 'dist'
+                },
+            ]
+        }),
         // 执行上传或者复制
         pluginDeploy
-    ]
+    ],
+    external: ['src/modules/layoutVisual/algo_wasm_priorityqueue.wasm'],
 };

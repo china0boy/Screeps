@@ -232,7 +232,7 @@ export class factoryExtension extends StructureFactory {
                 //总底物需要的数量 = 总数量*底物单次合成的数量/单次合成的数量 
                 let num1 = Factory.dataProduce[type].num * COMMODITIES[type].components[j] / COMMODITIES[type].amount;
                 //统计全局所有的这种资源数量
-                let numAll = StatisticalResources(j as CommodityConstant | MineralConstant | "energy" | "G")
+                let numAll = StatisticalResources(j as CommodityConstant | MineralConstant | "energy" | "G") + this.store[j]
                 //我的资源是否够合高级资源，不够就先合低级  够就创建资源平衡
                 if (numAll >= num1) {
                     if (!Factory.factoryData[j]) {

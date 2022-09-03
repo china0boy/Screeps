@@ -34,6 +34,46 @@ export default class RoomFunctionTowerExtension extends Room {
         else if (this, this.memory.state == 'war') {
             if (Game.flags[`${this.name}/stop`]) return
             if (this.memory.switch.AutoDefend) {
+                if (Game.shard.name != 'shrad3') {
+                    let enemys = this.find(FIND_HOSTILE_CREEPS, {
+                        filter: (creep) => {
+                            return !isInArray(Memory.whitesheet, creep.owner.username) && creep.owner.username != 'Invader' && !creep.getActiveBodyparts('tough')
+                        }
+                    })
+                    if (enemys.length) {
+                        for (var i of this.memory.StructureIdData.AtowerID) {
+                            let tower_ = Game.getObjectById(i) as StructureTower
+                            if (!tower_) continue
+                            if (enemys.length >= 1) {
+                                if (Game.time % 2 == 0) tower_.attack(enemys[0])
+                                else tower_.attack(enemys[1])
+                            }
+                            else {
+                                tower_.attack(enemys[0])
+                            }
+
+
+                        }
+                    }
+                }
+
+                let flag = Game.flags[`${this.name}/attack`]
+                if (flag) {
+                    let creeps = flag.pos.findClosestByRange(FIND_HOSTILE_CREEPS, {
+                        filter: (creep) => {
+                            return !isInArray(Memory.whitesheet, creep.owner.username)
+                        }
+                    })
+                    if (creeps) {
+                        for (let c of this.memory.StructureIdData.AtowerID) {
+                            let thisTower = Game.getObjectById(c) as StructureTower
+                            if (!thisTower) {
+                                let index = this.memory.StructureIdData.AtowerID.indexOf(c); this.memory.StructureIdData.AtowerID.splice(index, 1); continue
+                            }
+                            else thisTower.attack(creeps[0])
+                        }
+                    }
+                }
                 return
             }
             /* 没有主动防御下的防御塔逻辑 */

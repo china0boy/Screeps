@@ -17,6 +17,13 @@ export default class PowerCreepMissonBase extends PowerCreep {
         if (!myroom) return
         var thisSpawn = Game.getObjectById(Game.rooms[this.memory.belong].memory.StructureIdData.PowerSpawnID) as StructurePowerSpawn
         if (!thisSpawn) return
+        else {
+            if (this.hits < this.hitsMax - 200) {
+                this.goTo(thisSpawn.pos, 1)
+                if (this.room.name == this.memory.belong)
+                    this.optTower('heal', this);
+            }
+        }
         if (!this.memory.spawn) {
             this.memory.spawn = thisSpawn.id
         }

@@ -12,11 +12,13 @@ interface StructureTerminal {
 }
 
 interface StructureObserver {
-    work(): void;
-
+    stats(): string
+    work(): void
+    setmax(type: 'powerbank' | 'deposit', max: number): string
 }
 interface StructureFactory {
     ManageMission(): void
+    addData(type: CommodityConstant | MineralConstant | "energy" | "G", num: number): string
 }
 interface RoomMemory {
     TerminalData: { [resource: string]: { num: number, fill?: boolean } }

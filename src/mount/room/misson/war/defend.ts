@@ -128,9 +128,9 @@ export default class DefendWarExtension extends Room {
         if (!this.memory.state) return
         if (this.memory.state != 'war') { this.memory.switch.AutoDefend = false; this.memory.enemy = {}; return }
         /* 激活主动防御 */
-        var enemys = this.find(FIND_HOSTILE_CREEPS, {
+        let enemys = this.find(FIND_HOSTILE_CREEPS, {
             filter: (creep) => {
-                return !isInArray(Memory.whitesheet, creep.owner.username) && (creep.owner.username != 'Invader') && deserveDefend(creep)
+                return !isInArray(Memory.whitesheet, creep.owner.username) && creep.owner.username != 'Invader' && deserveDefend(creep)
             }
         })
         if (enemys.length <= 0) return

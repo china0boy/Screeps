@@ -117,8 +117,9 @@ export default class CreepMoveExtension extends Creep {
                         costs.set(struct.pos.x, struct.pos.y, 1)
                     }
                     else if (struct.structureType !== STRUCTURE_CONTAINER &&
-                        (struct.structureType !== STRUCTURE_RAMPART || (!struct.my && (struct.structureType !== STRUCTURE_RAMPART || (struct.structureType == STRUCTURE_RAMPART && !struct.isPublic)))))
-                        costs.set(struct.pos.x, struct.pos.y, 0xff)
+                        (struct.structureType !== STRUCTURE_RAMPART || (!struct.my && (struct.structureType == STRUCTURE_RAMPART && !struct.isPublic)))) {
+                        costs.set(struct.pos.x, struct.pos.y, 255)
+                    }
                 })
                 room.find(FIND_MY_CONSTRUCTION_SITES).forEach(cons => {
                     if (cons.structureType != 'road' && cons.structureType != 'rampart' && cons.structureType != 'container')

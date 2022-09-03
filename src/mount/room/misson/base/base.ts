@@ -57,6 +57,8 @@ export default class RoomMissonFrameExtension extends Room {
                     case '跨shard运输': { this.Task_carry_shard(misson); break A; }
                     case '普通冲级': { this.Task_Normal_upgrade(misson); break A; }
                     case '扩张援建': { this.Task_Expand(misson); break A; }
+                    case 'pb': { this.Task_pb_dp(misson); break A; }
+                    case 'dp_harvest': { this.Task_pb_dp(misson); break A; }
                 }
             }
     }
@@ -388,7 +390,7 @@ export default class RoomMissonFrameExtension extends Room {
     /* 判断lab的boost搬运模块 */
     public Check_Lab(misson: MissionModel, role: string, tankType: 'storage' | 'terminal' | 'complex'): boolean {
         if (!misson.LabBind) return true
-        var id: string
+        let id: string
         if (tankType == 'storage') {
             if (!this.memory.StructureIdData.storageID) return false
             id = this.memory.StructureIdData.storageID
@@ -397,23 +399,23 @@ export default class RoomMissonFrameExtension extends Room {
             if (!this.memory.StructureIdData.terminalID) return false
             id = this.memory.StructureIdData.terminalID
         }
-        var tank_ = Game.getObjectById(id) as StructureStorage | StructureTerminal
+        let tank_ = Game.getObjectById(id) as StructureStorage | StructureTerminal
         if (!tank_ && id) return false
 
         /* 负责lab的填充 */
-        for (var i in misson.LabBind) {
-            var All_i_Num: number
+        for (let i in misson.LabBind) {
+            let All_i_Num: number
             if (tankType == 'complex') {
-                var terminal = Game.getObjectById(this.memory.StructureIdData.terminalID) as StructureTerminal
-                var storage = Game.getObjectById(this.memory.StructureIdData.storageID) as StructureStorage
+                let terminal = this.terminal
+                let storage = this.storage
                 if (!terminal || !storage) {
                     if (!terminal && storage) tank_ = storage
                     else if (terminal && !storage) tank_ = terminal
                     else return false
                 }
                 else {
-                    var terminalNum = terminal ? terminal.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant) : 0
-                    var storageNum = storage ? storage.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant) : 0
+                    let terminalNum = terminal ? terminal.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant) : 0
+                    let storageNum = storage ? storage.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant) : 0
                     tank_ = terminalNum > storageNum ? terminal : storage
                 }
             }
@@ -436,7 +438,7 @@ export default class RoomMissonFrameExtension extends Room {
                 }
                 return
             }
-            var disLab = Game.getObjectById(i) as StructureLab
+            let disLab = Game.getObjectById(i) as StructureLab
             if (!disLab) // 说明找不到lab了
             {
                 let index = this.memory.StructureIdData.labs.indexOf(i)
@@ -445,18 +447,18 @@ export default class RoomMissonFrameExtension extends Room {
             }
             // 去除无关资源
             if (disLab.mineralType && disLab.mineralType != misson.LabBind[i]) {
-                var roleData: BindData = {}
+                let roleData: BindData = {}
                 roleData[role] = { num: 1, bind: [] }
-                var carryTask = this.Public_Carry(roleData, 45, this.name, disLab.pos.x, disLab.pos.y, this.name, this.storage.pos.x, this.storage.pos.y, disLab.mineralType, disLab.store.getUsedCapacity(disLab.mineralType))
+                let carryTask = this.Public_Carry(roleData, 45, this.name, disLab.pos.x, disLab.pos.y, this.name, this.storage.pos.x, this.storage.pos.y, disLab.mineralType, disLab.store.getUsedCapacity(disLab.mineralType))
                 this.AddMission(carryTask)
                 return
             }
             if (disLab.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant) < 1000 && this.Check_Carry('transport', tank_.pos, disLab.pos, misson.LabBind[i] as ResourceConstant)) {
                 if (All_i_Num < 1500)
                     return false
-                var roleData: BindData = {}
+                let roleData: BindData = {}
                 roleData[role] = { num: 1, bind: [] }
-                var carryTask = this.Public_Carry(roleData, 45, this.name, tank_.pos.x, tank_.pos.y, this.name, disLab.pos.x, disLab.pos.y, misson.LabBind[i] as ResourceConstant, 1600)
+                let carryTask = this.Public_Carry(roleData, 45, this.name, tank_.pos.x, tank_.pos.y, this.name, disLab.pos.x, disLab.pos.y, misson.LabBind[i] as ResourceConstant, 1600)
                 this.AddMission(carryTask)
                 return false
             }

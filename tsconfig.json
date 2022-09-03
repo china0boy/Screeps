@@ -16,5 +16,5 @@
     ],
     "include": [
         "src/**/*.ts"
-, "src/mount/global/resourceAPI.js", "src/visual/talk.js"    ]
+, "src/mount/global/resourceAPI.js", "src/visual/talk.js", "src/module/layoutVisual/dynamic/RoomVisual.js"    ]
 }

@@ -1,0 +1,2 @@
+Game.rooms['W39S59'].memory.market.deal[0].price = 1000.001
+for (let i = 0; i <= 50; i++) Game.market.createOrder({ type: ORDER_BUY, resourceType: 'metal', price: 700, totalAmount: 1, roomName: "W38S51" });

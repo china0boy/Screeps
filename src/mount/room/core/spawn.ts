@@ -93,13 +93,11 @@ export default class RoomCoreSpawnExtension extends Room {
         if (!this.memory.StructureIdData.spawn || this.memory.StructureIdData.spawn.length <= 0) return
         //核弹要来了，不生了
         if (this.memory.nukeID && this.memory.nukeID.length) {
-            let nukeTime = 50000;
             for (let i of this.memory.nukeID) {
                 let nuke = Game.getObjectById(i) as Nuke;
                 if (!nuke) continue
-                if (nuke.timeToLand <= nukeTime) nukeTime = nuke.timeToLand;
+                if (nuke.timeToLand <= 200) return
             }
-            if (nukeTime <= 200) return
         }
 
         let allEnergy = this.energyAvailable;

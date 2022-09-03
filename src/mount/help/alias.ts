@@ -45,7 +45,7 @@ export default [
                                 describe: '使房间开始运行',
                                 params: [
                                     { name: 'roomName', desc: '要增加的我的房间' },
-                                    { name: 'plan', desc: '布局类型 man(手动布局) hoho(hoho大佬的布局) dev(dev的布局)' },
+                                    { name: 'plan', desc: '布局类型 man(手动布局) hoho(hoho大佬的布局) dev(dev的布局) auto63(63布局)' },
                                     { name: 'x', desc: '中心点x' },
                                     { name: 'y', desc: '中心点y' },
                                 ],
@@ -824,20 +824,38 @@ export default [
         alias: 'helpFlag',
         exec: function (): string {
             return [
-                `\n    ${colorful('superbitch bot', 'yellow', true)}`,
+                `\n    ${colorful('E19N2 bot', 'yellow', true)}`,
                 '这里列出一些可能用到的旗帜及其作用 统一规定xx为任何字符串 [xx]为房间名',
                 '旗帜名: [xx]/repair 房间内所有防御塔参与维修',
+                '旗帜名: [xx]/attack 房间内所有防御塔攻击距离旗子最近的目标',
                 '旗帜名: [xx]/stop 房间内所有防御塔停止攻击',
                 '旗帜名: dismantle_xx 大黄拆迁指定旗帜下建筑',
                 '旗帜名: squad_attack_xx 四人小队攻击指定旗帜下建筑',
                 '旗帜名: support_double_xx 紧急支援双人小队拆迁指定旗帜下建筑',
                 '旗帜名: reapair_xx special维修爬维修指定旗帜下墙体',
+                '旗帜名: [xx]/expand 援助爬跑去当前房间',
                 '旗帜名: withdraw_xx紧急援助爬从该旗帜下的建筑提取能量',
                 '旗帜名: [紧急援助爬所属房间]/HB/harvest 紧急援助爬从该旗帜下的房间的矿点采集能量',
+                '旗帜名: [援助爬所属房间]/build 援助爬维修旗帜下的rampart',
                 '旗帜名: LayoutVisual 插在任意房间可以显示dev自动布局',
                 '旗帜名: TowerVisualAttack 插在距离自己8级房最近房间或有视野房间 显示该房间防御塔伤害信息',
                 '旗帜名: TowerVisualHeal 插在距离自己8级房最近房间或有视野房间 显示该房间防御塔治疗信息',
                 '旗帜名: TowerVisualRepair 插在距离自己8级房最近房间或有视野房间 显示该房间防御塔维修信息',
+            ].join('\n')
+        }
+    },
+    {
+        alias: 'help63',
+        exec: function (): string {
+            return [
+                `\n    ${colorful('E19N2 bot', 'yellow', true)}`,
+                '63布局详解',
+                '1.能量源分别插上名字为pa pb的旗子',
+                '2.化合物矿上插pm 控制器插pc storagePos(可选项)',
+                '3.上述操作完成后在随机地方插名字为63的旗子，用来显示布局',
+                '4.插名字为p的旗子用来开始自动布局',
+                '5.插名字为savestructMap的旗子用来把布局保存到内存开始自动建造',
+                '6.不看布局拔除63旗子，不然很费cpu'
             ].join('\n')
         }
     },

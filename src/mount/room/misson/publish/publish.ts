@@ -64,15 +64,8 @@ export default class RoomMissonPublish extends Room {
             maxTime: 3
         }
         thisTask.CreepBind = { 'repair': { num: num, bind: [] } }
-        if (boostType == 'LH') {
-            thisTask.LabMessage = { 'LH': 'boost' }
-        }
-        else if (boostType == 'LH2O') {
-            thisTask.LabMessage = { 'LH2O': 'boost' }
-
-        }
-        else if (boostType == 'XLH2O') {
-            thisTask.LabMessage = { 'XLH2O': 'boost' }
+        if (boostType && isInArray(['LH', 'LH2O', 'XLH2O'], boostType)) {
+            thisTask.LabMessage = { [boostType]: 'boost' }
         }
         thisTask.maxTime = 3
         return thisTask
@@ -250,7 +243,7 @@ export default class RoomMissonPublish extends Room {
                 shard: shard,
                 num: num,
                 body: body,
-                interval:interval,
+                interval: interval,
             },
         }
         thisTask.reserve = true
@@ -554,7 +547,7 @@ export default class RoomMissonPublish extends Room {
     }
 
 
-    public public_pb_attack(myroomname: string, FlagName: string, healerCreepName: string, num: number, time: number): MissionModel {
+    public public_pb_attack(myroomname: string, FlagName: string, healerCreepName: string, num: number, time: number, boost: string): MissionModel {
         var thisTask: MissionModel = {
             name: 'pb',
             range: 'Creep',
@@ -564,10 +557,20 @@ export default class RoomMissonPublish extends Room {
                 myroomname: myroomname,
                 FlagName: FlagName,
                 healerCreepName: healerCreepName,
+                boost: boost,
             },
             maxTime: 3//同时存在任务数
         }
         thisTask.reserve = true
+        if (boost == 't1') {
+            thisTask.LabMessage = { 'UH': 'boost', 'LO': 'boost' }
+        }
+        else if (boost == 't2') {
+            thisTask.LabMessage = { 'UH2O': 'boost', 'LHO2': 'boost' }
+        }
+        else if (boost == 't3') {
+            thisTask.LabMessage = { 'XUH2O': 'boost', 'XLHO2': 'boost' }
+        }
         thisTask.CreepBind = { 'pb_attack': { num: num, bind: [], interval: time ? time : 1000 }, 'pb_heal': { num: num, bind: [], interval: time ? time : 1000 } }
         return thisTask
     }
@@ -591,7 +594,7 @@ export default class RoomMissonPublish extends Room {
         thisTask.CreepBind = { 'pb_transfer': { num: num, bind: [], interval: time ? time : 100000 }, }
         return thisTask
     }
-    public public_dp_harvest(myroomname: string, FlagName: string, transferCreepName: string, num: number, time: number, boost: ResourceConstant): MissionModel {
+    public public_dp_harvest(myroomname: string, FlagName: string, transferCreepName: string, num: number, time: number, boost: string): MissionModel {
         var thisTask: MissionModel = {
             name: 'dp_harvest',
             range: 'Creep',
@@ -606,9 +609,15 @@ export default class RoomMissonPublish extends Room {
             maxTime: 5//同时存在任务数
         }
         thisTask.reserve = true
-        thisTask.CreepBind = { 'dp_harvest': { num: num, bind: [], interval: time ? time : 1000 }, }
-        if (boost) {
-            thisTask.LabMessage = { boost: 'boost' }
+        thisTask.CreepBind = { 'dp_harvest': { num: num, bind: [], interval: time ? time : 1000, MSB: boost ? true : undefined }, }
+        if (boost == 't1') {
+            thisTask.LabMessage = { 'UO': 'boost' }
+        }
+        else if (boost == 't2') {
+            thisTask.LabMessage = { 'UHO2': 'boost' }
+        }
+        else if (boost == 't3') {
+            thisTask.LabMessage = { 'XUHO2': 'boost' }
         }
         return thisTask
     }

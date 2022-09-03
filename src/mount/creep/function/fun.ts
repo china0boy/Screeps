@@ -94,7 +94,7 @@ export default class CreepFunctionExtension extends Creep {
     public build_(distination: ConstructionSite): void {
         if (this.build(distination) == ERR_NOT_IN_RANGE) {
             this.goTo(distination.pos, 1)
-        //    this.memory.standed = false
+            //    this.memory.standed = false
         }
         //else
         //    this.memory.standed = true
@@ -185,10 +185,10 @@ export default class CreepFunctionExtension extends Creep {
         return true;
     }
 
-    // 召唤所有房间内的防御塔治疗/攻击 自己/爬虫 [不一定成功]
+    // 召唤房间内的所有防御塔治疗/攻击 自己/爬虫 [不一定成功]
     public optTower(otype: 'heal' | 'attack', creep: Creep): void {
-        if (this.room.name != this.memory.belong || Game.shard.name != this.memory.shard) return
-        for (var i of Game.rooms[this.memory.belong].memory.StructureIdData.AtowerID) {
+        if (!Memory.RoomControlData[this.pos.roomName]) return
+        for (var i of Game.rooms[this.pos.roomName].memory.StructureIdData.AtowerID) {
             let tower_ = Game.getObjectById(i) as StructureTower
             if (!tower_) continue
             if (otype == 'heal') {

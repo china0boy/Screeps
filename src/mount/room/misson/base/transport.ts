@@ -32,7 +32,7 @@ export default class RoomMissonTransportExtension extends Room {
         var storage_ = this.storage
         var terminal_ = this.terminal
         var structure = storage_ && terminal_ ? (storage_.store.energy >= terminal_.store.energy ? storage_ : terminal_) : storage_ ? (storage_.store.energy ? storage_ : null) : terminal_ ? (terminal_.store.energy ? terminal_ : null) : null
-        if (!structure) return
+        if (!structure || !this.memory.StructureIdData.AtowerID) return
         for (let id of this.memory.StructureIdData.AtowerID) {
             let tower = Game.getObjectById(id) as StructureTower
             if (!tower) {
@@ -52,7 +52,7 @@ export default class RoomMissonTransportExtension extends Room {
     // 实验室能量填充任务 [包含多余物回收]
     public Lab_Feed(): void {
         if ((global.Gtime[this.name] - Game.time) % 13) return
-        if (!this.memory.StructureIdData.storageID) return
+        if (!this.memory.StructureIdData.storageID || !this.memory.StructureIdData.labs) return
         if (!this.storage && !this.terminal) return
         let missionNum = this.RoleMissionNum('transport', '物流运输')
         if (missionNum > 3) return

@@ -258,7 +258,7 @@ export default {
                 }
                 if (bR) {
                     thisRoom.memory.market['order'].push({ rType: rType, num: num, unit: unit, price: price })
-                    return `[market] 房间${roomName}成功下达order的资源卖出指令,type:sell,rType:${rType},num:${num},unit:${unit}`
+                    return `[market] 房间${roomName}成功下达order的资源卖出指令,type:sell,rType:${rType},num:${num},price${price},unit:${unit}`
                 }
                 else return `[market] 房间${roomName}已经存在${rType}的sell订单了`
             }
@@ -275,6 +275,7 @@ export default {
                 }
                 else return `[market] 房间${roomName}已经存在${rType}的sell订单了`
             }
+            else return `参数错误，重新输入`
         },
         // 查询正在卖的资源
         query(roomName: string): string {
@@ -389,6 +390,57 @@ export default {
         },
     },
 
+    /* obs */
+    obs: {
+        on(): string {
+            for (let roomName in Memory.RoomControlData) {
+                let obs = Game.rooms[roomName].memory.observer
+                if (obs) delete obs.pause
+            }
+            return `已开启所有房间的挖过道obs`
+        },
+        off(): string {
+            for (let roomName in Memory.RoomControlData) {
+                let obs = Game.rooms[roomName].memory.observer
+                if (obs) obs.pause = true
+            }
+            return `已关闭所有房间的挖过道obs`
+        },
+        //dp pb          t0 t1 t2 t3
+        boost(role: string, resource: string): string {
+            if (!role || !resource) return `参数不全，重新输入`;
+            for (let roomName in Memory.RoomControlData) {
+                let obs = Game.rooms[roomName].memory.observer
+                if (obs) {
+                    if (resource == 't0') {
+                        delete obs.boost[role]
+                        return `所有房间${role} 关闭boost`;
+                    }
+                    else obs.boost[role] = resource;
+                }
+            }
+            return `所有房间${role} 开启boost: ${resource}`;
+        },
+        stats() {
+            for (let roomName in Memory.RoomControlData) {
+                let obsMemory = Game.rooms[roomName].memory.observer
+                if (obsMemory) {
+                    let obs = Game.getObjectById(Game.rooms[roomName].memory.StructureIdData.ObserverID) as StructureObserver
+                    console.log(obs.stats())
+                }
+            }
+        },
+        setmax(type: 'powerbank' | 'deposit', max: number) {
+            for (let roomName in Memory.RoomControlData) {
+                let obsMemory = Game.rooms[roomName].memory.observer
+                if (obsMemory) {
+                    let obs = Game.getObjectById(Game.rooms[roomName].memory.StructureIdData.ObserverID) as StructureObserver
+                    console.log(obs.setmax(type, max))
+                }
+            }
+        }
+
+    },
     /* pc */
     pc: {
         option(roomName: string, stru: string): string {

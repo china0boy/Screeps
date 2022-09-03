@@ -1,15 +1,28 @@
-import dev from './dev'
-import syc from './syc'
+import { isInArray } from '@/utils'
+import dev from './static/dev/dev'
+import hoho from './static/hoho/hoho'
+import tea from './static/tea/tea'
+import syc from './static/syc/syc'
 import RoomVisual from './RoomVisual'
 export const drawByConfig = function (str: string) {
 
     let data: any
     let xx: number
     let yy: number
-    if (str == 'dev') {
+    if (str == 'Dev') {
         xx = -25;
         yy = -25;
         data = dev;
+    }
+    if (str == 'Hoho') {
+        xx = -25;
+        yy = -25;
+        data = hoho;
+    }
+    if (str == 'Tea') {
+        xx = -25;
+        yy = -25;
+        data = tea;
     }
     if (str == 'syc') {
         xx = -25;
@@ -21,6 +34,7 @@ export const drawByConfig = function (str: string) {
         return;
     }
     let roomName = flag.pos.roomName;
+    let terrian = new Room.Terrain(roomName)
     let rv = new RoomVisual(roomName)
     //    let poss = data.buildings['extension']['pos'];
 
@@ -31,7 +45,8 @@ export const drawByConfig = function (str: string) {
             let x = pos.x + xx + flag.pos.x;
             let y = pos.y + yy + flag.pos.y;
             try {
-                rv.structure(x, y, type)
+                if (terrian.get(x, y) != TERRAIN_MASK_WALL)
+                    rv.structure(x, y, type)
             } catch (e) {
                 log('err:' + x + "," + y + ',' + type)
                 throw e;
@@ -39,6 +54,13 @@ export const drawByConfig = function (str: string) {
         }
 
     }
+    // 墙
+    let pos = flag.pos
+    for (let i = pos.x - 9; i < pos.x + 10; i++)
+        for (let j = pos.y - 9; j < pos.y + 10; j++) {
+            if (!isInArray([0, 1, 48, 49], i) && !isInArray([0, 1, 48, 49], j) && (Math.abs(i - pos.x) == 9 || Math.abs(j - pos.y) == 9) && terrian.get(i, j) != TERRAIN_MASK_WALL)
+                rv.structure(i, j, STRUCTURE_RAMPART)
+        }
     rv.connRoads();
 
 }

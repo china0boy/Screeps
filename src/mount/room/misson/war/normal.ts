@@ -33,7 +33,7 @@ export default class NormalWarExtension extends Room {
             body.push.apply(body, bodyFree({ 'move': 6 }))
         }
         if (mission.Data.level == 3) {
-            body = bodyFree({ 'tough': 1,'ranged_attack': 8, 'heal': 1, 'move': 10 })
+            body = bodyFree({ 'tough': 1, 'ranged_attack': 8, 'heal': 1, 'move': 10 })
         }
         if (mission.Data.level == 10) {
             body = bodyFree({ 'tough': 1, 'ranged_attack': 1, 'move': 1, 'heal': 1 })
@@ -85,6 +85,14 @@ export default class NormalWarExtension extends Room {
         global.MSB[mission.id] = { 'carryShard': body }
         // boost lab填充检查
         if (!this.Check_Lab(mission, 'transport', 'complex')) return
+    }
+
+    public Task_pb_dp(mission: MissionModel): void {
+        if (mission.Data.boost) {
+            global.MSB[mission.id] = { 'dp_harvest': bodyFree({ 'work': 10, 'carry': 30, 'move': 10 }) }
+            // boost lab填充检查
+            if (!this.Check_Lab(mission, 'transport', 'complex')) return
+        }
     }
 }
 

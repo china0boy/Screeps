@@ -51,7 +51,7 @@ export default class extends RoomVisual {
 					this.line(r[0], r[1], c[0], c[1], {
 						color: color,
 						width: 0.35,
-						opacity: opts.opacity || 1
+						opacity: opts.opacity || 0.35
 					})
 				}
 			}
@@ -62,7 +62,7 @@ export default class extends RoomVisual {
 	}
 	public structure(x: number, y: number, type: string, opts?: { opacity: number }) {
 		opts = Object.assign({
-			opacity: 0.2
+			opacity: 0.5
 		}, opts)
 		switch (type) {
 			case STRUCTURE_RAMPART:
@@ -92,7 +92,7 @@ export default class extends RoomVisual {
 				inner = relPoly(x, y, inner)
 				outer.push(outer[0])
 				inner.push(inner[0])
-				this.poly(outer as Array<[number, number] | RoomPosition>, {
+				this.poly(outer as any, {
 					fill: colors.dark,
 					stroke: colors.outline,
 					strokeWidth: 0.05,
@@ -157,7 +157,7 @@ export default class extends RoomVisual {
 					[-0.55, 0],
 					[-0.45, -0.55],
 				])
-				this.poly(outline1 as Array<[number, number] | RoomPosition>, {
+				this.poly(outline1 as any, {
 					stroke: colors.outline,
 					strokeWidth: 0.05,
 					fill: colors.dark,
@@ -209,13 +209,13 @@ export default class extends RoomVisual {
 					inner = relPoly(x, y, inner)
 					outer.push(outer[0])
 					inner.push(inner[0])
-					this.poly(outer as Array<[number, number] | RoomPosition>, {
+					this.poly(outer as any, {
 						fill: colors.dark,
 						stroke: colors.outline,
 						strokeWidth: 0.05,
 						opacity: opts.opacity
 					})
-					this.poly(inner as Array<[number, number] | RoomPosition>, {
+					this.poly(inner as any, {
 						fill: colors.light,
 						opacity: opts.opacity
 					})
@@ -252,7 +252,7 @@ export default class extends RoomVisual {
 						[0.45, 0.3],
 					]
 					box = relPoly(x, y, box)
-					this.poly(box as Array<[number, number] | RoomPosition>, {
+					this.poly(box as any, {
 						stroke: colors.outline,
 						strokeWidth: 0.05,
 						opacity: opts.opacity
@@ -297,7 +297,7 @@ export default class extends RoomVisual {
 					[0, -1],
 				];
 				outline = relPoly(x, y, outline);
-				this.poly(outline as Array<[number, number] | RoomPosition>, {
+				this.poly(outline as any, {
 					stroke: colors.outline,
 					strokeWidth: 0.05,
 					fill: colors.dark,
@@ -310,7 +310,7 @@ export default class extends RoomVisual {
 					[0, -.80],
 				];
 				inline = relPoly(x, y, inline);
-				this.poly(inline as Array<[number, number] | RoomPosition>, {
+				this.poly(inline as any, {
 					stroke: colors.outline,
 					strokeWidth: 0.01,
 					fill: colors.gray,

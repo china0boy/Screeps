@@ -24,6 +24,7 @@ export const MemoryInit = function():void {
     if (!global.warData) global.warData = {tower:{},enemy:{},flag:{},structure:{}}
     global.Adaption = {}
     if (!Memory.VisualLevel) Memory.VisualLevel = 'high'    // 默认最高等级的画质显示
+    
 }
 
 export const memoryInit: AppLifecycleCallbacks = {
