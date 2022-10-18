@@ -11,7 +11,7 @@ export default class RoomMissonTransportExtension extends Room {
                 var thisMisson: MissionModel = {
                     name: "虫卵填充",
                     range: "Creep",
-                    delayTick: 49,
+                    delayTick: 47,
                     cooldownTick: 4,
                     CreepBind: { 'transport': { num: 2, bind: [] } },
                     Data: {}
@@ -52,7 +52,7 @@ export default class RoomMissonTransportExtension extends Room {
     // 实验室能量填充任务 [包含多余物回收]
     public Lab_Feed(): void {
         if ((global.Gtime[this.name] - Game.time) % 13) return
-        if (!this.memory.StructureIdData.storageID || !this.memory.StructureIdData.labs) return
+        if (!this.storage || !this.memory.StructureIdData.labs) return
         if (!this.storage && !this.terminal) return
         let missionNum = this.RoleMissionNum('transport', '物流运输')
         if (missionNum > 3) return
@@ -101,5 +101,24 @@ export default class RoomMissonTransportExtension extends Room {
         }
     }
 
+    // 墓碑回收任务
+    public Tombstone_Feed(): void {
+        if (Game.shard.name == 'shard3') return
+        if (Game.time % 50 || this.memory.state != "peace") return
+        if (!this.storage && !this.terminal) return
+        if (this.RoleMissionNum('transport', '物流运输') >= 3) return
+        var storage_ = this.storage
+        var terminal_ = this.terminal
+        var structure = storage_ && terminal_ ? (storage_.store.getFreeCapacity() >= 10000 ? storage_ : terminal_) : storage_ ? storage_ : terminal_ ? terminal_ : null
+        if (!structure) return
+        let tombstone = this.find(FIND_TOMBSTONES, { filter: (a: Tombstone) => { return a.store && a.store.getUsedCapacity() > 100 } })
+        if (tombstone.length) {
+            // 每个墓碑都发布一个任务
+            for (let i = 0; i < tombstone.length; i++) {
+                let thisTask = this.Public_Carry({ 'transport': { num: 1, bind: [] } }, 45, this.name, tombstone[i].pos.x, tombstone[i].pos.y, this.name, structure.pos.x, structure.pos.y)
+                this.AddMission(thisTask)
+            }
+        }
+    }
 }
 

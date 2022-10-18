@@ -6,7 +6,7 @@ export default class CreepMissonMineExtension extends Creep {
     /* 外矿开采处理 */
     public handle_outmine(): void {
         var creepMisson = this.memory.MissionData.Data
-        if(!creepMisson.disRoom) {this.say('找不到房间');return;}
+        if (!creepMisson.disRoom) { this.say('找不到房间'); return; }
         var globalMisson = Game.rooms[this.memory.belong].GainMission(this.memory.MissionData.id)
         if (!globalMisson) {
             this.say("找不到全局任务了！");
@@ -29,18 +29,17 @@ export default class CreepMissonMineExtension extends Creep {
             if (this.memory.role == 'out-claim') {
                 if (this.room.name != creepMisson.disRoom && !this.memory.disPos) {
                     this.goTo(new RoomPosition(25, 25, creepMisson.disRoom), 20)
-                    if (this.room.name != this.memory.belong) {
-                        /* 如果是别人的房间就不考虑 */
-                        if (this.room.controller && this.room.controller.owner && this.room.controller.owner.username != this.owner.username)
-                            return
-                        if (Memory.outMineData && Memory.outMineData[this.room.name] && Game.time % 50 == 0) {
-                            for (var i of Memory.outMineData[this.room.name].road) {
-                                var thisPos = unzipPosition(i)
-                                if (thisPos.roomName == this.name && !thisPos.GetStructure('road')) {
-                                    thisPos.createConstructionSite('road')
-                                }
-                            }
-                        }
+                    return
+                }
+                if (this.ticksToLive == 1) {
+                    //检测周围5格是否有敌方建筑
+                    let attackStructure = this.pos.findInRange(FIND_HOSTILE_STRUCTURES, 5)
+                    //如果有敌方建筑就发布外矿防守任务
+                    if (attackStructure.length) {
+                        let thisRoom = Game.rooms[this.memory.belong]
+                        if (!thisRoom) { this.say(`被偷家了`); return }
+                        let thisTask = thisRoom.public_red_out(this.pos.roomName)
+                        if (thisTask) thisRoom.AddMission(thisTask)
                     }
                 }
                 if (!this.memory.disPos && this.room.name == creepMisson.disRoom) {
@@ -60,17 +59,12 @@ export default class CreepMissonMineExtension extends Creep {
                         this.goTo(controllerPos, 1)
                     }
                     else {
-                        /*let sin = '乃琳!我真的好喜欢你呀!为了你!我要开外矿赚大米!'
-                        if (!this.room.controller.sign || !this.room.controller.sign.username || this.room.controller.sign.username != this.owner.username || this.room.controller.sign.text != sin) {
-                            this.signController(this.room.controller, sin)
-                        }*/
-                        let control=this.room.controller
-                        if (this.reserveController(control) == -7) this.attackController(control)
+                        let control = this.room.controller
+                        if (this.reserveController(control) == -7 && !this.room.controller.my) this.attackController(control)
                         if (Game.time % 91 == 0) {
                             if (Memory.outMineData && Memory.outMineData[this.room.name]) {
                                 for (var i of Memory.outMineData[this.room.name].road) {
                                     var thisPos = unzipPosition(i) as RoomPosition
-
                                     if (thisPos.roomName == this.room.name && !thisPos.GetStructure('road')) {
                                         thisPos.createConstructionSite('road')
                                     }
@@ -244,6 +238,7 @@ export default class CreepMissonMineExtension extends Creep {
             else {
                 if (this.hits < this.hitsMax) this.heal(this)
                 if (this.room.name != creepMisson.disRoom) {
+                    this.memory.crossLevel = 11
                     this.goTo(new RoomPosition(25, 25, creepMisson.disRoom), 20)
                 }
                 else {

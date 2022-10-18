@@ -321,8 +321,19 @@ export default class CreepMissonActionExtension extends Creep {
                                 this.goTo(res.pos, 1);
                             return
                         }
-                        if (this.room.terminal && this.room.terminal.store.energy) { this.withdraw_(structure, 'energy'); return }
+                        if (this.room.terminal && this.room.terminal.store.energy) { this.withdraw_(this.room.terminal, 'energy'); return }
                     }
+                }
+
+                // 以withdraw开头的旗帜  例如： withdraw_0
+                let withdrawFlag = this.pos.findClosestByPath(FIND_FLAGS, {
+                    filter: (flag) => {
+                        return flag.name.indexOf('withdraw') == 0
+                    }
+                })
+                if (withdrawFlag) {
+                    let tank_ = withdrawFlag.pos.GetStructureList(['storage', 'terminal', 'container', 'tower'])
+                    if (tank_.length > 0) { this.withdraw_(tank_[0], 'energy'); return }
                 }
 
                 if (Game.time % 10 == 0 || this.pos.x == 0 || this.pos.x == 49 || this.pos.y == 0 || this.pos.y == 49) {
@@ -398,6 +409,17 @@ export default class CreepMissonActionExtension extends Creep {
                         }
                         if (this.room.terminal && this.room.terminal.store.energy) { this.withdraw_(structure, 'energy'); return }
                     }
+                }
+
+                // 以withdraw开头的旗帜  例如： withdraw_0
+                let withdrawFlag = this.pos.findClosestByPath(FIND_FLAGS, {
+                    filter: (flag) => {
+                        return flag.name.indexOf('withdraw') == 0
+                    }
+                })
+                if (withdrawFlag) {
+                    let tank_ = withdrawFlag.pos.GetStructureList(['storage', 'terminal', 'container', 'tower'])
+                    if (tank_.length > 0) { this.withdraw_(tank_[0], 'energy'); return }
                 }
 
                 if (Game.time % 10 == 0 || this.pos.x == 0 || this.pos.x == 49 || this.pos.y == 0 || this.pos.y == 49) {
@@ -477,6 +499,53 @@ export default class CreepMissonActionExtension extends Creep {
         this.memory.standed = mission.Data.standed
     }
 
+    //外矿红球防守
+    public handle_out_attack(): void {
+        let missionData = this.memory.MissionData
+        if (!missionData) return
+        let id = missionData.id
+        let data = missionData.Data
+        let disRoom = data.disRoom
+        if (!disRoom) {
+            //删除外矿红球防守任务
+            Game.rooms[this.memory.belong].DeleteMission(id);
+            return
+        }
+        //如果不在目标房间，先去目标房间
+        if (this.pos.roomName != disRoom) {
+            this.goTo(new RoomPosition(24, 24, disRoom), 23)
+            return
+        }
+        if (data.attack) {
+            let attack = Game.getObjectById(data.attack) as Creep
+            if (attack) {
+                this.attack(attack)
+                this.goTo(attack.pos, 1)
+            }
+            else delete data.attack
+            return
+        }
+        else {
+            let attack = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS)
+            if (attack) {
+                this.attack(attack)
+                this.goTo(attack.pos, 1)
+                data.attack = attack.id
+                return
+            }
+            let attackStructure = this.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES)
+            if (attackStructure) {
+                this.attack(attackStructure)
+                this.goTo(attackStructure.pos, 1)
+                data.attack = attackStructure.id
+                return
+            }
+            //删除红球外矿防守任务
+            Game.rooms[this.memory.belong].DeleteMission(id);
+            return
+        }
+    }
+
     //双人小队
     public handle_doubleDismantle(): void {
         let missionData = this.memory.MissionData
@@ -527,10 +596,12 @@ export default class CreepMissonActionExtension extends Creep {
                 if (!Attack) return
                 if (getDistance1(Attack.pos, this.pos) > 1) {
                     this.goTo(Attack.pos, 1)
+                    this.memory.standed = false
                 }
                 else {
                     this.attack(Attack);
                     this.move(this.pos.getDirectionTo(Attack))
+                    this.memory.standed = true
                 }
                 return
             }
@@ -550,12 +621,14 @@ export default class CreepMissonActionExtension extends Creep {
                     else {
                         if (getDistance1(this.pos, creep_.pos) <= 1)
                             this.handle_attack(attackcreep)
+                        this.memory.standed = true
                         return;
                     }
                 }
                 if (getDistance1(this.pos, creep_.pos) <= 1 || this.pos.roomName != creep_.pos.roomName)
                     this.goTo(Flag.pos, 1);
                 else { if (!this.fatigue && creep_.fatigue) this.goTo(creep_.pos, 1); }
+                this.memory.standed = false
                 return;
             }
             if (creep_) {
@@ -575,17 +648,19 @@ export default class CreepMissonActionExtension extends Creep {
                         if (!attacks.length) attacks = this.pos.findInRange(FIND_HOSTILE_STRUCTURES, 1, { filter: function (object) { return object.structureType != 'controller' && object.structureType != 'keeperLair' && !Memory.whitesheet.includes(object.owner.username) } })
                         if (attacks.length) this.attack(attacks[0])
                         this.goTo(creep[0].pos, 8, true)
+                        this.memory.standed = true
                     }
                     else {
-                        if (this.attack(attack_structure_flag[0]) == ERR_NOT_IN_RANGE && a && b) this.goTo(attack_structure_flag[0].pos, 1)
-                        else { if (!this.fatigue && creep_.fatigue) this.goTo(creep_.pos, 1); }
+                        if (this.attack(attack_structure_flag[0]) == ERR_NOT_IN_RANGE && a && b) { this.goTo(attack_structure_flag[0].pos, 1); this.memory.standed = false }
+                        else { if (!this.fatigue && creep_.fatigue) this.goTo(creep_.pos, 1); this.memory.standed = true }
                     }
                 }
                 else {
                     if (data.wall) {
                         let wall = Game.getObjectById(data.wall) as any
                         if (wall) {
-                            if (this.attack(wall) == ERR_NOT_IN_RANGE && a && b) this.goTo(wall.pos, 1)
+                            if (this.attack(wall) == ERR_NOT_IN_RANGE && a && b) { this.goTo(wall.pos, 1); this.memory.standed = false }
+                            else this.memory.standed = true
                         }
                         else delete data.wall
                         let creeps = this.pos.findInRange(FIND_HOSTILE_CREEPS, 5, { filter: function (creep) { return !Memory.whitesheet.includes(creep.owner.username) } });
@@ -600,6 +675,7 @@ export default class CreepMissonActionExtension extends Creep {
                             if (!attacks.length) attacks = this.pos.findInRange(FIND_HOSTILE_STRUCTURES, 1, { filter: function (object) { return object.structureType != 'controller' && object.structureType != 'keeperLair' && !Memory.whitesheet.includes(object.owner.username) } })
                             if (attacks.length) this.attack(attacks[0])
                             this.goTo(creeps[0].pos, 8, true)
+                            this.memory.standed = true
                         }
                         if (Game.time % 50 == 0) delete data.wall;
                     }
@@ -616,6 +692,7 @@ export default class CreepMissonActionExtension extends Creep {
                             if (!attacks.length) attacks = this.pos.findInRange(FIND_HOSTILE_STRUCTURES, 1, { filter: function (object) { return object.structureType != 'controller' && object.structureType != 'keeperLair' && !Memory.whitesheet.includes(object.owner.username) } })
                             if (attacks.length) this.attack(attacks[0])
                             this.goTo(creep[0].pos, 8, true)
+                            this.memory.standed = true
                             return;
                         }
                         let Attack_creep = this.pos.findClosestByRange(FIND_HOSTILE_CREEPS, { filter: function (creep) { return !Memory.whitesheet.includes(creep.owner.username) } });
@@ -623,16 +700,17 @@ export default class CreepMissonActionExtension extends Creep {
                             if (this.PathFinders(Attack_creep.pos, 1, true)) {
                                 if (a && b) {
                                     this.handle_attack(Attack_creep)
+                                    this.memory.standed = true
                                 }
-                                else { if (!this.fatigue && creep_.fatigue) this.goTo(creep_.pos, 1); }
+                                else { if (!this.fatigue && creep_.fatigue) { this.goTo(creep_.pos, 1); this.memory.standed = false } }
                             }
                             else data.wall = this.handle_wall_rampart(Attack_creep, 1);
                         }
                         else {
                             let Attack_structure = this.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, { filter: function (structure) { return structure.structureType != 'controller' && structure.structureType != 'keeperLair' && !Memory.whitesheet.includes(structure.owner.username) } });
                             if (Attack_structure) {
-                                if (this.attack(Attack_structure) == ERR_NOT_IN_RANGE && a && b) this.goTo(Attack_structure.pos, 1)
-                                else { if (!this.fatigue && creep_.fatigue) this.goTo(creep_.pos, 1); }
+                                if (this.attack(Attack_structure) == ERR_NOT_IN_RANGE && a && b) { this.goTo(Attack_structure.pos, 1); this.memory.standed = false }
+                                else { if (!this.fatigue && creep_.fatigue) this.goTo(creep_.pos, 1); this.memory.standed = true }
                             }
                             else {
                                 this.say('没有发现敌人');
@@ -662,24 +740,28 @@ export default class CreepMissonActionExtension extends Creep {
             let creep_ = Game.creeps[this.memory.double];//配对爬
             if (this.getActiveBodyparts('tough') <= 6 && data.runRoom) {//残血就跑
                 this.goTo(new RoomPosition(24, 24, data.runRoom), 22)
+                this.memory.standed = true
                 return
             }
             if (this.pos.roomName != Flag.pos.roomName) {
                 if (getDistance1(this.pos, creep_.pos) <= 1 || this.pos.roomName != creep_.pos.roomName)
                     this.goTo(Flag.pos, 1);
+                this.memory.standed = false
                 return;
             }
             let a = creep_ ? !(this.fatigue || creep_.fatigue) : true//爬的体力
             let b = creep_ ? !(this.pos.roomName == creep_.pos.roomName && getDistance1(this.pos, creep_.pos) > 1) : true//是否相邻
             let attack_structure_flag = Flag.pos.lookFor('structure')
             if (attack_structure_flag.length) {//优先强制打旗子下面的建筑
-                if (this.dismantle(attack_structure_flag[0]) == ERR_NOT_IN_RANGE && a && b) this.goTo(attack_structure_flag[0].pos, 1)
+                if (this.dismantle(attack_structure_flag[0]) == ERR_NOT_IN_RANGE && a && b) { this.goTo(attack_structure_flag[0].pos, 1); this.memory.standed = false }
+                else this.memory.standed = true
             }
             else {
                 if (data.wall) {
                     let wall = Game.getObjectById(data.wall) as any
                     if (wall) {
-                        if (this.dismantle(wall) == ERR_NOT_IN_RANGE && a && b) this.goTo(wall.pos, 1)
+                        if (this.dismantle(wall) == ERR_NOT_IN_RANGE && a && b) { this.goTo(wall.pos, 1); this.memory.standed = false }
+                        else this.memory.standed = true
                     }
                     else delete data.wall
                     if (Game.time % 20 == 0) delete data.wall;
@@ -690,7 +772,8 @@ export default class CreepMissonActionExtension extends Creep {
                     if (!dis) { this.goTo(Flag.pos, 0); this.say(`没有可以拆的建筑了`) }
                     if (dis) {
                         if (this.PathFinders(dis.pos, 1, true)) {
-                            if (this.dismantle(dis) == ERR_NOT_IN_RANGE && a && b) this.goTo(dis.pos, 1)
+                            if (this.dismantle(dis) == ERR_NOT_IN_RANGE && a && b) { this.goTo(dis.pos, 1); this.memory.standed = false }
+                            else this.memory.standed = true
                         }
                         else data.wall = this.handle_wall_rampart(dis, 1);
                     }
@@ -737,10 +820,12 @@ export default class CreepMissonActionExtension extends Creep {
                         this.goTo(attackCreeps.pos, 1);
                     }
                 }
+                this.memory.standed = false
             }
             else {//贴脸追的打
                 this.attack(attackCreeps);
                 this.move(this.pos.getDirectionTo(attackCreeps))
+                this.memory.standed = true;
             }
         }
         return false
@@ -887,7 +972,7 @@ export default class CreepMissonActionExtension extends Creep {
         let Flags = Game.flags[data.sourceFlagName];//要掠夺的旗子
         if (this.store.getUsedCapacity() == 0) data.storedeta = 0;//0为空，1为满
         if (this.store.getFreeCapacity() == 0) data.storedeta = 1;
-        if (data.creeptime == undefined) data.creeptime = 0;
+        if (data.creeptime == undefined || data.creeptime >= 1300) data.creeptime = 0;
         if (data.Gametime == undefined) data.Gametime = 0
         if (this.ticksToLive <= data.creeptime && !this.store.getUsedCapacity()) { this.suicide(); return; }
         if (Flags) {
@@ -929,7 +1014,7 @@ export default class CreepMissonActionExtension extends Creep {
                         }
                         if (targetStructure) {//有就存id，没有就找这个房间的容器
                             this.withdraw_(targetStructure, Object.keys(targetStructure.store)[0] as ResourceConstant)
-                            this.memory.MissionData.Data.sourceId = targetStructure.id
+                            data.sourceId = targetStructure.id
                         }
                         else {
                             this.say('没找到建筑啊');
@@ -1139,7 +1224,7 @@ export default class CreepMissonActionExtension extends Creep {
                 }
             }
             else {
-                this.handle_ranged_attack(creeps[0])
+                this.handle_ranged_attack(this.pos.findClosestByRange(FIND_HOSTILE_CREEPS, { filter: function (creep) { return !Memory.whitesheet.includes(creep.owner.username) } }))
                 this.handle_heal();
                 return true
             }
@@ -1523,7 +1608,7 @@ export default class CreepMissonActionExtension extends Creep {
                 })
                 if (!structure) { this.say(`无法找到资源充足的建筑`); }
                 if (this.withdraw_(structure, data.type) == OK) {
-                    let mission = Game.rooms[this.memory.belong].GainMission(id)
+                    let mission = Game.rooms[this.memory.belong]?.GainMission(id)
                     if (mission) {
                         mission.Data.num -= this.store.getCapacity();//更新房间任务数据
                         data.num = mission.Data.num

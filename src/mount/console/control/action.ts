@@ -66,7 +66,7 @@ export default {
             }
             return colorful(`[expand] 房间${roomName}挂载扩张援建计划失败 -(${shard})-> ${disRoom}`, 'red')
         },
-        remove(roomName: string, disRoom: string, shard: shardName): string {
+        remove(roomName: string, disRoom: string, shard: shardName = Game.shard.name as shardName): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[expand] 不存在房间${roomName}`
             for (var i of thisRoom.memory.Misson['Creep'])

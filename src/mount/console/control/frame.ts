@@ -1,6 +1,7 @@
 import { resourceComDispatch } from "@/constant/ResourceConstant"
 import { RecognizeLab } from "@/module/fun/funtion"
 import { Colorful, isInArray } from "@/utils"
+import { frame } from "@tensorflow/tfjs"
 import { object } from "lodash"
 
 export default {
@@ -54,7 +55,7 @@ export default {
     },
     frame:
     {
-        add(roomName: string, plan: 'man' | 'dev'| 'hoho' | 'auto63', x: number, y: number): string {
+        add(roomName: string, plan: 'man' | 'dev' | 'hoho' | 'auto63', x: number, y: number): string {
             let thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[frame] 不存在房间${roomName}`
             Memory.RoomControlData[roomName] = { arrange: plan, center: [x, y] }
@@ -66,16 +67,20 @@ export default {
         },
         del(roomName: string, x: number, y: number, mold: BuildableStructureConstant): string {
             var myRoom = Game.rooms[roomName]
-            if (!myRoom) return `[frame] 未找到房间${roomName},请确认房间!`
+            if (!myRoom) return `[frame] 不存在房间${roomName}`
             var thisPosition: RoomPosition = new RoomPosition(x, y, roomName)
-            if (thisPosition.GetStructure(mold)) { myRoom.unbindMemory(mold, x, y); return `[frame] 房间${roomName}已经执行delStructure命令!` }
+            if (thisPosition.GetStructure(mold)) {
+                myRoom.unbindMemory(mold, x, y);
+                return `[frame] 删除房间${roomName}的${mold}成功`
+            }
             else {
                 let cons = thisPosition.lookFor(LOOK_CONSTRUCTION_SITES)
                 if (cons.length > 0 && cons[0].structureType == mold) {
-                    myRoom.unbindMemory(mold, x, y); return `[frame] 房间${roomName}已经执行delStructure命令!`
+                    myRoom.unbindMemory(mold, x, y);
+                    return `[frame] 删除房间${roomName}的${mold}成功`
                 }
             }
-            return `[frame] 房间${roomName}未找到相应建筑!`
+            return `[frame] 房间${roomName}未找到${mold}，请确认!`
         },
         // 查询任务
         task(roomName: string): string {
@@ -172,7 +177,7 @@ export default {
         ResourceBuy(roomName: string, type: "deal" | "sell", rType: ResourceConstant, num: number, range: number, max: number = 35, time?: number): string {
             let thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[link] 不存在房间${roomName}`
-            let task = thisRoom.Public_Buy(type, rType, num, range, max,time)
+            let task = thisRoom.Public_Buy(type, rType, num, range, max, time)
             if (task && thisRoom.AddMission(task))
                 return Colorful(`[debug] 资源购买任务发布,房间${roomName},订单类型${type} ,资源类型${rType},数量${num},价格范围${range},最高价格${max}`, 'blue')
             return Colorful(`[debug] 房间${roomName}资源购买任务发布失败!`, 'yellow')

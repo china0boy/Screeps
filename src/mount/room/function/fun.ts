@@ -408,12 +408,13 @@ export default class RoomFunctionFindExtension extends Room {
                 if (this.controller.level >= 4) {
                     for (var i of this.memory.Misson['Creep'])
                         if (i.name == '急速冲级') {
-                            this.memory.SpawnConfig.upgrade.num=0
+                            this.memory.SpawnConfig.upgrade.num = 0
                             return
                         }
                     let storage = this.storage;
                     if (storage) {
-                        this.memory.SpawnConfig.upgrade.num = Math.floor(storage.store.energy / 200000) >= 3 ? 3 : Math.floor(storage.store.energy / 200000);
+                        let num = Math.floor(storage.store.energy / 200000)
+                        this.memory.SpawnConfig.upgrade.num = num >= 3 ? (this.controller.level <= 5 ? num : 3) : num;
                     }
                 }
             }

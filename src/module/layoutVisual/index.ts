@@ -5,7 +5,7 @@ let autoPlanner63 = require('autoPlanner63');
 import { drawByConfig } from './common'
 
 export function layoutVisual(): void {
-    for (let name of ['Dev','63','Hoho','Tea']) {
+    for (let name of ['Dev', '63', 'Hoho', 'Tea', 'syc']) {
         let flag = Game.flags[name];
         if (flag) {
             switch (name) {
@@ -16,6 +16,9 @@ export function layoutVisual(): void {
                     drawByConfig(flag.name);
                     break;
                 case 'Tea':
+                    drawByConfig(flag.name);
+                    break;
+                case 'syc':
                     drawByConfig(flag.name);
                     break;
                 case '63':
@@ -52,7 +55,7 @@ export function layoutVisual(): void {
                                             if (_add_lv_state) {
                                                 global.roomStructsData.structMaplv.push(`${e[0]}/${e[1]}/${type}/${level}`)
                                             }
-                                            new RoomVisual(flag.pos.roomName ).text(level.toString(), e[0] + 0.3, e[1] + 0.5, { font: 0.4, opacity: 0.8 })
+                                            new RoomVisual(flag.pos.roomName).text(level.toString(), e[0] + 0.3, e[1] + 0.5, { font: 0.4, opacity: 0.8 })
                                         }
                                     }
                                 } else {
@@ -63,7 +66,7 @@ export function layoutVisual(): void {
                                                 global.roomStructsData.structMaplv.push(`${e[0]}/${e[1]}/${type}/${level}`)
                                             }
                                             // {x: -4, y: -3,structureType:'extension',level:2}
-                                            new RoomVisual(flag.pos.roomName ).text(level.toString(), e[0] + 0.3, e[1] + 0.5, { font: 0.4, opacity: 0.8 })
+                                            new RoomVisual(flag.pos.roomName).text(level.toString(), e[0] + 0.3, e[1] + 0.5, { font: 0.4, opacity: 0.8 })
                                         }
                                     }
                                 }
@@ -88,7 +91,7 @@ export function layoutVisual(): void {
 
 }
 
-function showRoomStructures(roomName: string, structMap: StructMap ) {
+function showRoomStructures(roomName: string, structMap: StructMap) {
     let terrian = new Room.Terrain(roomName)
     let rv = new RoomVisual(roomName)
     _.keys(CONTROLLER_STRUCTURES).forEach(struct => {
@@ -100,7 +103,8 @@ function showRoomStructures(roomName: string, structMap: StructMap ) {
                 log('err:' + e[0] + "," + e[1] + ',' + struct)
                 throw e;
             }
-        })})
+        })
+    })
 }
 
 export function log(str: string, color: string = 'white') {

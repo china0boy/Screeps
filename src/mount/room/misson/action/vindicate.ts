@@ -56,6 +56,8 @@ export default class RoomMissonVindicateExtension extends Room {
         if (this.controller.level >= 8) { this.DeleteMission(mission.id); console.log(`房间${this.name}等级已到8级，删除任务!`); return }
         if (!this.memory.StructureIdData.terminalID) return
         if (!this.memory.StructureIdData.labs || this.memory.StructureIdData.labs.length <= 0) return
+        /* 把升级把数量设置为0 */
+        if (this.memory.SpawnConfig.upgrade.num) this.memory.SpawnConfig.upgrade.num = 0;
         if (mission.LabBind && !this.Check_Lab(mission, 'transport', 'complex')) return   // boost
     }
 
@@ -81,7 +83,7 @@ export default class RoomMissonVindicateExtension extends Room {
             let history = Game.market.getAllOrders({ type: ORDER_BUY, resourceType: 'energy' });
             let avePrice = 0;
             for (let i = 0; i < history.length; i++) {
-                if (history[i].price > avePrice && history[i].price <= 7 && history[i].roomName != this.name) { avePrice = history[i].price + 0.001; }//符合条件
+                if (history[i].price > avePrice && history[i].price <= 20 && history[i].roomName != this.name) { avePrice = history[i].price + 0.001; }//符合条件
             }
 
             //* 清理过期订单 */
@@ -164,9 +166,10 @@ export default class RoomMissonVindicateExtension extends Room {
         if (storage_.store.getUsedCapacity('energy') + terminal_.store.getUsedCapacity('energy') < 150000) return   // 仓库资源太少不执行
         // 不限定资源代表除了能量和ops之外所有资源都要转移
         if (!mission.Data.rType) {
-            for (var i in storage_.store) {
+            for (let i in storage_.store) {
                 if (isInArray(['energy', 'ops'], i)) continue
                 let missNum = (storage_.store[i] >= 50000) ? 50000 : storage_.store[i]
+                if (terminal_.store.getFreeCapacity() + terminal_.store.energy < 2 * missNum) continue
                 let sendTask = this.Public_Send(mission.Data.disRoom, i as ResourceConstant, missNum)
                 if (this.AddMission(sendTask))
                     return
@@ -185,6 +188,7 @@ export default class RoomMissonVindicateExtension extends Room {
                 return
             }
             let missNum = (num >= 50000) ? 50000 : num
+            if (terminal_.store.getFreeCapacity() + terminal_.store.energy < 2 * missNum) return
             if (missNum > storage_.store.getUsedCapacity(rType) + terminal_.store.getUsedCapacity(rType)) missNum = storage_.store.getUsedCapacity(rType) + terminal_.store.getUsedCapacity(rType)
             let sendTask = this.Public_Send(mission.Data.disRoom, rType, missNum)
             if (sendTask && this.AddMission(sendTask)) {

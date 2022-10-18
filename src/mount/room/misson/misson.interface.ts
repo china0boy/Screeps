@@ -13,17 +13,18 @@ interface Room {
     MissionName(range: string, name: string): MissionModel | null
 
     // 主动任务
-    Spawn_Feed(): void
-    Constru_Build(): void
-    Tower_Feed(): void
-    Un_boost(): void
-    Lab_Feed(): void
-    Task_CenterLink(): void
-    Task_Clink(): void
-    Task_ComsumeLink(): void
-    Nuke_Defend(): void
-    Task_CompoundDispatch(): void
-    Task_Auto_Defend(): void
+    Spawn_Feed(): void              // 虫卵填充任务
+    Tombstone_Feed(): void          // 墓碑回收
+    Constru_Build(): void           // 建筑建造任务
+    Tower_Feed(): void              // 防御塔填充任务
+    Un_boost(): void                // unBoost的化合物回收
+    Lab_Feed(): void                // 实验室能量填充任务 [包含多余物回收]
+    Task_CenterLink(): void         // 资源link资源转移至centerlink中
+    Task_Clink(): void              // 链接送仓   即中央链接能量转移至仓库
+    Task_ComsumeLink(): void        // 消费link请求资源 例如升级Link
+    Nuke_Defend(): void             // 核弹防御任务
+    Task_CompoundDispatch(): void   // 合成规划
+    Task_Auto_Defend(): void        // 主动防御任务发布
 
     // 被动任务
     Task_Carry(misson: MissionModel): void
@@ -46,7 +47,7 @@ interface Room {
     Task_carry_shard(mission: MissionModel): void
     Task_Normal_upgrade(mission: MissionModel): void
     Task_Expand(mission: MissionModel): void
-    Task_pb_dp(mission: MissionModel):void
+    Task_pb_dp(mission: MissionModel): void
 }
 
 interface RoomMemory {

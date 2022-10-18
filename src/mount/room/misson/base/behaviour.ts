@@ -55,7 +55,7 @@ export default class RoomMissonBehaviourExtension extends Room {
         if (!this.memory.StructureIdData.center_link || this.MissionNum('Structure', '链传送能') > 0) return
         let center_link = Game.getObjectById(this.memory.StructureIdData.center_link) as StructureLink
         if (!center_link) { delete this.memory.StructureIdData.center_link; return }
-        if (this.memory.StructureIdData.upgrade_link) {
+        if (this.memory.StructureIdData.upgrade_link || this.memory.StructureIdData.comsume_link) {
             let upgrade_link = Game.getObjectById(this.memory.StructureIdData.upgrade_link) as StructureLink
             if (!upgrade_link) { delete this.memory.StructureIdData.upgrade_link; return }
             if (upgrade_link.store.getUsedCapacity('energy') < 500) {
@@ -63,7 +63,7 @@ export default class RoomMissonBehaviourExtension extends Room {
                 this.AddMission(thisTask)
                 return
             }
-            if (this.memory.StructureIdData.comsume_link.length > 0) {
+            if (this.memory.StructureIdData.comsume_link && this.memory.StructureIdData.comsume_link.length > 0) {
                 for (var i of this.memory.StructureIdData.comsume_link) {
                     let l = Game.getObjectById(i) as StructureLink
                     if (!l) {
@@ -97,6 +97,7 @@ export default class RoomMissonBehaviourExtension extends Room {
             this.DeleteMission(misson.id)
             return
         }
+        //清空源lab杂质
         if (raw1.mineralType && raw1.mineralType != misson.Data.raw1 && this.Check_Carry('transport', raw1.pos, storage_.pos, raw1.mineralType)) {
             var thisTask = this.Public_Carry({ 'transport': { num: 1, bind: [] } }, 30, this.name, raw1.pos.x, raw1.pos.y, this.name, storage_.pos.x, storage_.pos.y, raw1.mineralType, raw1.store.getUsedCapacity(raw1.mineralType))
             this.AddMission(thisTask)
@@ -110,7 +111,7 @@ export default class RoomMissonBehaviourExtension extends Room {
         let re = false
         let comData = []
         for (let bindLab in misson.LabBind) {
-            if (!isInArray([misson.Data.raw1, misson.Data.raw2], misson.LabBind[bindLab])) comData.push(bindLab)
+            if (!isInArray([misson.Data.raw1, misson.Data.raw2], misson.LabBind[bindLab]) && this.memory.RoomLabBind[bindLab] && this.memory.RoomLabBind[bindLab].type == 'com') comData.push(bindLab)
         }
         for (let i of comData) {
             var thisLab = Game.getObjectById(i) as StructureLab
@@ -164,38 +165,37 @@ export default class RoomMissonBehaviourExtension extends Room {
             // 原矿 资源调用
             if (storage_.store.getUsedCapacity(resource_) + terminal_.store.getUsedCapacity(resource_) < 10000 && isInArray(['H', 'O', 'K', 'L', 'X', 'U', 'Z'], resource_)) {
                 let num = StatisticalResources(resource_)
-                if (num >= 10000) {
+                if (num >= 10000 || num >= misson.Data.num) {
                     if (checkDispatch(this.name, resource_)) continue  // 已经存在调用信息的情况
                     if (checkSend(this.name, resource_)) continue  // 已经存在其它房间的传送信息的情况
                     console.log(colorful(`[资源调度]<lab com> 房间${this.name}没有足够的资源[${resource_}],将执行资源调度!`, 'yellow'))
                     let dispatchTask: RDData = {
                         sourceRoom: this.name,
                         rType: resource_,
-                        num: 9800,
+                        num: num >= 9800 ? 9800 : misson.Data.num,
                         delayTick: 200,
                         conditionTick: 35,
                         buy: false,
                         mtype: 'deal'
                     }
                     Memory.ResourceDispatchData.push(dispatchTask)
-                    return
+
                 } else {
                     let FactoryId = this.memory.StructureIdData.FactoryId as Id<StructureFactory>
-                    if (!FactoryId) return
+                    if (!FactoryId) continue
                     let numBar = 0
-                    let typeBar
                     for (let j in COMMODITIES[resource_].components) {
                         if (j != 'energy') {
                             numBar = StatisticalResources(j as ResourceConstant)
-                            typeBar = j
                         }
                     }
                     if (misson.Data.num >= 0) {
                         let addNum = misson.Data.num / 10
                         if (addNum / 5 <= numBar) {
+                            let num = Math.ceil(addNum)
                             let Factory = Game.getObjectById(FactoryId)
-                            if (Factory && typeBar && !this.memory.Factory.factoryData[typeBar]) {
-                                Factory.addData(resource_ as CommodityConstant, addNum)
+                            if (Factory && !this.memory.Factory.dataProduce[resource_]) {
+                                Factory.addData(resource_ as CommodityConstant, Math.ceil(500 - num % 500 + num))
                                 console.log(colorful(`房间${this.name}没有足够的资源[${resource_}],将合成[${resource_}],数量[${addNum}]!`, 'yellow'))
                             }
                         }
@@ -206,14 +206,14 @@ export default class RoomMissonBehaviourExtension extends Room {
             // 其他中间物 资源调用
             else if (storage_.store.getUsedCapacity(resource_) + terminal_.store.getUsedCapacity(resource_) < 500 && !isInArray(['H', 'O', 'K', 'L', 'X', 'U', 'Z'], resource_)) {
                 let num = StatisticalResources(resource_)
-                if (num >= 5000) {
+                if (num >= 5000 || num >= misson.Data.num) {
                     if (checkDispatch(this.name, resource_)) continue  // 已经存在调用信息的情况
                     if (checkSend(this.name, resource_)) continue  // 已经存在其它房间的传送信息的情况
                     console.log(colorful(`[资源调度]<lab com> 房间${this.name}没有足够的资源[${resource_}],将执行资源调度!`, 'yellow'))
                     let dispatchTask: RDData = {
                         sourceRoom: this.name,
                         rType: resource_,
-                        num: 4900,
+                        num: num >= 4900 ? 4900 : misson.Data.num,
                         delayTick: 100,
                         conditionTick: 25,
                         buy: false,

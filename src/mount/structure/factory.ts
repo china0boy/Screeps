@@ -72,7 +72,7 @@ export class factoryExtension extends StructureFactory {
                                     let dispatchTask: RDData = {
                                         sourceRoom: this.room.name,   // 请求调度资源的房间
                                         rType: i as ResourceConstant,  // 资源类型
-                                        num: num,      // 数量
+                                        num: Math.floor(num),      // 数量
                                         delayTick: 500,        // 超时时间 默认 500 tick
                                         buy: false,        // 超时过后是否会寻求购买
                                     }
@@ -410,7 +410,7 @@ export class factoryExtension extends StructureFactory {
      */
     public add_Bar(types: CommodityConstant | MineralConstant | "energy" | "G", num: number): string {
         if (this.room.memory.Factory.automation_Bar === undefined) this.room.memory.Factory.automation_Bar = {}
-        let type = ['U', 'L', 'K', 'Z', 'X', 'O', 'H', 'battery', 'silicon', 'biomass', 'mist', 'metal'];
+        let type = ['U', 'L', 'K', 'Z', 'X', 'O', 'H', 'G', 'battery', 'silicon', 'biomass', 'mist', 'metal'];
         if (type.indexOf(types) != -1) {
             this.room.memory.Factory.automation_Bar[types] = { num: num }
             return `添加 ${types} 数量高于 ${num} 将自动发布合成压缩包任务`
@@ -451,10 +451,15 @@ export class factoryExtension extends StructureFactory {
      * 自动检测合成压缩包
      */
     public automation_Bar(): void {
-        if (Game.time % 1000) return
+        if (Game.shard.name == 'shard3') {
+            if (Game.time % 1000) return
+        }
+        else {
+            if (Game.time % 100) return
+        }
         let storage_ = this.room.storage
         if (!storage_) return
-        let type = ['U', 'L', 'K', 'Z', 'X', 'O', 'H'];
+        let type = ['U', 'L', 'K', 'Z', 'X', 'O', 'H', 'G'];
         let type1 = { 'metal': 'alloy', 'mist': 'condensate', 'biomass': 'cell', 'silicon': 'wire' };
         let Factory = this.room.memory.Factory
         if (Factory.automation_Bar === undefined) Factory.automation_Bar = {}

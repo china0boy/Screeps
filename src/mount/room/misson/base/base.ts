@@ -20,17 +20,18 @@ export default class RoomMissonFrameExtension extends Room {
         this.PowerCreep_TaskManager()
 
         /* [全自动] 任务挂载区域 需要按照任务重要程度进行排序 */
-        this.Spawn_Feed()    // 虫卵填充任务 
-        this.Task_CenterLink()  // 能量采集  
-        this.Task_ComsumeLink() // 消费、冲级link
-        this.Constru_Build()   // 建造任务
-        this.Task_Clink()       // 链接送仓任务
-        this.Tower_Feed()   // 防御塔填充任务 
-        this.Lab_Feed()     // 实验室填充\回收任务       
-        this.Nuke_Defend()  // 核弹防御
+        this.Spawn_Feed()               // 虫卵填充任务
+        this.Task_CenterLink()          // 资源link资源转移至centerlink中
+        this.Task_ComsumeLink()         // 消费、冲级link
+        this.Constru_Build()            // 建造任务
+        this.Task_Clink()               // 链接送仓任务
+        this.Tower_Feed()               // 防御塔填充任务 
+        this.Lab_Feed()                 // 实验室填充\回收任务
+        this.Nuke_Defend()              // 核弹防御
         this.Task_CompoundDispatch()    // 合成规划 （中级）
-        this.Task_Auto_Defend()     // 主动防御任务发布
-        this.Un_boost()     // unBoost回收
+        this.Task_Auto_Defend()         // 主动防御任务发布
+        this.Un_boost()                 // unBoost回收
+        this.Tombstone_Feed()           // 墓碑回收任务
 
         /* 基本任务监控区域 */
         for (var index in this.memory.Misson)
@@ -63,9 +64,7 @@ export default class RoomMissonFrameExtension extends Room {
             }
     }
 
-    /** 
-     * 添加任务
-    */
+    /* 添加任务 */
     public AddMission(mis: MissionModel): boolean {
         if (!mis) return false
         var Index: string
@@ -129,9 +128,7 @@ export default class RoomMissonFrameExtension extends Room {
         return true
     }
 
-    /** 
-     * 删除任务
-    */
+    /* 删除任务 */
     public DeleteMission(id: string): boolean {
         var range: string
         if (!id) { console.log("存在id异常! 发生在房间", this.name); return false }
@@ -453,7 +450,7 @@ export default class RoomMissonFrameExtension extends Room {
                 this.AddMission(carryTask)
                 return
             }
-            if (disLab.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant) < 1000 && this.Check_Carry('transport', tank_.pos, disLab.pos, misson.LabBind[i] as ResourceConstant)) {
+            if (disLab.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant) <= 1400 && this.Check_Carry('transport', tank_.pos, disLab.pos, misson.LabBind[i] as ResourceConstant)) {
                 if (All_i_Num < 1500)
                     return false
                 let roleData: BindData = {}

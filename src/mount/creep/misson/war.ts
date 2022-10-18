@@ -74,7 +74,7 @@ export default class CreepMissonWarExtension extends Creep {
             if (!this.pos.isNearTo(control)) this.goTo(control.pos, 1)
             else {
                 if (!control.my) {//不是我的控制器
-                    if (control.owner && control.owner.username) {//有占有者就攻击
+                    if (control.owner && control.owner.username && control.owner.username != 'Invader') {//有占有者就攻击
                         if (control.upgradeBlocked > 1) return//有冷却等待
                         if (this.ticksToLive <= 3 || Game.time % 10 == 0) {//一起攻击
                             let creeps = this.pos.findInRange(FIND_MY_CREEPS, 2, { filter: function (object) { return object.getActiveBodyparts('claim'); } })

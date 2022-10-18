@@ -93,22 +93,21 @@ export function ResourceDispatch(thisRoom: Room): void {
             if (storage_.store.getUsedCapacity(i.rType))
                 var limitNum = global.ResourceLimit[thisRoom.name][i.rType] ? global.ResourceLimit[thisRoom.name][i.rType] : 0
             if (storage_.store.getUsedCapacity(i.rType) <= 0) continue  // 没有就删除
-            // storage里资源大于等于调度所需资源
-            if ((storage_.store.getUsedCapacity(i.rType) - limitNum) >= i.num) {
-                var SendNum = i.num > 50000 ? 50000 : i.num
-                let task = thisRoom.Public_Send(i.sourceRoom, i.rType, SendNum)
+            
+            let num = storage_.store.getUsedCapacity(i.rType) - limitNum
+            let SendNum = 0
+            let task = null
+            if (num >= 0) {
+                if (num >= i.num) {// storage里资源大于等于调度所需资源
+                    SendNum = i.num > 50000 ? 50000 : i.num
+                    task = thisRoom.Public_Send(i.sourceRoom, i.rType, SendNum)
+                }
+                else {// sotrage里资源小于调度所需资源
+                    SendNum = storage_.store.getUsedCapacity(i.rType) - limitNum
+                    task = thisRoom.Public_Send(i.sourceRoom, i.rType, SendNum)
+                }
                 if (task && thisRoom.AddMission(task)) {
                     if (i.num <= 50000) i.dealRoom = thisRoom.name // 如果调度数量大于50k 则只减少num数量
-                    console.log(Colorful(`房间${thisRoom.name}接取房间${i.sourceRoom}的资源调度申请,资源:${i.rType},数量:${SendNum}`, 'green'))
-                    i.num -= SendNum
-                    return
-                }
-            }
-            // sotrage里资源小于调度所需资源
-            if ((storage_.store.getUsedCapacity(i.rType) - limitNum) > 0 && storage_.store.getUsedCapacity(i.rType) - limitNum < i.num) {
-                let SendNum = storage_.store.getUsedCapacity(i.rType) - limitNum
-                let task = thisRoom.Public_Send(i.sourceRoom, i.rType, SendNum)
-                if (task && thisRoom.AddMission(task)) {
                     console.log(Colorful(`房间${thisRoom.name}接取房间${i.sourceRoom}的资源调度申请,资源:${i.rType},数量:${SendNum}`, 'green'))
                     i.num -= SendNum
                     return

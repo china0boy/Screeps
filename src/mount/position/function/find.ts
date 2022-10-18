@@ -199,7 +199,26 @@ export default class PositionFunctionFindExtension extends RoomPosition {
         }
         return null
     }
-
+    /**
+     * 获取该位置上有store的tombstone
+     */
+    public GetTombstone(): Tombstone {
+        var lis = this.lookFor(LOOK_TOMBSTONES)
+        if (lis.length <= 0) return null
+        for (var i of lis) {
+            if (i.store && Object.keys(i.store).length > 0)
+                return i
+        }
+        return null
+    }
+    /**
+     * 获取该位置上的resource
+     */
+    public GetResource(): Resource {
+        var lis = this.lookFor(LOOK_RESOURCES)
+        if (lis.length <= 0) return null
+        return lis[0]
+    }
     /* 寻找两个点之间的路线 */
     public FindPath(target: RoomPosition, range: number): RoomPosition[] {
         /* 全局路线存储 */

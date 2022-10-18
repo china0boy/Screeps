@@ -54,6 +54,7 @@ export const RoleData: SpawnConstantData = {
     'out-mineral': { num: 0, ability: [16, 16, 16, 0, 0, 0, 0, 0], level: 12, mark: "挖" },
     'out-car': { num: 0, ability: [1, 5, 6, 0, 0, 0, 0, 0], level: 12, mark: "外运" },
     'out-defend': { num: 0, ability: [0, 0, 10, 0, 10, 10, 0, 0], level: 10, mark: "外防" },
+    'out-attack': { num: 0, ability: [0, 0, 10, 10, 0, 10, 0, 0], level: 10, mark: "外攻" },
     /* 主动防御 */
     'defend-attack': { num: 0, ability: [0, 0, 10, 40, 0, 0, 0, 0], level: 8, mark: "🔴", must: true },
     'defend-range': { num: 0, ability: [0, 0, 10, 0, 40, 0, 0, 0], level: 8, mark: "🔵", must: true },
@@ -122,7 +123,7 @@ export const RoleLevelData = {
         1: { bodypart: [0, 1, 1, 0, 0, 0, 0, 0], num: 0 },
         2: { bodypart: [0, 1, 1, 0, 0, 0, 0, 0], num: 0 },
         3: { bodypart: [0, 2, 2, 0, 0, 0, 0, 0], num: 0 },
-        4: { bodypart: [0, 2, 2, 0, 0, 0, 0, 0], num: 1 },
+        4: { bodypart: [0, 2, 2, 0, 0, 0, 0, 0], num: 0 },
         5: { bodypart: [0, 10, 5, 0, 0, 0, 0, 0], num: 1 },
         6: { bodypart: [0, 16, 4, 0, 0, 0, 0, 0], num: 1 },
         7: { bodypart: [0, 20, 10, 0, 0, 0, 0, 0], num: 1 },
@@ -228,5 +229,15 @@ export const RoleLevelData = {
         6: { bodypart: [0, 0, 8, 0, 4, 4, 0, 0], num: 0 },
         7: { bodypart: [0, 0, 16, 0, 8, 8, 0, 0], num: 0 },
         8: { bodypart: [0, 0, 16, 0, 20, 12, 0, 0], num: 0 },
+    },
+    "out-attack": {
+        1: { bodypart: [0, 0, 1, 1, 0, 0, 0, 0], num: 0 },
+        2: { bodypart: [0, 0, 1, 1, 0, 0, 0, 0], num: 0 },
+        3: { bodypart: [0, 0, 1, 1, 0, 0, 0, 0], num: 0 },
+        4: { bodypart: [0, 0, 3, 3, 0, 0, 0, 0], num: 0 },
+        5: { bodypart: [0, 0, 6, 6, 0, 0, 0, 0], num: 0 },
+        6: { bodypart: [0, 0, 8, 8, 0, 0, 0, 0], num: 0 },
+        7: { bodypart: [0, 0, 10, 10, 0, 0, 0, 0], num: 0 },
+        8: { bodypart: [0, 0, 10, 10, 0, 0, 0, 0], num: 0 },
     },
 }

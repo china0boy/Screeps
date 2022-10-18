@@ -22,6 +22,7 @@ interface Creep {
     handle_dp(): void
     handle_pb(): void
     handle_outmine(): void
+    handle_out_attack(): void 
     handle_defend_attack(): void
     handle_defend_range(): void
     handle_defend_double(): void

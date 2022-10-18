@@ -90,7 +90,7 @@ export default class CreepMissonTransportExtension extends Creep {
     public handle_carry(): void {
         let Data = this.memory.MissionData.Data
         /* 数据不全拒绝执行任务 */
-        if (!Data || Object.keys(Data).length < 7) {
+        if (!Data || Object.keys(Data).length < 6) {
             Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id)
             return
         }
@@ -330,32 +330,43 @@ export default class CreepMissonTransportExtension extends Creep {
                     else {
                         let targets = disPos.GetStructureList(['terminal', 'storage', 'tower', 'powerSpawn', 'container', 'factory', 'nuker', 'lab', 'link'])
                         let ruin = disPos.GetRuin()
-                        if (targets.length > 0 || ruin) {
+                        let tombstone = disPos.GetTombstone()
+                        let resource = disPos.GetResource()
+                        if (targets.length > 0 || ruin || tombstone || resource) {
                             let target = targets[0] as StructureStorage
                             let targetR = ruin as Ruin
                             if (target) {
-                                if (!target.store || target.store.getUsedCapacity() == 0) {
-                                    /* 如果发现没资源了，就取消搬运任务 */
-                                    Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id)
-                                    return
-                                }
+                                // if (!target.store || target.store.getUsedCapacity() == 0) {
+                                //     /* 如果发现没资源了，就取消搬运任务 */
+                                //     Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id)
+                                //     return
+                                // }
                                 for (let t in target.store) {
                                     this.withdraw(target, t as ResourceConstant)
                                 }
                                 return
                             }
                             if (targetR) {
-                                if (!targetR.store || targetR.store.getUsedCapacity() == 0) {
-                                    /* 如果发现没资源了，就取消搬运任务 */
-                                    Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id)
-                                    return
-                                }
                                 for (let t in targetR.store) {
                                     this.withdraw(targetR, t as ResourceConstant)
                                 }
                                 return
                             }
-
+                            if (tombstone) {
+                                for (let t in tombstone.store) {
+                                    this.withdraw(tombstone, t as ResourceConstant)
+                                }
+                                return
+                            }
+                            if (resource) {
+                                this.pickup(resource)
+                                return
+                            }
+                        }
+                        else {
+                            /* 如果发现没资源了，就取消搬运任务 */
+                            Game.rooms[this.memory.belong].DeleteMission(this.memory.MissionData.id)
+                            return
                         }
                     }
                 }

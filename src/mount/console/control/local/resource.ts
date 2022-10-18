@@ -20,9 +20,8 @@ export const getCatteryResource = (cattery: Room): CatteryResource => {
 };
 
 export const uniqueColor = (str: string, resType: ResourceConstant): string => {
-  return `<span class='resource-name' style='position: relative; color: ${
-    resourceColorMap[resType] || 'inherited'
-  }'>${str}</span>`;
+  return `<span class='resource-name' style='position: relative; color: ${resourceColorMap[resType] || 'inherited'
+    }'>${str}</span>`;
 };
 
 
@@ -41,8 +40,9 @@ export const allResource = (): void => {
     if (allResource[resType]) {
       str += `<div class='resource-room' style='position: absolute; display: none; top: 100%; right: 0; padding: 5px; background: #333; color: #ccc; border: 1px solid #ccc; border-radius: 5px; z-index: 10;'>`;
       for (const key in catteriesResource) {
-        if (catteriesResource[key][resType])
+        if (catteriesResource[key][resType]) {
           str += `${_.padRight(key, 6)}: ${_.padLeft((catteriesResource[key][resType] || 0).toLocaleString(), 9)}<br/>`;
+        }
       }
       str += '</div>';
     }
@@ -82,7 +82,7 @@ export const allResource = (): void => {
   console.log(`cpu: ${Game.cpu.getUsed() - time}`);
 };
 
-export const roomResource = (roomName:string): void => {
+export const roomResource = (roomName: string): void => {
   const time = Game.cpu.getUsed();
   const myCatteries: Room[] = [Game.rooms[roomName]];
   const catteriesResource: { [key in string]: CatteryResource } = {};
@@ -97,8 +97,9 @@ export const roomResource = (roomName:string): void => {
     if (allResource[resType]) {
       str += `<div class='resource-room' style='position: absolute; display: none; top: 100%; right: 0; padding: 5px; background: #333; color: #ccc; border: 1px solid #ccc; border-radius: 5px; z-index: 10;'>`;
       for (const key in catteriesResource) {
-        if (catteriesResource[key][resType])
+        if (catteriesResource[key][resType]) {
           str += `${_.padRight(key, 6)}: ${_.padLeft((catteriesResource[key][resType] || 0).toLocaleString(), 9)}<br/>`;
+        }
       }
       str += '</div>';
     }

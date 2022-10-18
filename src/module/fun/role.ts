@@ -366,7 +366,7 @@ export function harvest_Mineral(creep: Creep): void {
     var structues = thisRoom.storage ? thisRoom.storage : thisRoom.terminal ? thisRoom.terminal : null
     var mineral = Game.getObjectById(thisRoom.memory.StructureIdData.mineralID) as Mineral;
     if (!thisRoom || !structues) return;
-    if (creep.ticksToLive <= 100) {
+    if (creep.ticksToLive <= 100 || mineral.mineralAmount == 0) {
         if (creep.store.getUsedCapacity()) creep.transfer_(structues, Object.keys(creep.store)[0] as ResourceConstant);
         else creep.suicide();
         return;

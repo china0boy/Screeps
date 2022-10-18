@@ -26,6 +26,7 @@ interface Room {
     Task_Blue_Defend(mission: MissionModel): void
     Task_Double_Defend(mission: MissionModel): void
     public_OutMine(sourceRoom: string, x: number, y: number, disRoom: string): MissionModel
+    public_red_out(disRoom: string): MissionModel
     public_red_defend(num: number): MissionModel
     public_blue_defend(num: number): MissionModel
     public_double_defend(num: number): MissionModel

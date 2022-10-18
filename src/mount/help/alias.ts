@@ -45,7 +45,7 @@ export default [
                                 describe: '使房间开始运行',
                                 params: [
                                     { name: 'roomName', desc: '要增加的我的房间' },
-                                    { name: 'plan', desc: '布局类型 man(手动布局) hoho(hoho大佬的布局) dev(dev的布局) auto63(63布局)' },
+                                    { name: 'plan', desc: '布局类型 man(手动布局) hoho(hoho大佬的布局) tea(tea的布局) dev(dev的布局) auto63(63布局)' },
                                     { name: 'x', desc: '中心点x' },
                                     { name: 'y', desc: '中心点y' },
                                 ],
@@ -841,6 +841,11 @@ export default [
                 '旗帜名: TowerVisualAttack 插在距离自己8级房最近房间或有视野房间 显示该房间防御塔伤害信息',
                 '旗帜名: TowerVisualHeal 插在距离自己8级房最近房间或有视野房间 显示该房间防御塔治疗信息',
                 '旗帜名: TowerVisualRepair 插在距离自己8级房最近房间或有视野房间 显示该房间防御塔维修信息',
+                '旗帜名: Dev 插在任意房间可以显示dev自动布局',
+                '旗帜名: Hoho 插在任意房间可以显示hoho自动布局',
+                '旗帜名: Tea 插在任意房间可以显示tea自动布局',
+                '旗帜名: Syc 插在任意房间可以显示syc自动布局',
+                '旗帜名: 63 布局详情输入help63',
             ].join('\n')
         }
     },

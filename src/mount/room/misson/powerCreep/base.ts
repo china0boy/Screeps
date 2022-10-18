@@ -37,7 +37,7 @@ export default class PowerCreepMisson extends Room {
         let pc = Game.powerCreeps[`${this.name}/queen/${Game.shard.name}`]
         if (!pc || !pc.powers[PWR_OPERATE_STORAGE] || pc.powers[PWR_OPERATE_STORAGE].cooldown) return
         if (!storage_.effects) storage_.effects = []
-        if (((storage_.store.getFreeCapacity() <= 30000 && !isOPWR(storage_)) || (storage_.store.getUsedCapacity() >= 1000000 && storage_.effects.length && storage_.effects[0].ticksRemaining <= 40)) && this.MissionNum('PowerCreep', '仓库扩容') <= 0) {
+        if (((storage_.store.getFreeCapacity() <= 30000 && !isOPWR(storage_)) || (storage_.store.getUsedCapacity() >= 1000000 && storage_.effects.length && storage_.effects[0].ticksRemaining <= 50)) && this.MissionNum('PowerCreep', '仓库扩容') <= 0) {
             /* 发布任务 */
             var thisTask: MissionModel = {
                 name: "仓库扩容",
@@ -115,7 +115,11 @@ export default class PowerCreepMisson extends Room {
     }
     /* 挂载填充拓展任务 适用于queen类型pc */
     public enhance_extension(): void {
-        if ((Game.time - global.Gtime[this.name]) % 25) return
+        if (Game.shard.name == 'shard3') {
+            if ((Game.time - global.Gtime[this.name]) % 25) return
+        } else {
+            if ((Game.time - global.Gtime[this.name]) % 5) return
+        }
         if (this.memory.switch.StopEnhanceExtension) return
         var storage_ = this.storage
         if (!storage_ || storage_.store.getUsedCapacity('energy') < 20000) return

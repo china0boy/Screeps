@@ -14,7 +14,7 @@ export default class RoomMissonPublish extends Room {
      * @param tR        存放资源的建筑所在房间
      * @param tX        存放资源的建筑X坐标
      * @param tY        存放资源的建筑Y坐标
-     * @param rType     资源类型[可选] 例如： 'energy' 或者 'XLH2O'等
+     * @param rType     资源类型[可选] 例如： 'energy' 或者 'XLH2O'等 没有则默认为全部资源
      * @param num       要搬运的数量[可选]
      * @returns         任务对象
      */
@@ -182,6 +182,22 @@ export default class RoomMissonPublish extends Room {
             },
         }
         thisTask.CreepBind = { 'out-claim': { num: 0, bind: [] }, 'out-harvest': { num: 0, bind: [], MSB: true }, 'out-mineral': { num: 0, bind: [] }, 'out-car': { num: 0, bind: [] }, 'out-defend': { num: 0, bind: [] } }
+        return thisTask
+    }
+
+    /* 外矿红球防守任务发布函数 */
+    public public_red_out(disRoom: string): MissionModel {
+        var thisTask: MissionModel = {
+            name: '外矿红球防守',
+            range: 'Creep',
+            delayTick: 99999,
+            level: 10,
+            Data: {
+                disRoom: disRoom,
+            },
+            maxTime: 1//同时存在任务数
+        }
+        thisTask.CreepBind = { 'out-attack': { num: 1, bind: [] } }
         return thisTask
     }
 

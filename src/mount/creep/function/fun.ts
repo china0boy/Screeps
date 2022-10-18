@@ -136,18 +136,27 @@ export default class CreepFunctionExtension extends Creep {
                 var disLab = Game.getObjectById(tempID) as StructureLab
                 if (!disLab) continue
                 // 计算body部件
-                let s = 0
-                for (var b of this.body) {
+                let s = this.getActiveBodyparts(body as BodyPartConstant)
+
+                /*for (var b of this.body) {
                     if (b.type == body) s++
-                }
+                }*/
                 if (!disLab.mineralType) return false
                 if (thisRoomMisson.LabBind[tempID] != disLab.mineralType) return false
+                //计算lab资源是否够boost
+                let energyNum = s * 20
+                let typeNum = s * 30
+                if (disLab.store.getUsedCapacity('energy') < energyNum || disLab.store.getUsedCapacity(disLab.mineralType) < typeNum) return
+                //去boost
                 if (!this.pos.isNearTo(disLab)) this.goTo(disLab.pos, 1)
                 else {
                     for (var i of this.body) {
-                        if (i.type == body && i.boost != thisRoomMisson.LabBind[tempID]) { disLab.boostCreep(this); return false }
+                        if (i.type == body && i.boost != thisRoomMisson.LabBind[tempID]) {
+                            disLab.boostCreep(this);
+                            this.memory.boostData[body] = { boosted: true, num: s, type: thisRoomMisson.LabBind[tempID] as ResourceConstant }
+                            return false
+                        }
                     }
-                    this.memory.boostData[body] = { boosted: true, num: s, type: thisRoomMisson.LabBind[tempID] as ResourceConstant }
                 }
                 return false
             }

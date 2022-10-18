@@ -41,47 +41,49 @@ export default class RoomCoreEcosphereExtension extends Room {
                 }
             }
             /* link */
-            if (level == 5)                 // 5级1个source的Link
-            {
-                let sourceIDs = this.memory.StructureIdData.source
-                if (sourceIDs.length <= 0) return
-                let source = Game.getObjectById(sourceIDs[0]) as Source
-                let points = source.pos.getSourceLinkVoid()
-                if (points.length <= 0) return
-                LoopA:
-                for (var i of points) {
-                    if (i.lookFor(LOOK_CONSTRUCTION_SITES).length <= 0 && i.lookFor(LOOK_STRUCTURES).length <= 0) {
-                        i.createConstructionSite(STRUCTURE_LINK)
-                        break LoopA
+            if (LayOutPlan != 'auto63') {
+                if (level == 5)                 // 5级1个source的Link
+                {
+                    let sourceIDs = this.memory.StructureIdData.source
+                    if (sourceIDs.length <= 0) return
+                    let source = Game.getObjectById(sourceIDs[0]) as Source
+                    let points = source.pos.getSourceLinkVoid()
+                    if (points.length <= 0) return
+                    LoopA:
+                    for (var i of points) {
+                        if (i.lookFor(LOOK_CONSTRUCTION_SITES).length <= 0 && i.lookFor(LOOK_STRUCTURES).length <= 0) {
+                            i.createConstructionSite(STRUCTURE_LINK)
+                            break LoopA
+                        }
                     }
                 }
-            }
-            else if (level == 6)        // 6级出控制器Link 便于冲级
-            {
-                let controller = this.controller
-                let points = controller.pos.getSourceLinkVoid()
-                if (points.length <= 0) return
-                LoopA:
-                for (let i of points) {
-                    if (i.lookFor(LOOK_CONSTRUCTION_SITES).length <= 0 && i.lookFor(LOOK_STRUCTURES).length <= 0) {
-                        i.createConstructionSite(STRUCTURE_LINK)
-                        break LoopA
+                else if (level == 6)        // 6级出控制器Link 便于冲级
+                {
+                    let controller = this.controller
+                    let points = controller.pos.getSourceLinkVoid()
+                    if (points.length <= 0) return
+                    LoopA:
+                    for (let i of points) {
+                        if (i.lookFor(LOOK_CONSTRUCTION_SITES).length <= 0 && i.lookFor(LOOK_STRUCTURES).length <= 0) {
+                            i.createConstructionSite(STRUCTURE_LINK)
+                            break LoopA
+                        }
                     }
-                }
 
-            }
-            else if (level == 7)        // 7级出source的Link
-            {
-                let sourceIDs = this.memory.StructureIdData.source
-                if (sourceIDs.length <= 1) return
-                let source = Game.getObjectById(sourceIDs[1]) as Source
-                let points = source.pos.getSourceLinkVoid()
-                if (points.length <= 0) return
-                LoopA:
-                for (var i of points) {
-                    if (i.lookFor(LOOK_CONSTRUCTION_SITES).length <= 0 && i.lookFor(LOOK_STRUCTURES).length <= 0) {
-                        i.createConstructionSite(STRUCTURE_LINK)
-                        break LoopA
+                }
+                else if (level == 7)        // 7级出source的Link
+                {
+                    let sourceIDs = this.memory.StructureIdData.source
+                    if (sourceIDs.length <= 1) return
+                    let source = Game.getObjectById(sourceIDs[1]) as Source
+                    let points = source.pos.getSourceLinkVoid()
+                    if (points.length <= 0) return
+                    LoopA:
+                    for (var i of points) {
+                        if (i.lookFor(LOOK_CONSTRUCTION_SITES).length <= 0 && i.lookFor(LOOK_STRUCTURES).length <= 0) {
+                            i.createConstructionSite(STRUCTURE_LINK)
+                            break LoopA
+                        }
                     }
                 }
             }
@@ -193,17 +195,14 @@ export default class RoomCoreEcosphereExtension extends Room {
                 if (new_point && new_point.lookFor(LOOK_CONSTRUCTION_SITES).length <= 0 && !posOcp) {
                     let result = new_point.createConstructionSite(obj.structureType)
                     if (result != 0) {
-                        let str = Colorful(`房间${this.name}创建工地${obj.structureType}失败! 位置: x=${obj.x}|y=${obj.y}`, 'orange', false)
+                        let str = Colorful(`房间${this.name}创建工地${obj.structureType}失败! 位置: x=${center_point.x + obj.x}|y=${center_point.y + obj.y}`, 'orange', false)
                         console.log(str)
                     }
                     else {
-                        let str = Colorful(`房间${this.name}创建工地${obj.structureType}成功! 位置: x=${obj.x}|y=${obj.y}`, 'green', false)
+                        let str = Colorful(`房间${this.name}创建工地${obj.structureType}成功! 位置: x=${center_point.x + obj.x}|y=${center_point.y + obj.y}`, 'green', false)
                         console.log(str)
                     }
                 }
-
-
-
             }
             else return // 不遍历无关建筑
         }

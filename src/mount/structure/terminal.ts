@@ -18,18 +18,28 @@ export default class terminalExtension extends StructureTerminal {
         /* 按照优先级排序 */
         if (allmyTask.length >= 1)
             allmyTask.sort(compare('level'))
-        thisTask = allmyTask[0]
-        if (!thisTask || !isInArray(['资源传送'], thisTask.name)) {
-            /* terminal默认操作*/
-            this.ResourceBalance()  // 资源平衡
-            this.ResourceMarket()   // 资源买卖
-            if (!thisTask) return
+
+        let a = 1;
+        for (let i = 0; i <= 1; i++) {
+            thisTask = allmyTask[i]
+            if (thisTask && isInArray(['资源传送'], thisTask.name)) {
+                a = 0; break
+            }
         }
-        if (thisTask.delayTick < 99995)
-            thisTask.processing = true
-        switch (thisTask.name) {
-            case "资源传送": { this.ResourceSend(thisTask); break }
-            case "资源购买": { this.ResourceDeal(thisTask); break }
+        for (let i = 0; i <= 1; i++) {
+            thisTask = allmyTask[i]
+            if (!thisTask || !isInArray(['资源传送'], thisTask.name)) {
+                /* terminal默认操作*/
+                if (a) this.ResourceBalance()  // 资源平衡
+                this.ResourceMarket()   // 资源买卖
+                if (!thisTask) return
+            }
+            if (thisTask.delayTick < 99995)
+                thisTask.processing = true
+            switch (thisTask.name) {
+                case "资源传送": { this.ResourceSend(thisTask); break }
+                case "资源购买": { this.ResourceDeal(thisTask); break }
+            }
         }
     }
 
@@ -136,7 +146,7 @@ export default class terminalExtension extends StructureTerminal {
             }
 
             /* 仓库资源过于饱和就卖掉能量 或者转移*/
-            if (storage_.store.getFreeCapacity() < 100000 && storage_.store.getCapacity() >= storage_.store.getUsedCapacity()) {
+            if (storage_.store.getFreeCapacity() < 70000 && storage_.store.getCapacity() >= storage_.store.getUsedCapacity()) {
                 /* 先转移到空间大的房间 */
                 if (storage_.store.energy >= 300000) {
                     let toRoom: string;
@@ -176,7 +186,7 @@ export default class terminalExtension extends StructureTerminal {
                     }
                     if (bR) {
                         /* 下达自动deal的任务 */
-                        this.room.memory.market['deal'].push({ rType: 'energy', num: 100000, price: 100 })
+                        this.room.memory.market['deal'].push({ rType: 'energy', num: 100000, price: 20 })
                     }
                 }
             }
@@ -335,7 +345,7 @@ export default class terminalExtension extends StructureTerminal {
         }
         if (!task.state) task.state = 1     // 1状态下，搜集资源
         if (task.state == 1) {
-            if (Game.time % 10) return  /* 每10tick监测一次 */
+            if (Game.time % 5) return  /* 每10tick监测一次 */
             if (task.Data.num <= 0 || task.Data.num == undefined) this.room.DeleteMission(task.id)
             if (this.room.RoleMissionNum('manage', '物流运输') > 0) return // manage爬虫有任务时就不管
             // 路费
@@ -363,14 +373,11 @@ export default class terminalExtension extends StructureTerminal {
             }
             /* 资源判断 */
             let cargoNum: number = task.Data.rType == 'energy' ? this.store.getUsedCapacity(task.Data.rType) - wastage : this.store.getUsedCapacity(task.Data.rType)
-            console.log(
-                Colorful(`                     资源传送任务监控中\n`, 'blue') +
-                Colorful(`———————————————————————————————————————————————————————————\n`, 'blue') +
-                Colorful(`房间：${this.room.name}--->${task.Data.disRoom}  运送资源：${task.Data.rType}\n`, 'blue') +
-                Colorful(`———————————————————————————————————————————————————————————\n`, 'blue') +
-                Colorful(`路费:${wastage} energy\t终端拥有能量:${this.store.getUsedCapacity('energy')} energy\n`, 'blue') +
-                Colorful(`终端拥有资源量:${cargoNum}\t仓库拥有资源量:${storage_.store.getUsedCapacity(task.Data.rType)}\t任务所需资源量:${task.Data.num}\n`, 'blue') +
-                Colorful(`———————————————————————————————————————————————————————————\n`, 'blue'))
+            console.log(`<div style="width:530px;height:200px;margin:5px;line-height:20px;border:1px solid #ffce00;background-image:radial-gradient(circle, #ffce00, #ffc200, #ffb500, #ffa900, #ff9c00, #fba000, #f8a500, #f4a900, #e8bf00, #d4d400, #b7ea00, #8bff00);"><h3 style="color:blue;text-align: center;" >资源传送任务监控中</h3><hr width=100% size=100% color=pink><h5 style="color:#a200ff">
+房间：${this.room.name}--->${task.Data.disRoom}\t运送资源：${task.Data.rType}
+
+路费:${wastage} energy \t终端拥有能量:${this.store.energy} energy<hr width=100% size=100% color=pink>
+终端拥有资源量:${cargoNum}\t仓库拥有资源量:${storage_.store.getUsedCapacity(task.Data.rType)}\t任务所需资源量:${task.Data.num}<hr width=100% size=100% color=pink><h5><div>`)
             if (task.Data.num > cargoNum) {
                 let MaxStore: number;
                 switch (this.room.controller.level) {
@@ -410,7 +417,12 @@ export default class terminalExtension extends StructureTerminal {
      * 资源购买 (deal)
      */
     public ResourceDeal(task: MissionModel): void {
-        if ((Game.time - global.Gtime[this.room.name]) % 10) return
+        if (Game.shard.name == 'shard3') {
+            if ((Game.time - global.Gtime[this.room.name]) % 10) return
+        }
+        else {
+            if ((Game.time - global.Gtime[this.room.name]) % 5) return
+        }
         if (this.cooldown) return
         if (!task.Data) { this.room.DeleteMission(task.id); return }
         let Data = task.Data;
@@ -487,7 +499,6 @@ export default class terminalExtension extends StructureTerminal {
     public OrderEnergy(type: MarketResourceConstant, num: number, max: number): string {
         let history = Game.market.getAllOrders({ type: ORDER_BUY, resourceType: type });
         let avePrice = 0;
-        let j = -1;
         for (let i = 0; i < history.length; i++) {
             if (history[i].price > avePrice && history[i].price <= max && history[i].roomName != this.room.name && history[i].amount >= 1000) { avePrice = history[i].price + 0.001; }//符合条件
         }

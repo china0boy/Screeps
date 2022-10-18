@@ -64,11 +64,10 @@ export function colorHex(color: string) {
 	}
 };
 
-export function Colorful(content: string, colorName: Colors | string = null, bolder: boolean = false): string {
+export function Colorful(content: string, colorName: Colors | string = null, bolder: boolean = false, href: boolean = false): string {
 	const colorStyle = colorName ? `color: ${colors[colorName] ? colors[colorName] : colorName};` : ''
 	const bolderStyle = bolder ? 'font-weight: bolder;' : ''
-
-	return `<text style="${[colorStyle, bolderStyle].join(' ')}">${content}</text>`
+	return href ? `<a href="https://screeps.com/a/#!/room/${Game.shard.name}/${content}" style="${colorStyle}${bolderStyle}">${content}</a>` : `<span style="${colorStyle}${bolderStyle}">${content}</span>`
 }
 
 function getRooms(): string[] {
@@ -120,7 +119,7 @@ export function getStore(roomName?: string) {
 			let factoryCapacity = factory?.store.getCapacity() || 1;
 			let factoryProportion = (factoryUsed / factoryCapacity * 100).toFixed(2) + '%';
 			let factoryColor = colorHex(getColor(Math.ceil(factoryUsed / factoryCapacity * 100)));
-			console.log(Colorful(rooms[i], 'blue'),
+			console.log(Colorful(rooms[i], 'blue', false, true),
 				'Storage:', Colorful(storageProportion, storageColor), ' ',
 				'Terminal', Colorful(terminalProportion, terminalColor), ' ',
 				'Factory', Colorful(factoryProportion, factoryColor));

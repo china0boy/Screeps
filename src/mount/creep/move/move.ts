@@ -79,8 +79,10 @@ export default class CreepMoveExtension extends Creep {
                     let isHighway = (Number(parsed[1]) % 10 === 0) ||
                         (Number(parsed[2]) % 10 === 0);
                     let isMyRoom = Game.rooms[roomName] &&
-                        Game.rooms[roomName].controller &&
-                        Game.rooms[roomName].controller.my;
+                        Game.rooms[roomName].controller && (
+                            Game.rooms[roomName].controller.my ||
+                            Game.rooms[roomName].controller.reservation &&
+                            Game.rooms[roomName].controller.reservation.username == "Eileen");
                     if (isHighway || isMyRoom) {
                         return 1;
                     } else {
@@ -111,6 +113,14 @@ export default class CreepMoveExtension extends Creep {
                 if (!room) return
                 // 有视野的房间
                 let costs = new PathFinder.CostMatrix
+                //设置pc
+                const pc = Game.powerCreeps[`${this.pos.roomName}/queen/${Game.shard.name}`]
+                if (pc && pc.shard) {
+                    if ((pc.memory.crossLevel && this.memory.crossLevel && pc.memory.crossLevel > this.memory.crossLevel) || pc.memory.standed)
+                        costs.set(pc.pos.x, pc.pos.y, 255)
+                    else
+                        costs.set(pc.pos.x, pc.pos.y, 5)
+                }
                 // 将道路的cost设置为1，无法行走的建筑设置为255
                 room.find(FIND_STRUCTURES).forEach(struct => {
                     if (struct.structureType === STRUCTURE_ROAD) {
@@ -148,13 +158,7 @@ export default class CreepMoveExtension extends Creep {
                     else
                         costs.set(creep.pos.x, creep.pos.y, 4)
                 })
-                const pc = Game.powerCreeps[`${this.pos.roomName}/queen/${Game.shard.name}`]
-                if (pc && pc.shard) {
-                    if ((pc.memory.crossLevel && this.memory.crossLevel && pc.memory.crossLevel > this.memory.crossLevel) || pc.memory.standed)
-                        costs.set(pc.pos.x, pc.pos.y, 255)
-                    else
-                        costs.set(pc.pos.x, pc.pos.y, 4)
-                }
+
                 return costs
             }
         })
@@ -290,7 +294,7 @@ export default class CreepMoveExtension extends Creep {
     // 跨shard移动
     public arriveTo(target: RoomPosition, range: number, shard: shardName = Game.shard.name as shardName, shardData: shardRoomData[] = null): void {
         if (!this.memory.targetShard) this.memory.targetShard = shard
-        if (!shardData || shardData == []) {
+        if (!shardData || !shardData.length) {
             if (shard == Game.shard.name) {
                 this.goTo(target, range)
                 this.say(`前往${target.roomName}`)
@@ -357,7 +361,7 @@ export default class CreepMoveExtension extends Creep {
                 }
                 this.memory.shardAffirm = data
             }
-            if (this.memory.shardAffirm == []) {
+            if (!this.memory.shardAffirm.length) {
                 this.say("shardAffirm赋予错误!")
                 return
             }

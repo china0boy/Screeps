@@ -16,7 +16,7 @@ export default class CreepMissonBaseExtension extends Creep {
                     return;
                 }
             }
-            if (this.store.getUsedCapacity()) this.memory.standed = true;
+            if (this.memory.MissionData && Object.keys(this.memory.MissionData).length) this.memory.standed = true;
             else this.memory.standed = false
         }
         /* 生命低于10就将资源上交 */
@@ -127,6 +127,7 @@ export default class CreepMissonBaseExtension extends Creep {
                 case '蓝球防御': { this.handle_defend_range(); break }
                 case '双人防御': { this.handle_defend_double(); break }
                 case '外矿开采': { this.handle_outmine(); break }
+                case '外矿红球防守': { this.handle_out_attack(); break }
                 case '四人小队': { this.handle_task_squard(); break }
                 case '跨shard运输': { this.handle_carry_shard(); break }
             }
