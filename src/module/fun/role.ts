@@ -1,5 +1,3 @@
-import { loop } from "@/main";
-import creep from "@/mount/creep";
 import { getDistance } from "@/utils";
 
 /**

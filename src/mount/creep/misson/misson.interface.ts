@@ -22,13 +22,14 @@ interface Creep {
     handle_dp(): void
     handle_pb(): void
     handle_outmine(): void
-    handle_out_attack(): void 
+    handle_out_attack(): void
+    handle_out_range(): void
     handle_defend_attack(): void
     handle_defend_range(): void
     handle_defend_double(): void
     handle_task_squard(): void
     handle_carry_shard(): void
-    handle_normalRush():void
+    handle_normalRush(): void
 
     //爬的一些动作
     handle_ranged_attack(attackcreep: Creep, bool?: boolean): boolean

@@ -128,7 +128,7 @@ export default class PowerCreepMisson extends Room {
         if (this.energyAvailable < this.energyCapacityAvailable * 0.1 && this.MissionNum('PowerCreep', '扩展填充') <= 0) {
             var thisTask: MissionModel = {
                 name: "扩展填充",
-                delayTick: 20,
+                delayTick: 50,
                 range: 'PowerCreep',
                 Data: {
                 }

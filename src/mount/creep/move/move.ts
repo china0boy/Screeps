@@ -1,7 +1,7 @@
 // import { RequestShard } from "@/shard/base"
 import { hurts, parts } from "@/module/fun/funtion"
 import { RequestShard } from "@/module/shard/intershard"
-import { closestPotalRoom, getOppositeDirection, isInArray } from "@/utils"
+import { closestPotalRoom, getOppositeDirection, isInArray, getDistance1 } from "@/utils"
 
 /* 本地寻路移动 */
 export default class CreepMoveExtension extends Creep {
@@ -84,7 +84,7 @@ export default class CreepMoveExtension extends Creep {
                             Game.rooms[roomName].controller.reservation &&
                             Game.rooms[roomName].controller.reservation.username == "Eileen");
                     if (isHighway || isMyRoom) {
-                        return 1;
+                        return isHighway ? 1 : 0.8;
                     } else {
                         return 2.5;
                     }
@@ -188,10 +188,10 @@ export default class CreepMoveExtension extends Creep {
     public goTo(target: RoomPosition, range: number = 1, flee: boolean = false): CreepMoveReturnCode | ERR_NO_PATH | ERR_NOT_IN_RANGE | ERR_INVALID_TARGET {
         //  var a = Game.cpu.getUsed()
         if (this.memory.moveData == undefined) this.memory.moveData = {}
-        if (target.roomName != this.room.name) {
-            Game.map.visual.line(this.pos, target, { color: '#ffffff', lineStyle: 'dashed' });
-            Game.map.visual.text(`${this.memory.MissionData ? this.memory.MissionData.name : null}|${this.name}`, this.pos, { color: '#ffffff', fontSize: 5 });
-        }
+        // if (target.roomName != this.room.name) {
+        //     Game.map.visual.line(this.pos, target, { color: '#ffffff', lineStyle: 'dashed' });
+        //     Game.map.visual.text(`${this.memory.MissionData ? this.memory.MissionData.name : null}|${this.name}`, this.pos, { color: '#ffffff', fontSize: 5 });
+        // }
         // 确认目标没有变化，如果变化了就重新规划路线
         var targetPosTag: string
         //防止骑墙导致目标一直变化导致的重新寻路
@@ -453,125 +453,6 @@ export default class CreepMoveExtension extends Creep {
         }
     }
 
-    /*
-    // 跨shard移动
-    public arriveTo(target: RoomPosition, range: number, shard: shardName = Game.shard.name as shardName): void {
-        if (!this.memory.targetShard) this.memory.targetShard = shard
-        if (shard == Game.shard.name) {
-            this.goTo(target, range)
-        }
-        else {
-            if (!this.memory.protalRoom)
-            // 寻找最近的十字路口房间
-            {
-                if (Game.flags[`${this.memory.belong}/portal`]) {
-                    this.memory.protalRoom = Game.flags[`${this.memory.belong}/portal`].pos.roomName
-                }
-                else {
-                    this.memory.protalRoom = closestPotalRoom(this.memory.belong, target.roomName)
-                }
-            }
-            if (!this.memory.protalRoom || this.memory.protalRoom == null) return
-            if (this.room.name != this.memory.protalRoom) {
-                this.goTo(new RoomPosition(25, 25, this.memory.protalRoom), 20)
-            }
-            else {
-                var shards = ['shard0', 'shard1', 'shard2', 'shard3']
-                var myShard = shards.indexOf(Game.shard.name)
-                var toShard = shards.indexOf(shard)
-                if (myShard == -1 || toShard == -1) { console.log(`错误,没有此shard${myShard} ${toShard}`); return }
-                let X = myShard - toShard;
-                X > 0 ? X = -1 : X = 1;
-                // 寻找星门 
-                var portal = this.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return structure.structureType == STRUCTURE_PORTAL
-                    }
-                }) as StructurePortal[]
-                if (portal.length <= 0) return
-                var thisportal: StructurePortal
-                for (var i of portal) {
-                    var porType = i.destination as { shard: string, room: string }
-                    if (porType.shard == shards[myShard + X])
-                        thisportal = i
-                }
-                if (!thisportal) return
-                if (!this.pos.isNearTo(thisportal)) this.goTo(thisportal.pos, 1)
-                else {
-                    // moveData里的shardmemory 
-                    // 靠近后等待信息传送 
-                    var RequestData = {
-                        relateShard: shards[myShard + X] as shardName,
-                        sourceShard: Game.shard.name as shardName,
-                        type: 1,
-                        data: { id: this.name, MemoryData: this.memory }
-                    }
-                    if (RequestShard(RequestData)) {
-                        this.moveTo(thisportal)
-                    }
-                }
-            }
-        }
-        return
-    }*/
-
-
-    /** 
-     * // 跨shard移动
-    public arriveTo(target: RoomPosition, range: number, shard: shardName = Game.shard.name as shardName): void {
-        if (!this.memory.targetShard) this.memory.targetShard = shard
-        if (shard == Game.shard.name) {
-            this.goTo(target, range)
-        }
-        else {
-            if (!this.memory.protalRoom)
-            // 寻找最近的十字路口房间
-            {
-                if (Game.flags[`${this.memory.belong}/portal`]) {
-                    this.memory.protalRoom = Game.flags[`${this.memory.belong}/portal`].pos.roomName
-                }
-                else {
-                    this.memory.protalRoom = closestPotalRoom(this.memory.belong, target.roomName)
-                }
-            }
-            if (!this.memory.protalRoom || this.memory.protalRoom == null) return
-            if (this.room.name != this.memory.protalRoom) {
-                this.goTo(new RoomPosition(25, 25, this.memory.protalRoom), 20)
-            }
-            else {
-                var portal = this.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return structure.structureType == STRUCTURE_PORTAL
-                    }
-                }) as StructurePortal[]
-                if (portal.length <= 0) return
-                var thisportal: StructurePortal
-                for (var i of portal) {
-                    var porType = i.destination as { shard: string, room: string }
-                    if (porType.shard == shard)
-                        thisportal = i
-                }
-                if (!thisportal) return
-                if (!this.pos.isNearTo(thisportal)) this.goTo(thisportal.pos, 1)
-                else {
-                    // moveData里的shardmemory 
-                    // 靠近后等待信息传送 
-                    var RequestData = {
-                        relateShard: shard,
-                        sourceShard: Game.shard.name as shardName,
-                        type: 1,
-                        data: { id: this.name, MemoryData: this.memory }
-                    }
-                    if (RequestShard(RequestData)) {
-                        this.moveTo(thisportal)
-                    }
-                }
-            }
-        }
-        return
-    }
-    */
-
     //寻找我和目标之间路径是否完整 ture为完整路径
     public PathFinders(target: RoomPosition, range: number, bool?: boolean): boolean {
         let ret = PathFinder.search(
@@ -681,8 +562,13 @@ export default class CreepMoveExtension extends Creep {
                             for (var j = creep.pos.y - 3; j < creep.pos.y + 4; j++)
                                 if (i > 0 && i < 49 && j > 0 && j < 49) {
                                     var nearpos = new RoomPosition(i, j, creep.room.name)
-                                    if (!nearpos.GetStructure('rampart'))
-                                        costs.set(i, j, 20)
+                                    if (!nearpos.GetStructure('rampart')) {
+                                        let list = getDistance1(creep.pos, nearpos)
+                                        if (list) {
+                                            costs.set(i, j, 10 * list)
+                                        }
+                                        else costs.set(i, j, 255)
+                                    }
                                 }
                     }
                 })

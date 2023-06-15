@@ -156,7 +156,7 @@ export default class RoomMissonPublish extends Room {
         var thisTask: MissionModel = {
             name: '核弹填充',
             range: 'Structure',
-            delayTick: 1000,
+            delayTick: 10000,
             maxTime: 1
         }
         return thisTask
@@ -181,7 +181,7 @@ export default class RoomMissonPublish extends Room {
                 startpoint: zipPosition(pos)
             },
         }
-        thisTask.CreepBind = { 'out-claim': { num: 0, bind: [] }, 'out-harvest': { num: 0, bind: [], MSB: true }, 'out-mineral': { num: 0, bind: [] }, 'out-car': { num: 0, bind: [] }, 'out-defend': { num: 0, bind: [] } }
+        thisTask.CreepBind = { 'out-claim': { num: 0, bind: [] }, 'out-harvest': { num: 0, bind: [], MSB: true }, 'out-mineral': { num: 0, bind: [] }, 'out-car': { num: 0, bind: [] } }
         return thisTask
     }
 
@@ -191,13 +191,29 @@ export default class RoomMissonPublish extends Room {
             name: '外矿红球防守',
             range: 'Creep',
             delayTick: 99999,
-            level: 10,
+            level: 9,
             Data: {
                 disRoom: disRoom,
             },
             maxTime: 1//同时存在任务数
         }
         thisTask.CreepBind = { 'out-attack': { num: 1, bind: [] } }
+        return thisTask
+    }
+
+    /* 外矿蓝球防守任务发布函数 */
+    public public_blue_out(disRoom: string): MissionModel {
+        var thisTask: MissionModel = {
+            name: '外矿蓝球防守',
+            range: 'Creep',
+            delayTick: 99999,
+            level: 9,
+            Data: {
+                disRoom: disRoom,
+            },
+            maxTime: 1//同时存在任务数
+        }
+        thisTask.CreepBind = { 'out-defend': { num: 1, bind: [] } }
         return thisTask
     }
 
@@ -261,6 +277,7 @@ export default class RoomMissonPublish extends Room {
                 body: body,
                 interval: interval,
             },
+            maxTime: 5//同时存在任务数
         }
         thisTask.reserve = true
         if (body == 1)
@@ -456,7 +473,7 @@ export default class RoomMissonPublish extends Room {
         }
         thisTask.reserve = true
         thisTask.CreepBind = { 'AIO': { num: num, bind: [], interval: time ? time : 1000, MSB: true }, }
-        if (level != 3)
+        if (level != 4)
             thisTask.LabMessage = { 'XZHO2': 'boost', 'XGHO2': 'boost', 'XLHO2': 'boost', 'XKHO2': 'boost' }
         return thisTask
     }

@@ -63,9 +63,21 @@ export function layoutVisual(): void {
                                         let e = ret.structMap[type][i]
                                         if (type != 'rampart') {
                                             if (_add_lv_state) {
+                                                if (type == 'link') {
+                                                    if (Memory.RoomControlData[flag.pos.roomName] || Game.flags['storagePos']) {
+                                                        let center = Memory.RoomControlData[flag.pos.roomName] ? Memory.RoomControlData[flag.pos.roomName].center : [];
+                                                        if (center.length == 0) {
+                                                            center[0] = Game.flags['storagePos'].pos.x;
+                                                            center[1] = Game.flags['storagePos'].pos.y;
+                                                        }
+                                                        if (Math.abs(e[0] - center[0]) < 2 && Math.abs(e[1] - center[1]) < 2) {
+                                                            global.roomStructsData.structMaplv.push(`${e[0]}/${e[1]}/${type}/5`)
+                                                        }
+                                                    }
+                                                    continue;
+                                                }
                                                 global.roomStructsData.structMaplv.push(`${e[0]}/${e[1]}/${type}/${level}`)
                                             }
-                                            // {x: -4, y: -3,structureType:'extension',level:2}
                                             new RoomVisual(flag.pos.roomName).text(level.toString(), e[0] + 0.3, e[1] + 0.5, { font: 0.4, opacity: 0.8 })
                                         }
                                     }

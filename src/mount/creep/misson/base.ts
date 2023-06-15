@@ -89,6 +89,9 @@ export default class CreepMissonBaseExtension extends Creep {
                 LoopBind:
                 for (var t of thisTaskList) {
                     if (t.CreepBind && t.CreepBind[this.memory.role] && t.CreepBind[this.memory.role].bind.length < t.CreepBind[this.memory.role].num) {
+                        if (this.memory.role == 'out-attack' || this.memory.role == 'out-defend') {
+                            if (t.Data && t.Data.disRoom && Game.map.getRoomLinearDistance(t.Data.disRoom, this.memory.belong) > 3) continue LoopBind
+                        }
                         /* 绑定任务了就输入任务数据 */
                         t.processing = true // 领取任务后，任务开始计时
                         t.CreepBind[this.memory.role].bind.push(this.name)
@@ -128,6 +131,7 @@ export default class CreepMissonBaseExtension extends Creep {
                 case '双人防御': { this.handle_defend_double(); break }
                 case '外矿开采': { this.handle_outmine(); break }
                 case '外矿红球防守': { this.handle_out_attack(); break }
+                case '外矿蓝球防守': { this.handle_out_range(); break }
                 case '四人小队': { this.handle_task_squard(); break }
                 case '跨shard运输': { this.handle_carry_shard(); break }
             }

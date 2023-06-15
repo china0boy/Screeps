@@ -6,7 +6,7 @@ export default {
         let cost = computationalExpense(type, num)
         for (let i in cost) {
             cost[i] -= StatisticalResources(i as ResourceConstant)
-            cost[i] < 0 ? delete cost[i] : cost[i]
+            cost[i] <= 0 ? delete cost[i] : cost[i]
         }
         let b = Game.cpu.getUsed();
         return `花费时间:${b - a}  ` + JSON.stringify(cost)
@@ -90,7 +90,7 @@ export default {
         disaio(roomName: string, FlagName: string, num: number = 1, level: number = 2, time?: number, shard?: string, shardData: shardRoomData[] = null): string {
             var thisRoom = Game.rooms[roomName]
             if (!thisRoom) return `[war] 不存在房间${roomName}`
-            if (level != 1 && level != 2 && level != 3 && level != 10) return `level 只限  1 或者 2 或者 3`
+            if (level != 1 && level != 2 && level != 3 && level != 4 && level != 10) return `level 只限  1 或者 2 或者 3 或者 4`
             let task = thisRoom.Public_AIO(FlagName, num, level, shard, time)
             if (thisRoom.AddMission(task)) {
                 if (shardData) task.Data.shardData = shardData

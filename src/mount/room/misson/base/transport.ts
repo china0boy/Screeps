@@ -1,3 +1,4 @@
+import { RoleLevelData } from "src/constant/SpawnConstant"
 /* 房间原型拓展   --任务  --运输工任务 */
 export default class RoomMissonTransportExtension extends Room {
     // 虫卵填充任务
@@ -6,14 +7,16 @@ export default class RoomMissonTransportExtension extends Room {
         if (Game.time % 10) return
         if (!this.storage && !this.terminal) return
         if (this.RoleMissionNum('transport', '虫卵填充') < 1) {
-            if (this.energyAvailable < this.energyCapacityAvailable) {
+            let energyNum = this.energyCapacityAvailable - this.energyAvailable
+            let creepEnergyNum = RoleLevelData['transport'][this.controller.level].bodypart[1] * 50
+            if (energyNum > 0) {
                 /* 满足条件则触发虫卵填充任务 */
                 var thisMisson: MissionModel = {
                     name: "虫卵填充",
                     range: "Creep",
                     delayTick: 47,
                     cooldownTick: 4,
-                    CreepBind: { 'transport': { num: 2, bind: [] } },
+                    CreepBind: { 'transport': { num: energyNum > creepEnergyNum ? 2 : 1, bind: [] } },
                     Data: {}
                 }
                 this.AddMission(thisMisson)
@@ -94,7 +97,7 @@ export default class RoomMissonTransportExtension extends Room {
             if (container.store.getUsedCapacity()) {
                 let a = this.storage ? this.storage : this.terminal;
                 if (a && this.Check_Carry('transport', container.pos, a.pos, Object.keys(container.store)[0] as ResourceConstant)) {
-                    let thisTask = this.Public_Carry({ 'transport': { num: 1, bind: [] } }, 20, this.name, container.pos.x, container.pos.y, this.name, a.pos.x, a.pos.y, Object.keys(container.store)[0] as ResourceConstant, container.store[Object.keys(container.store)[0]])
+                    let thisTask = this.Public_Carry({ 'transport': { num: 1, bind: [] } }, 20, this.name, container.pos.x, container.pos.y, this.name, a.pos.x, a.pos.y)
                     this.AddMission(thisTask)
                 }
             }

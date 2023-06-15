@@ -126,7 +126,7 @@ export default class DefendWarExtension extends Room {
         if (Game.time % 5) return
         if (this.controller.level < 6) return
         if (!this.memory.state) return
-        if (this.memory.state != 'war') { this.memory.switch.AutoDefend = false; this.memory.enemy = {}; return }
+        if (this.memory.state != 'war') { this.memory.switch.AutoDefend = false; this.memory.switch.AutoDefendAttack = false; this.memory.enemy = {}; return }
         /* 激活主动防御 */
         let enemys = this.find(FIND_HOSTILE_CREEPS, {
             filter: (creep) => {
@@ -140,18 +140,20 @@ export default class DefendWarExtension extends Room {
             let users = []
             for (let c of enemys) if (!isInArray(users, c.owner.username)) users.push(c.owner.username)
             let str = ''; for (let s of users) str += ` ${s}`
-            Game.notify(`房间${this.name}激活主动防御! 目前检测到的攻击方为:${str},爬虫数为:${enemys.length},我们将抗战到底!`)
-            console.log(`房间${this.name}激活主动防御! 目前检测到的攻击方为:${str},爬虫数为:${enemys.length},我们将抗战到底!`)
+            let string = `房间${this.name}激活主动防御! 目前检测到的攻击方为:${str},爬虫数为:${enemys.length},我们将抗战到底!`
+            Game.notify(string)
+            console.log(string)
         }
         /* 分析敌对爬虫的数量,应用不同的主防任务应对 */
         let defend_plan = {}
         if (enemys.length <= 2)     // 1
         {
-            defend_plan = { 'attack': 1 }
+            // 防御塔打不过，需要出爬打
+            if (this.memory.switch.AutoDefendAttack) defend_plan = { 'attack': 1 }
         }
         else if (enemys.length > 2 && enemys.length < 5)       // 3-4
         {
-            defend_plan = { 'attack': 1, 'double': 0 }
+            defend_plan = { 'range': 1 }
         }
         else if (enemys.length >= 5 && enemys.length < 8)   // 5-7
         {

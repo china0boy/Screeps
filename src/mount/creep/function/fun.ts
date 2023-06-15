@@ -21,14 +21,14 @@ export default class CreepFunctionExtension extends Creep {
             if (nukeTime <= 200) this.memory.nuke.on = true;
             else this.memory.nuke.on = false;
         }
-        if (!this.memory.nuke.on) return false
+        if (!this.memory.nuke.on || Game.rooms[this.memory.belong].memory.state == 'war') return false
         if (this.store.getUsedCapacity() && this.pos.roomName == myroom.name) {
             let structure = this.room.storage ? this.room.storage : this.room.terminal ? this.room.terminal : null
             if (!structure) this.suicide();
             this.transfer_(structure, Object.keys(this.store)[0] as ResourceConstant)
             return true
         }
-        //去等待房间
+        //去等待房间F
         if (this.memory.nuke.exitRoom) {
             this.say(`核弹来咯，溜溜球`, true)
             this.goTo(new RoomPosition(24, 24, this.memory.nuke.exitRoom), 15)
@@ -137,28 +137,24 @@ export default class CreepFunctionExtension extends Creep {
                 if (!disLab) continue
                 // 计算body部件
                 let s = this.getActiveBodyparts(body as BodyPartConstant)
-
-                /*for (var b of this.body) {
-                    if (b.type == body) s++
-                }*/
                 if (!disLab.mineralType) return false
                 if (thisRoomMisson.LabBind[tempID] != disLab.mineralType) return false
                 //计算lab资源是否够boost
                 let energyNum = s * 20
                 let typeNum = s * 30
-                if (disLab.store.getUsedCapacity('energy') < energyNum || disLab.store.getUsedCapacity(disLab.mineralType) < typeNum) return
+                if (disLab.store.getUsedCapacity('energy') < energyNum || disLab.store.getUsedCapacity(disLab.mineralType) < typeNum) return false
                 //去boost
-                if (!this.pos.isNearTo(disLab)) this.goTo(disLab.pos, 1)
+                if (!this.pos.isNearTo(disLab)) { this.goTo(disLab.pos, 1); return false }
                 else {
                     for (var i of this.body) {
                         if (i.type == body && i.boost != thisRoomMisson.LabBind[tempID]) {
                             disLab.boostCreep(this);
                             this.memory.boostData[body] = { boosted: true, num: s, type: thisRoomMisson.LabBind[tempID] as ResourceConstant }
-                            return false
+                            //return false
                         }
                     }
                 }
-                return false
+                //return false
             }
         }
         return true

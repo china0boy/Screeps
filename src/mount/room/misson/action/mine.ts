@@ -77,7 +77,7 @@ export default class RoomMissonMineExtension extends Room {
             else if (misson.Data.state == 2)    // 采集状态 [正常状态]
             {
                 misson.CreepBind['out-harvest'].num = Memory.outMineData[disRoomName].minepoint.length
-                misson.CreepBind['out-defend'].num = 0
+                if (misson.CreepBind['out-defend']) misson.CreepBind['out-defend'].num = 0
                 if (Memory.outMineData[disRoomName].car) {
                     misson.CreepBind['out-car'].num = Memory.outMineData[disRoomName].minepoint.length
                 }
@@ -87,7 +87,8 @@ export default class RoomMissonMineExtension extends Room {
             {
                 misson.CreepBind['out-harvest'].num = 0
                 misson.CreepBind['out-car'].num = 0
-                misson.CreepBind['out-defend'].num = 1
+                //检查是否已经发布了防御任务
+                if (!this.MissionNum('Creep', 'out-defend')) this.AddMission(this.public_blue_out(misson.Data.disRoom))
                 if (Game.rooms[misson.Data.disRoom]) {
                     var enemys = Game.rooms[misson.Data.disRoom].find(FIND_HOSTILE_CREEPS, {
                         filter: (creep) => {
@@ -101,6 +102,7 @@ export default class RoomMissonMineExtension extends Room {
                     })
                     if (enemys.length <= 0 && InvaderCore.length <= 0)
                         misson.Data.state = 2
+                    return
                 }
             }
         }

@@ -1,0 +1,905 @@
+{
+  "whitesheet": [
+    "Nemophilist"
+  ],
+  "ignoreMissonName": [
+    "虫卵填充",
+    "链传送能",
+    "物流运输",
+    "source强化",
+    "合成加速",
+    "资源传送",
+    "仓库扩容",
+    "工厂强化",
+    "power强化"
+  ],
+  "marketAdjust": {},
+  "RoomControlData": {
+    "W39S59": {
+      "arrange": "max",
+      "center": [
+        26,
+        37
+      ]
+    },
+    "W38S51": {
+      "arrange": "man",
+      "center": [
+        33,
+        11
+      ]
+    },
+    "W39S53": {
+      "arrange": "man",
+      "center": [
+        19,
+        8
+      ]
+    },
+    "W29S52": {
+      "arrange": "man",
+      "center": [
+        18,
+        37
+      ]
+    },
+    "W51S51": {
+      "arrange": "man",
+      "center": [
+        13,
+        32
+      ]
+    },
+    "W51S59": {
+      "arrange": "man",
+      "center": [
+        37,
+        18
+      ]
+    },
+    "W31S42": {
+      "arrange": "tea",
+      "center": [
+        36,
+        38
+      ]
+    }
+  },
+  "rooms": {
+    "W38S51": {
+      "StructureIdData": {
+        "spawn": [
+          "622063ce6bc5f459fc5fa928",
+          "6226fcc64abbfae7d404756c",
+          "62285d1b97063a8265a4abb7"
+        ],
+        "mineralID": "5bbcb19d40062e4259e93132",
+        "source": [
+          "5bbcaaeb9099fc012e6326f8",
+          "5bbcaaeb9099fc012e6326fa"
+        ],
+        "source_links": [
+          "6221ce2404a01f45ecccf624",
+          "635653481e579376c367ced9"
+        ],
+        "comsume_link": [],
+        "labInspect": {
+          "raw1": "6225fffbcebb50305507c5a5",
+          "raw2": "62288e7a76cf3af884f0ab96",
+          "com": [
+            "6225a44c759acc281eda6078",
+            "62260201dbb09b7717cc534c",
+            "622716062213a1c6b612e631",
+            "62272cd297063a0d90a45200",
+            "62273de9d32fac053d4e88ca",
+            "6228699340d11b7980d1101b",
+            "62287c1c6825c65606d6c408",
+            "6228abae9db01fbc4557bf06"
+          ]
+        },
+        "AtowerID": [
+          "62209c1670df7bb178d603cc",
+          "6221f8f9755376c5afd1b7ac",
+          "6227312140f8dae07aa55f43",
+          "6228ad5f89fa494d34cd9a1e",
+          "6228afd8cc72042b3e7e1876",
+          "6228b1bf908df8534f3d0048"
+        ],
+        "NtowerID": "62209c1670df7bb178d603cc",
+        "storageID": "622174838f0f3e4f8a351a8a",
+        "upgrade_link": "622594a2759acc9831da5bbc",
+        "terminalID": "622592b858b8e231ba340ce2",
+        "labs": [
+          "6225a44c759acc281eda6078",
+          "6225fffbcebb50305507c5a5",
+          "62260201dbb09b7717cc534c",
+          "622716062213a1c6b612e631",
+          "62272cd297063a0d90a45200",
+          "62273de9d32fac053d4e88ca",
+          "6228699340d11b7980d1101b",
+          "62287c1c6825c65606d6c408",
+          "62288e7a76cf3af884f0ab96",
+          "6228abae9db01fbc4557bf06"
+        ],
+        "extractID": "6225d0c8dbd449094ed2796a",
+        "PowerSpawnID": "622831c50392d9713cb03de6",
+        "NukerID": "62284a5c4f52c41da7d934cc",
+        "FactoryId": "6228587bea49eb0a5b5c6293",
+        "ObserverID": "62289f3e3e744f5e8f15e70d",
+        "center_link": "624ad3b553d33e41924c2cae"
+      },
+      "RoomLabBind": {},
+      "SpawnConfig": {
+        "harvest": {
+          "num": 2,
+          "adaption": true,
+          "level": 5
+        },
+        "carry": {
+          "num": 0,
+          "adaption": true,
+          "level": 5
+        },
+        "upgrade": {
+          "num": 1,
+          "level": 10
+        },
+        "harvest_Mineral": {
+          "num": 0,
+          "adaption": true,
+          "level": 11
+        },
+        "manage": {
+          "num": 1,
+          "must": true,
+          "adaption": true,
+          "level": 2
+        },
+        "transport": {
+          "num": 2,
+          "must": true,
+          "adaption": true,
+          "level": 1
+        },
+        "build": {
+          "num": 0,
+          "must": true,
+          "level": 10
+        }
+      },
+      "originLevel": 8,
+      "SpawnList": [],
+      "state": "peace",
+      "CoolDownDic": {
+        "链传送能": 8
+      },
+      "Misson": {
+        "Structure": [
+          {
+            "name": "资源购买",
+            "range": "Structure",
+            "structure": [
+              "622592b858b8e231ba340ce2"
+            ],
+            "delayTick": 99999,
+            "level": 10,
+            "maxTime": 3,
+            "Data": {
+              "rType": "ops",
+              "num": 200000,
+              "range": 1,
+              "type": "sell",
+              "maxPrice": 20
+            },
+            "id": "S-ig1uivfp648802082"
+          },
+          {
+            "name": "链传送能",
+            "range": "Structure",
+            "delayTick": 18,
+            "structure": [
+              "624ad3b553d33e41924c2cae"
+            ],
+            "level": 25,
+            "Data": {
+              "disStructure": "622594a2759acc9831da5bbc"
+            },
+            "id": "S-4f3lcbr1jj48938379",
+            "processing": true
+          }
+        ],
+        "Room": [],
+        "Creep": [
+          {
+            "name": "墙体维护",
+            "range": "Creep",
+            "delayTick": 99999,
+            "level": 10,
+            "Data": {
+              "RepairType": "global",
+              "num": 1,
+              "vindicate": false
+            },
+            "maxTime": 3,
+            "CreepBind": {
+              "repair": {
+                "num": 1,
+                "bind": [
+                  "刷墙·7245txpkafzd2l"
+                ]
+              }
+            },
+            "id": "C-sx2irk1fxd37425703",
+            "processing": true
+          },
+          {
+            "name": "虫卵填充",
+            "range": "Creep",
+            "delayTick": 36,
+            "cooldownTick": 4,
+            "CreepBind": {
+              "transport": {
+                "num": 2,
+                "bind": [
+                  "搬运·7850g0sbriiqov",
+                  "搬运·7902t2udsjnre5"
+                ]
+              }
+            },
+            "Data": {},
+            "id": "C-wph21xywdn48938370",
+            "level": 10,
+            "processing": true
+          },
+          {
+            "name": "dp_harvest",
+            "range": "Creep",
+            "delayTick": 14184,
+            "level": 12,
+            "Data": {
+              "myroomname": "W38S51",
+              "FlagName": "deposit W38S51 48902391",
+              "transferCreepName": "deposit W38S51 48902391 transfer",
+              "intervalTime": 48902391,
+              "dpId": "6485305987abcbc0fd40596b"
+            },
+            "maxTime": 5,
+            "reserve": true,
+            "CreepBind": {
+              "dp_harvest": {
+                "num": 1,
+                "bind": [
+                  "dp·7491qjky0r0ag3"
+                ],
+                "interval": 1300
+              }
+            },
+            "id": "C-2puggzkyo48902391",
+            "processing": true
+          },
+          {
+            "name": "dp_transfer",
+            "range": "Creep",
+            "delayTick": 14160,
+            "level": 12,
+            "Data": {
+              "myroomname": "W38S51",
+              "FlagName": "deposit W38S51 48902391",
+              "transferCreepName": "deposit W38S51 48902391 transfer",
+              "creeptimebool": false,
+              "intervalTime": 48902391,
+              "creeptime": 238
+            },
+            "maxTime": 5,
+            "reserve": true,
+            "CreepBind": {
+              "dp_transfer": {
+                "num": 1,
+                "bind": [
+                  "dp·749160einlaq7r"
+                ],
+                "interval": 1300
+              }
+            },
+            "id": "C-4ipnzsd6g848902391",
+            "processing": true
+          },
+          {
+            "name": "dp_harvest",
+            "range": "Creep",
+            "delayTick": 46530,
+            "level": 12,
+            "Data": {
+              "myroomname": "W38S51",
+              "FlagName": "deposit W38S51 48934761",
+              "transferCreepName": "deposit W38S51 48934761 transfer",
+              "intervalTime": 48934761,
+              "dpId": "6486331139ad0058caa12989"
+            },
+            "maxTime": 5,
+            "reserve": true,
+            "CreepBind": {
+              "dp_harvest": {
+                "num": 1,
+                "bind": [
+                  "dp·716120ad4fogbr"
+                ],
+                "interval": 1200
+              }
+            },
+            "id": "C-yo9wlna6nv48934761",
+            "processing": true
+          },
+          {
+            "name": "dp_transfer",
+            "range": "Creep",
+            "delayTick": 46530,
+            "level": 12,
+            "Data": {
+              "myroomname": "W38S51",
+              "FlagName": "deposit W38S51 48934761",
+              "transferCreepName": "deposit W38S51 48934761 transfer",
+              "creeptimebool": false,
+              "intervalTime": 48934761,
+              "creeptime": 332
+            },
+            "maxTime": 5,
+            "reserve": true,
+            "CreepBind": {
+              "dp_transfer": {
+                "num": 1,
+                "bind": [
+                  "dp·7161jfo4s8ld9n"
+                ],
+                "interval": 1200
+              }
+            },
+            "id": "C-0yfdqwq9c48934761",
+            "processing": true
+          }
+        ],
+        "PowerCreep": []
+      },
+      "TerminalData": {
+        "energy": {
+          "num": 50000,
+          "fill": true
+        }
+      },
+      "MarketData": {
+        "deal": {},
+        "order": {}
+      },
+      "harvestData": {
+        "5bbcaaeb9099fc012e6326f8": {
+          "harvest": "挖·8230e0ns3obsbo",
+          "carry": "[运] 6k8jj9629s8629",
+          "linkID": "6221ce2404a01f45ecccf624"
+        },
+        "5bbcaaeb9099fc012e6326fa": {
+          "harvest": "挖·6817kvjqmsja2o",
+          "carry": "[运] 20rj8h3kyg6139",
+          "linkID": "635653481e579376c367ced9"
+        }
+      },
+      "structureNum": 187,
+      "distribution": {
+        "spawn": [
+          "27/11",
+          "30/13",
+          "35/11"
+        ],
+        "container": [],
+        "extension": [
+          "30/10",
+          "29/11",
+          "27/10",
+          "26/9",
+          "30/9",
+          "31/9",
+          "32/8",
+          "29/9",
+          "31/8",
+          "31/7",
+          "28/12",
+          "28/11",
+          "28/10",
+          "30/8",
+          "28/8",
+          "28/7",
+          "29/7",
+          "29/6",
+          "30/6",
+          "27/7",
+          "28/6",
+          "29/5",
+          "32/6",
+          "33/5",
+          "33/6",
+          "34/6",
+          "33/7",
+          "35/7",
+          "34/8",
+          "26/8",
+          "37/11",
+          "38/10",
+          "39/9",
+          "27/13",
+          "26/13",
+          "26/12",
+          "26/14",
+          "26/15",
+          "27/15",
+          "28/14",
+          "29/13",
+          "30/14",
+          "31/13",
+          "30/12",
+          "28/15",
+          "29/15",
+          "30/16",
+          "36/12",
+          "38/12",
+          "39/12",
+          "39/11",
+          "40/11",
+          "40/10",
+          "25/11",
+          "25/10",
+          "38/13",
+          "31/5",
+          "32/14",
+          "31/15",
+          "34/10"
+        ],
+        "tower": [
+          "33/10",
+          "30/3",
+          "28/3",
+          "32/3",
+          "26/3",
+          "24/3"
+        ],
+        "road": [
+          "33/8",
+          "31/10",
+          "32/9",
+          "32/13",
+          "31/12",
+          "29/12",
+          "30/11",
+          "35/10",
+          "30/15",
+          "28/13",
+          "29/14",
+          "29/10",
+          "28/9",
+          "36/11",
+          "34/9",
+          "37/12",
+          "32/7",
+          "31/6",
+          "27/8",
+          "34/7",
+          "26/7",
+          "29/8",
+          "27/6",
+          "27/12",
+          "26/11",
+          "26/10",
+          "27/9",
+          "30/7",
+          "30/5",
+          "28/5",
+          "29/4",
+          "31/14",
+          "32/5",
+          "33/4",
+          "36/9",
+          "37/8",
+          "38/7",
+          "39/8",
+          "40/9",
+          "39/10",
+          "38/11",
+          "27/14",
+          "29/16",
+          "25/6",
+          "24/5",
+          "23/5",
+          "22/5",
+          "21/5",
+          "20/5",
+          "19/5",
+          "18/5",
+          "17/5",
+          "15/5",
+          "16/5",
+          "14/5",
+          "13/5",
+          "12/5",
+          "11/5",
+          "39/6",
+          "40/5",
+          "41/5",
+          "42/5",
+          "43/5",
+          "44/5",
+          "32/12",
+          "33/11",
+          "33/13",
+          "34/13",
+          "35/12",
+          "33/9"
+        ],
+        "storage": [
+          "32/10"
+        ],
+        "link": [
+          "24/12",
+          "35/13",
+          "33/12",
+          "32/17"
+        ],
+        "terminal": [
+          "34/12"
+        ],
+        "extractor": [
+          "23/44"
+        ],
+        "lab": [
+          "35/9",
+          "36/8",
+          "35/8",
+          "36/7",
+          "37/7",
+          "38/8",
+          "36/10",
+          "37/10",
+          "37/9",
+          "38/9"
+        ],
+        "factory": [
+          "34/11"
+        ],
+        "powerSpawn": [
+          "32/11"
+        ],
+        "observer": [
+          "26/16"
+        ],
+        "nuker": [
+          "31/11"
+        ],
+        "rampart": [
+          "8/2",
+          "10/2",
+          "12/2",
+          "14/2",
+          "19/2",
+          "21/2",
+          "23/2",
+          "25/2",
+          "27/2",
+          "29/2",
+          "31/2",
+          "33/2",
+          "42/2",
+          "44/2",
+          "46/2",
+          "32/3",
+          "30/3",
+          "28/3",
+          "26/3",
+          "24/3",
+          "32/10",
+          "31/11",
+          "32/11",
+          "33/10",
+          "34/11",
+          "34/12",
+          "33/12"
+        ]
+      },
+      "ResourceLimit": {
+        "energy": 350000
+      },
+      "nukeID": [],
+      "nukeData": {
+        "damage": {},
+        "rampart": {}
+      },
+      "Factory": {
+        "factoryData": {
+          "energy": {
+            "num": 4900,
+            "fill": true
+          },
+          "G": {
+            "num": 4900,
+            "fill": true
+          }
+        },
+        "produce": {
+          "ghodium_melt": true
+        },
+        "level": 5,
+        "dataProduce": {
+          "ghodium_melt": {
+            "num": 21522
+          },
+          "machine": {
+            "num": 500
+          }
+        },
+        "automation_Bar": {
+          "L": {
+            "num": 50000
+          },
+          "metal": {
+            "num": 50000
+          },
+          "O": {
+            "num": 100000
+          }
+        }
+      },
+      "observer": {
+        "watchIndex": 10,
+        "watchRooms": [
+          "W34S50",
+          "W35S50",
+          "W36S50",
+          "W37S50",
+          "W38S50",
+          "W41S50",
+          "W42S50",
+          "W43S50",
+          "W40S46",
+          "W40S47",
+          "W40S48",
+          "W44S50"
+        ],
+        "pbNumber": 0,
+        "depositNumber": 2,
+        "pbMax": 1,
+        "depositMax": 2,
+        "boost": {}
+      },
+      "ComDispatchData": {},
+      "market": {
+        "deal": [],
+        "order": []
+      },
+      "switch": {
+        "AutoDefend": false,
+        "AutoDefendAttack": false
+      },
+      "enemy": {},
+      "pausePS": false,
+      "energyPS": 20000,
+      "TowerAttackList": [],
+      "TowerAttack": {}
+    }
+  },
+  "creeps": {
+    "dp·6795o5b9f8nd07": {
+      "role": "dp_harvest",
+      "belong": "W39S59",
+      "shard": "shard3",
+      "boostData": {
+        "work": {},
+        "carry": {},
+        "move": {}
+      },
+      "working": false,
+      "adaption": false,
+      "taskRB": "C-5vi5rta3lo48913891",
+      "MissionData": {},
+      "crossLevel": 10
+    },
+    "挖·6817kvjqmsja2o": {
+      "role": "harvest",
+      "belong": "W38S51",
+      "shard": "shard3",
+      "boostData": {
+        "work": {},
+        "carry": {},
+        "move": {}
+      },
+      "working": false,
+      "adaption": false,
+      "targetID": "5bbcaaeb9099fc012e6326fa",
+      "moveData": {
+        "targetPos": "W38S51/32/17/shard3",
+        "index": 0
+      },
+      "prePos": "30/15",
+      "crossLevel": 10
+    },
+    "搬运·6948r8j5nfp27e": {
+      "role": "transport",
+      "belong": "W29S52",
+      "shard": "shard3",
+      "boostData": {
+        "carry": {},
+        "move": {}
+      },
+      "working": true,
+      "adaption": false,
+      "MissionData": {
+        "id": "C-gupdack6e48938370",
+        "name": "虫卵填充",
+        "Data": {}
+      },
+      "prePos": "14/31",
+      "standed": false,
+      "crossLevel": 10,
+      "fillingConstruction": "622c802d1958b3581a075eac",
+      "moveData": {
+        "targetPos": "W29S52/13/33/shard3",
+        "index": 2,
+        "path": "86"
+      }
+    },
+    "挖化合物·6951ysbfmqrgy": {
+      "role": "harvest_Mineral",
+      "belong": "W51S51",
+      "shard": "shard3",
+      "boostData": {
+        "work": {},
+        "carry": {},
+        "move": {}
+      },
+      "working": false,
+      "adaption": false,
+      "standed": true,
+      "prePos": "15/17",
+      "crossLevel": 10,
+      "moveData": {
+        "targetPos": "W51S51/17/19/shard3",
+        "index": 14,
+        "path": "22228822224444"
+      }
+    },
+    "刷墙·7055vtiiynn76y": {
+      "role": "repair",
+      "belong": "W39S59",
+      "shard": "shard3",
+      "boostData": {
+        "work": {},
+        "carry": {},
+        "move": {}
+      },
+      "working": true,
+      "adaption": false,
+      "crossLevel": 10,
+      "MissionData": {
+        "id": "C-yds3w68hj41993104",
+        "name": "墙体维护",
+        "Data": {
+          "RepairType": "global",
+          "num": 1,
+          "vindicate": false
+        }
+      },
+      "targetID": "61148de18a17f4725d6e6d92",
+      "prePos": "26/39",
+      "standed": false,
+      "moveData": {
+        "targetPos": "W39S59/30/43/shard3",
+        "index": 2,
+        "path": "44"
+      }
+    },
+    "升级·7063un1sjr0f1g": {
+      "role": "upgrade",
+      "belong": "W31S42",
+      "shard": "shard3",
+      "boostData": {
+        "work": {},
+        "carry": {},
+        "move": {}
+      },
+      "working": true,
+      "adaption": false,
+      "targetID": "6372955ab24bb072f796749f",
+      "standed": true,
+      "moveData": {
+        "targetPos": "W31S42/38/19/shard3",
+        "index": 18,
+        "path": "812232221111111112"
+      },
+      "prePos": "37/21"
+    },
+    "dp·7161jfo4s8ld9n": {
+      "role": "dp_transfer",
+      "belong": "W38S51",
+      "shard": "shard3",
+      "boostData": {
+        "carry": {},
+        "move": {}
+      },
+      "working": false,
+      "adaption": false,
+      "taskRB": "C-0yfdqwq9c48934761",
+      "crossLevel": 10,
+      "MissionData": {
+        "id": "C-0yfdqwq9c48934761",
+        "name": "dp_transfer",
+        "Data": {
+          "myroomname": "W38S51",
+          "FlagName": "deposit W38S51 48934761",
+          "transferCreepName": "deposit W38S51 48934761 transfer",
+          "creeptimebool": false,
+          "intervalTime": 48934761,
+          "creeptime": 332
+        }
+      },
+      "prePos": "11/40",
+      "moveData": {
+        "targetPos": "W43S50/10/41/shard3",
+        "index": 0
+      },
+      "standed": true,
+      "double": "dp·716120ad4fogbr"
+    },
+    "中央·7211jexk8cs953a": {
+      "role": "manage",
+      "belong": "W51S59",
+      "shard": "shard3",
+      "boostData": {
+        "carry": {},
+        "move": {}
+      },
+      "working": true,
+      "adaption": false,
+      "MissionData": {},
+      "prePos": "38/17",
+      "crossLevel": 10,
+      "moveData": {
+        "targetPos": "W51S59/37/18/shard3",
+        "index": 1,
+        "path": "6"
+      },
+      "standed": false
+    }
+  },
+  "ResourceDispatchData": [],
+  "stats": {
+    "gcl": 50.76565078788887,
+    "gclLevel": 23,
+    "gpl": 57.34873563218391,
+    "gplLevel": 217,
+    "cpu": 17.63801330025308,
+    "bucket": 9634,
+    "cr": 1019299978.0573001,
+    "energy": 1688884,
+    "power": 12871403
+  },
+  "outMineData": {},
+  "powerCreeps": {
+    "W31S42/queen/shard3": {
+      "belong": "W31S42",
+      "role": "queen",
+      "shard": "shard3",
+      "spawn": "63891b818a0d28a3d8e5ab71",
+      "nuke": {},
+      "prePos": "35/36",
+      "MissionData": {},
+      "crossLevel": 10,
+      "moveData": {
+        "targetPos": "W31S42/37/37/shard3",
+        "index": 1,
+        "path": "4"
+      }
+    }
+  },
+  "squadMemory": {},
+  "superbitch-Framework": true,
+  "VisualLevel": "low",
+  "bypassRooms": [
+    "W31S41",
+    "W31S51"
+  ]
+}

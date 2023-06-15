@@ -371,7 +371,7 @@ export default class RoomFunctionFindExtension extends Room {
             this.memory.originLevel = this.controller.level
     }
 
-    /* 监控升级工任务动态数量孵化 和 监控发布挖化合物任务 */
+    /* 监控升级工任务动态数量孵化 和 监控发布挖化合物任务 和 监控需要多少搬运爬 */
     public LevelUpgradeCreep(): void {
         if (Game.time % 100) return
         //控制挖化合物爬数量
@@ -385,7 +385,10 @@ export default class RoomFunctionFindExtension extends Room {
                 }
                 else { this.memory.SpawnConfig.harvest_Mineral.num = 0; }
             }
-            else this.memory.SpawnConfig.harvest_Mineral.num = 0;
+            else {
+                delete this.memory.StructureIdData.extractID;
+                this.memory.SpawnConfig.harvest_Mineral.num = 0;
+            }
         }
         else this.memory.SpawnConfig.harvest_Mineral.num = 0;
 
@@ -407,7 +410,7 @@ export default class RoomFunctionFindExtension extends Room {
             else {
                 if (this.controller.level >= 4) {
                     for (var i of this.memory.Misson['Creep'])
-                        if (i.name == '急速冲级') {
+                        if (i.name == '急速冲级' || i.name == '普通冲级') {
                             this.memory.SpawnConfig.upgrade.num = 0
                             return
                         }
@@ -418,6 +421,16 @@ export default class RoomFunctionFindExtension extends Room {
                     }
                 }
             }
+
+            //控制搬运爬数量
+            let num = 0
+            for (let harvest in this.memory.harvestData) {
+                if (this.memory.harvestData[harvest].containerID) {
+                    if (Game.getObjectById(this.memory.harvestData[harvest].containerID)) num++
+                    else delete this.memory.harvestData[harvest].containerID
+                }
+            }
+            if (num != this.memory.SpawnConfig.carry.num) this.memory.SpawnConfig.carry.num = num
         }
     }
 }

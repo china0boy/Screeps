@@ -48,6 +48,10 @@ export default class RoomCoreSpawnExtension extends Room {
                 if (role == 'upgrade')
                     for (let i of this.memory.Misson['Creep'])
                         if (i.name == '急速冲级') continue A
+                if (role == 'harvester') {
+                    this.memory.SpawnConfig[role].num = Object.keys(this.memory.harvestData).length
+                    continue
+                }
                 var role_ = this.memory.SpawnConfig[role]
                 if (!role_.manual && RoleLevelData[role] && RoleLevelData[role][this.controller.level]) {
                     role_.num = RoleLevelData[role][this.controller.level].num
@@ -96,7 +100,7 @@ export default class RoomCoreSpawnExtension extends Room {
             for (let i of this.memory.nukeID) {
                 let nuke = Game.getObjectById(i) as Nuke;
                 if (!nuke) continue
-                if (nuke.timeToLand <= 200) return
+                if (nuke.timeToLand <= 1000) return
             }
         }
 

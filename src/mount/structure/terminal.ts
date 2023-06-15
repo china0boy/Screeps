@@ -6,7 +6,7 @@ import { avePrice, haveOrder, highestPrice } from "@/module/fun/funtion"
 // terminal 扩展
 export default class terminalExtension extends StructureTerminal {
     public ManageMission(): void {
-        if (this.room.MissionNum('Creep', '急速冲级') > 0) return   // 急速冲级状态下停止terminal功能
+        if (this.room.MissionNum('Creep', '急速冲级') > 0 || this.room.controller.level < 6) return   // 急速冲级状态下停止terminal功能
         let allmyTask: MissionModel[] = []
         for (let task of this.room.memory.Misson['Structure']) {
             if (!task.structure) continue
@@ -141,7 +141,7 @@ export default class terminalExtension extends StructureTerminal {
                 else {
                     //购买能量
                     if (Game.market.credits >= 10000000)
-                        this.OrderEnergy('energy', 10000, 20 - energyNum / 10000);
+                        this.OrderEnergy('energy', 10000, 60 - energyNum / 10000);// energyNum <= 80000 ? 60 - energyNum / 10000 : 20 - energyNum / 10000
                 }
             }
 
@@ -500,7 +500,7 @@ export default class terminalExtension extends StructureTerminal {
         let history = Game.market.getAllOrders({ type: ORDER_BUY, resourceType: type });
         let avePrice = 0;
         for (let i = 0; i < history.length; i++) {
-            if (history[i].price > avePrice && history[i].price <= max && history[i].roomName != this.room.name && history[i].amount >= 1000) { avePrice = history[i].price + 0.001; }//符合条件
+            if (history[i].price > avePrice && history[i].price <= max && !(history[i].roomName in Memory.RoomControlData) && history[i].amount > 10000) { avePrice = history[i].price + 0.001; }//符合条件
         }
         /* 判断有无自己的订单 */
         let thisOrder = Game.market.orders;

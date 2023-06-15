@@ -31,7 +31,7 @@ export default class CreepMissonMineExtension extends Creep {
                     this.goTo(new RoomPosition(25, 25, creepMisson.disRoom), 20)
                     return
                 }
-                if (this.ticksToLive == 1) {
+                if (this.ticksToLive % 250 == 0) {
                     //检测周围5格是否有敌方建筑
                     let attackStructure = this.pos.findInRange(FIND_HOSTILE_STRUCTURES, 5)
                     //如果有敌方建筑就发布外矿防守任务
@@ -113,7 +113,7 @@ export default class CreepMissonMineExtension extends Creep {
                     if (!this.pos.isNearTo(disPos)) this.goTo(disPos, 1)
                     else {
                         let source = Game.getObjectById(this.memory.bindpoint) as Source
-                        this.harvest(source);
+                        if (source) this.harvest(source);
                         if (this.hits < this.hitsMax) globalMisson.Data.state = 3
                     }
                     return
@@ -161,7 +161,7 @@ export default class CreepMissonMineExtension extends Creep {
                         let a = Game.rooms[this.memory.belong].storage ? Game.rooms[this.memory.belong].storage : Game.rooms[this.memory.belong].terminal ? Game.rooms[this.memory.belong].terminal : null
                         if (a) this.transfer_(a, 'energy')
                     }
-                    else this.goTo(new RoomPosition(25, 25, this.memory.belong), 23);
+                    else this.goTo(new RoomPosition(25, 25, this.memory.belong), 22);
                     return
                 }
                 if (this.ticksToLive <= 100) {
@@ -234,57 +234,6 @@ export default class CreepMissonMineExtension extends Creep {
                     }
                 }
 
-            }
-            else {
-                if (this.hits < this.hitsMax) this.heal(this)
-                if (this.room.name != creepMisson.disRoom) {
-                    this.memory.crossLevel = 11
-                    this.goTo(new RoomPosition(25, 25, creepMisson.disRoom), 20)
-                }
-                else {
-                    if (globalMisson.Data.state == 2) {
-                        let wounded = this.pos.findClosestByRange(FIND_MY_CREEPS, {
-                            filter: (creep) => {
-                                return creep.hits < creep.hitsMax && creep != this
-                            }
-                        })
-                        if (wounded) {
-                            if (!this.pos.isNearTo(wounded)) this.goTo(wounded.pos, 1)
-                            this.heal(wounded)
-                        }
-                        return
-                    }
-                    var enemy = this.pos.findClosestByPath(FIND_HOSTILE_CREEPS, {
-                        filter: (creep) => {
-                            return !isInArray(Memory.whitesheet, creep.owner.username)
-                        }
-                    })
-                    if (enemy) {
-                        this.handle_ranged_attack(enemy)
-                        return
-                    }
-                    else {
-                        let InvaderCore = this.pos.findClosestByPath(FIND_STRUCTURES, {
-                            filter: (stru) => {
-                                return stru.structureType == STRUCTURE_INVADER_CORE
-                            }
-                        }) as StructureInvaderCore
-                        if (InvaderCore) {
-                            if (this.rangedAttack(InvaderCore) == ERR_NOT_IN_RANGE) this.goTo(InvaderCore.pos, 3)
-                        }
-                    }
-                    /*
-                    var InvaderCore = this.pos.findClosestByPath(FIND_HOSTILE_STRUCTURES,{filter:(stru)=>{
-                        return stru.structureType != 'rampart'
-                    }})
-                    if (InvaderCore)
-                    {
-                        this.memory.standed = true
-                        if (!this.pos.isNearTo(InvaderCore)) this.goTo(InvaderCore.pos,1)
-                        else this.rangedMassAttack()
-                        return
-                    }*/
-                }
             }
         }
         if (Memory.outMineData[creepMisson.disRoom].mineType == 'center') {
