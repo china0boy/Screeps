@@ -93,7 +93,7 @@ export function ResourceDispatch(thisRoom: Room): void {
             if (storage_.store.getUsedCapacity(i.rType))
                 var limitNum = global.ResourceLimit[thisRoom.name][i.rType] ? global.ResourceLimit[thisRoom.name][i.rType] : 0
             if (storage_.store.getUsedCapacity(i.rType) <= 0) continue  // 没有就删除
-            
+
             let num = storage_.store.getUsedCapacity(i.rType) - limitNum
             let SendNum = 0
             let task = null
@@ -106,7 +106,7 @@ export function ResourceDispatch(thisRoom: Room): void {
                     SendNum = storage_.store.getUsedCapacity(i.rType) - limitNum
                     task = thisRoom.Public_Send(i.sourceRoom, i.rType, SendNum)
                 }
-                if (task && thisRoom.AddMission(task)) {
+                if (SendNum > 0 && task && thisRoom.AddMission(task)) {
                     if (i.num <= 50000) i.dealRoom = thisRoom.name // 如果调度数量大于50k 则只减少num数量
                     console.log(Colorful(`房间${thisRoom.name}接取房间${i.sourceRoom}的资源调度申请,资源:${i.rType},数量:${SendNum}`, 'green'))
                     i.num -= SendNum

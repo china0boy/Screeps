@@ -1,0 +1,53 @@
+Game.market.createOrder({ type: ORDER_SELL, resourceType: 'energy', price: 100000000, totalAmount: 1, roomName: "E19N2" });
+
+Game.rooms['W39S59'].memory.market.deal[0].price = 1000.001
+debug.ResourceBuy("W51S51", "deal", "XKH2O", 700000, 1, 200, 99999)
+
+debug.ResourceBuy("W38S51", "sell", "Z", 2000000, 1, 3, 99999)
+
+market.sell("W38S51", "machine", "deal", 数量, 单价, 5)market.sell("E18S1", "power", "order", 200000, 170, 20000)
+market.sell("W38S51", "machine", "deal", 268, 5500000, 5)Game.rooms['W39S59'].memory.market.order[0].unit = 50000
+
+loot.carryShard("W38S51", "Flag1", "Flag2", 1, 1, "machine", 100, 1500, "shard3", "shard1")
+
+Game.rooms['W27S47'].find(FIND_STRUCTURES, { filter: (s) => s.structureType == STRUCTURE_WALL }).forEach((s) => s.destroy())
+Game.rooms['W35S58'].find(FIND_HOSTILE_STRUCTURES).forEach((s) => s.destroy())
+for (let i = 0; i <= 50; i++) Game.market.createOrder({ type: ORDER_BUY, resourceType: 'metal', price: 700, totalAmount: 1, roomName: "W38S51" });
+for (let i = 17; i <= 19; i++) { for (let j = 29; j <= 46; j++) { frame.del('WS', i, j, 'wall') } }
+for (let i = 17; i <= 19; i++) { for (let j = 29; j <= 46; j++) { let a = new RoomPosition(i, j, 'W39S59').lookFor(LOOK_STRUCTURES); if (a[0] && a[0].structureType == STRUCTURE_WALL) { a[0].destroy() } } }
+`<div style="width:500px;height:200px;margin:5px;line-height:20px;text-decoration: none;border:1px solid #ff8b00;background-image:radial-gradient(circle, #ffce00, #ffc200, #ffb500, #ffa900, #ff9c00, #fba000, #f8a500, #f4a900, #e8bf00, #d4d400, #b7ea00, #8bff00);"><div>`
+  `<div style="width:530px;height:200px;margin:5px;line-height:20px;text-decoration: none;border:1px solid #ff8b00;background-image:radial-gradient(circle, #ffce00, #ffc200, #ffb500, #ffa900, #ff9c00, #fba000, #f8a500, #f4a900, #e8bf00, #d4d400, #b7ea00, #8bff00);"><h3 style="color:blue;text-align: center;" >资源传送任务监控中</h3><hr width=100% size=100% color=pink><h5 style="color:#a200ff">
+房间：W38S51--->W51S51\t运送资源：energy
+
+路费:235 energy \t终端拥有能量:500 energy<hr width=100% size=100% color=pink>
+终端拥有资源量:500\t仓库拥有资源量:541200\t任务所需资源量:5000<hr width=100% size=100% color=pink><h5><div>`
+
+console.log(
+  Colorful(`                     资源传送任务监控中\n`, 'blue') +
+  Colorful(`———————————————————————————————————————————————————————————\n`, 'blue') +
+  Colorful(`房间：${this.room.name}--->${task.Data.disRoom}  运送资源：${task.Data.rType}\n`, 'blue') +
+  Colorful(`———————————————————————————————————————————————————————————\n`, 'blue') +
+  Colorful(`路费:${wastage} energy\t终端拥有能量:${this.store.getUsedCapacity('energy')} energy\n`, 'blue') +
+  Colorful(`终端拥有资源量:${cargoNum}\t仓库拥有资源量:${storage_.store.getUsedCapacity(task.Data.rType)}\t任务所需资源量:${task.Data.num}\n`, 'blue') +
+  Colorful(`———————————————————————————————————————————————————————————\n`, 'blue'))
+
+
+//遍历显示Game.constructionSites里的所有建筑类型和房间号，给房间号加上a标签
+for (let i in Game.constructionSites) {
+  console.log(`<a href="#!/room/${Game.shard.name}/${Game.constructionSites[i].pos.roomName}">${Game.constructionSites[i].pos.roomName}</a>,${Game.constructionSites[i].structureType}`)
+}
+
+// 遍历所有房间的power spawn,调用on函数
+for (let i in Memory.RoomControlData) { let room = Game.rooms[i]; if (room && room.controller && room.controller.my) { let powerSpawn = Game.getObjectById(room.memory.StructureIdData.PowerSpawnID); if (powerSpawn) { powerSpawn.on(20000); } } }
+
+let order = Game.market.outgoingTransactions;
+let num=0;
+let a=0;
+for (let i in order) {
+  if (order[i].from  == "E19N2"&&order[i].resourceType == "power") {
+    num += order[i].amount;
+    a++;
+    console.log(JSON.stringify(order[i]));
+  }
+}
+console.log(a,num);

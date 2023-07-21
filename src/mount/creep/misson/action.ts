@@ -53,6 +53,18 @@ export default class CreepMissonActionExtension extends Creep {
                 var leastRam = this.room.getListHitsleast([STRUCTURE_RAMPART, STRUCTURE_WALL], 3)
                 if (!leastRam) return
                 this.memory.targetID = leastRam.id
+                // 如果shard不为3就搜索有没有地上的能量
+                if (Game.shard.name != 'shard3') {
+                    let dropped = this.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {
+                        filter: (res) => {
+                            return res.resourceType == 'energy' && res.amount >= this.store.getFreeCapacity()
+                        }
+                    })
+                    if (dropped) {
+                        if (this.pickup(dropped) == ERR_NOT_IN_RANGE) this.goTo(dropped.pos, 1)
+                        return
+                    }
+                }
                 if (!this.memory.containerID) {
                     var tank = this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
                         filter: (stru) => {

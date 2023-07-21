@@ -57,8 +57,8 @@ export default class RoomMissonBehaviourExtension extends Room {
         if (!center_link) { delete this.memory.StructureIdData.center_link; return }
         if (this.memory.StructureIdData.upgrade_link || this.memory.StructureIdData.comsume_link) {
             let upgrade_link = Game.getObjectById(this.memory.StructureIdData.upgrade_link) as StructureLink
-            if (!upgrade_link) { delete this.memory.StructureIdData.upgrade_link; return }
-            if (upgrade_link.store.getUsedCapacity('energy') < 500) {
+            if (!upgrade_link) { delete this.memory.StructureIdData.upgrade_link; }
+            if (upgrade_link && upgrade_link.store.getUsedCapacity('energy') < 500) {
                 var thisTask = this.Public_link([center_link.id], upgrade_link.id, 25)
                 this.AddMission(thisTask)
                 return

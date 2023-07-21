@@ -416,7 +416,7 @@ export default class RoomFunctionFindExtension extends Room {
                         }
                     let storage = this.storage;
                     if (storage) {
-                        let num = Math.floor(storage.store.energy / 200000)
+                        let num = Math.floor(storage.store.energy / 50000)
                         this.memory.SpawnConfig.upgrade.num = num >= 3 ? (this.controller.level <= 5 ? num : 3) : num;
                     }
                 }
