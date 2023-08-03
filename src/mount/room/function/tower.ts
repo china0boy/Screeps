@@ -69,7 +69,7 @@ export default class RoomFunctionTowerExtension extends Room {
                             if (!thisTower) {
                                 let index = this.memory.StructureIdData.AtowerID.indexOf(c); this.memory.StructureIdData.AtowerID.splice(index, 1); continue
                             }
-                            else thisTower.attack(creeps[0])
+                            else thisTower.attack(creeps)
                         }
                     }
                 }

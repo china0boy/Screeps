@@ -41,6 +41,22 @@ export default class RoomMissonBehaviourExtension extends Room {
                 this.memory.StructureIdData.source_links.splice(index, 1)
                 return
             }
+            // 先判断消费link是否需要能量
+            if (this.memory.StructureIdData.comsume_link && this.memory.StructureIdData.comsume_link.length > 0) {
+                for (var i of this.memory.StructureIdData.comsume_link) {
+                    let l = Game.getObjectById(i) as StructureLink
+                    if (!l) {
+                        let index = this.memory.StructureIdData.comsume_link.indexOf(i)
+                        this.memory.StructureIdData.comsume_link.splice(index, 1)
+                    }
+                    else if (l.store.getUsedCapacity('energy') <= 400 && this.Check_Link(source_link.pos, l.pos)) {
+                        var thisTask = this.Public_link([source_link.id], l.id, 5)
+                        this.AddMission(thisTask)
+                        continue
+                    }
+                }
+            }
+            // 在判断升级link是否需要能量
             if (source_link.store.getUsedCapacity('energy') >= 700 && this.Check_Link(source_link.pos, center_link.pos)) {
                 var thisTask = this.Public_link([source_link.id], center_link.id, 5)
                 this.AddMission(thisTask)

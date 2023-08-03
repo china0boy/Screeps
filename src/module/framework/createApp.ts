@@ -41,15 +41,32 @@ export const createApp = function (opt: Partial<CreateOptions> = {}) {
      * 来源 @see https://screeps.slack.com/files/U33SKDU0P/F5GKDBBAA/Memory_Cache.js?origin_team=T0HJCPP9T&origin_channel=C2G22RFPF
      */
     let _memoryCacher: MemoryCacher = next => {
-        if (_cachedMemory) {
+
+        // let lastTime = _cachedMemory.lastTime;
+        // @ts-ignore
+        if (_cachedMemory && _cachedMemory.lastTime && Game.time == _cachedMemory.lastTime + 1) {
             // @ts-ignore
-            delete global.Memory
+            delete global.Memory;
             // @ts-ignore
-            global.Memory = _cachedMemory
+            global.Memory = _cachedMemory;
+            // @ts-ignore
+            RawMemory._parsed = global.Memory;
+        } else {
+            // @ts-ignore
+            _cachedMemory = global.Memory;
         }
-        else {
-            _cachedMemory = Memory
-        }
+        // @ts-ignore
+        _cachedMemory.lastTime = Game.time;
+
+        // if (_cachedMemory) {
+        //     // @ts-ignore
+        //     delete global.Memory
+        //     // @ts-ignore
+        //     global.Memory = _cachedMemory
+        // }
+        // else {
+        //     _cachedMemory = Memory
+        // }
 
         next()
 

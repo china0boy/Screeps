@@ -64,7 +64,7 @@ export default class CreepMissonWarExtension extends Creep {
         if (!missionData) return
         let id = missionData.id
         let data = missionData.Data
-        if (data.biao) return
+        // if (data.biao) return
         if (this.room.name != data.disRoom || Game.shard.name != data.shard) {
             this.arriveTo(new RoomPosition(24, 24, data.disRoom), 20, data.shard, data.shardData)
         }
@@ -82,7 +82,7 @@ export default class CreepMissonWarExtension extends Creep {
                                 for (let i of creeps) {
                                     i.attackController(control)
                                     i.suicide()
-                                    i.memory.MissionData.Data.biao = true
+                                    // i.memory.MissionData.Data.biao = true
                                 }
                                 this.attackController(control)
                                 this.suicide()

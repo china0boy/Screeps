@@ -69,7 +69,7 @@ export default class CreepMissonActionExtension extends Creep {
                     var tank = this.pos.findClosestByPath(FIND_MY_STRUCTURES, {
                         filter: (stru) => {
                             return stru.structureType == 'storage' ||
-                                (stru.structureType == 'link' && isInArray(Game.rooms[this.memory.belong].memory.StructureIdData.comsume_link, stru.id) && stru.store.getUsedCapacity('energy') > this.store.getCapacity())
+                                (stru.structureType == 'link' && isInArray(Game.rooms[this.memory.belong].memory.StructureIdData.comsume_link, stru.id) && stru.store.getUsedCapacity('energy'))
                         }
                     })
                     if (tank) this.memory.containerID = tank.id
@@ -81,7 +81,13 @@ export default class CreepMissonActionExtension extends Creep {
 
                 }
                 let tank_ = Game.getObjectById(this.memory.containerID) as StructureStorage
-                this.withdraw_(tank_, 'energy')
+                if (tank_ && tank_.store.getUsedCapacity('energy')) {
+                    this.withdraw_(tank_, 'energy')
+                }
+                else {
+                    delete this.memory.containerID
+                }
+
             }
         }
         else if (mission.Data.RepairType == 'nuker') {
@@ -1390,9 +1396,8 @@ export default class CreepMissonActionExtension extends Creep {
         }
         else {
             if (distance >= 1) {
-                if (this.PathFinders(attackcreep.pos, 1, true))
-                    this.goTo(attackcreep.pos, 1);
-                else this.goTo(attackcreep.pos, 3);
+                let range = this.PathFinders(attackcreep.pos, 1, true) ? 1 : 3;
+                this.goTo(attackcreep.pos, range);
             }
             else this.move(this.pos.getDirectionTo(attackcreep))
             if (distance > 1 && distance <= 3) this.rangedAttack(attackcreep);

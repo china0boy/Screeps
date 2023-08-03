@@ -420,7 +420,7 @@ export default class RoomMissonFrameExtension extends Room {
             All_i_Num = tank_.store.getUsedCapacity(misson.LabBind[i] as ResourceConstant)
             if (All_i_Num < 2100) {
                 /* 资源调度 */
-                if (DispatchNum(this.name) <= 0 && this.MissionNum('Structure', '资源购买') <= 0 && !checkSend(this.name, misson.LabBind[i] as ResourceConstant)) {
+                if (DispatchNum(this.name) <= 0 && this.MissionNum('Structure', '资源购买') <= 2 && !checkSend(this.name, misson.LabBind[i] as ResourceConstant)) {
                     console.log(Colorful(`[资源调度] 房间${this.name}没有足够的资源[${misson.LabBind[i] as ResourceConstant}],将执行资源调度!`, 'brown'))
                     let dispatchTask: RDData = {
                         sourceRoom: this.name,
