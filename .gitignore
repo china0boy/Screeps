@@ -5,3 +5,7 @@ dist/
 .secret.json
 
 *.tmp.txt
+
+.file
+
+.txt
