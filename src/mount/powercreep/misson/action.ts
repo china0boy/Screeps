@@ -172,11 +172,11 @@ export default class PowerCreepMissonAction extends PowerCreep {
         }
         var spawningSpawn = this.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (stru) => {
-                return stru.structureType == 'spawn'
+                return stru.structureType == 'spawn' && !isOPWR(stru)
             }
         })
         if (!this.OpsPrepare()) return
-        if (!this.pos.inRangeTo(spawningSpawn.pos, 3)) {
+        if (spawningSpawn && !this.pos.inRangeTo(spawningSpawn.pos, 3)) {
             this.goTo(spawningSpawn.pos, 3)
             return
         }

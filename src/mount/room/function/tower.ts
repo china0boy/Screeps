@@ -31,7 +31,10 @@ export default class RoomFunctionTowerExtension extends Room {
                 Ntower.repair(Repairdata)
             }
         }
-        else if (this, this.memory.state == 'war') {
+        else if (this.memory.state == 'war') {
+            if (!this.memory.switch.AttackTime) this.memory.switch.AttackTime = 0
+            this.memory.switch.AttackTime++
+            if (this.memory.switch.AttackTime >= 200) { this.memory.switch.AutoDefendAttack = true; this.memory.switch.AttackTime = 0 }
             if (Game.flags[`${this.name}/stop`]) return
             if (!this.memory.TowerAttackList) this.memory.TowerAttackList = []
             if (this.memory.switch.AutoDefend) {
@@ -124,14 +127,16 @@ export default class RoomFunctionTowerExtension extends Room {
                         // 单人小队
                         // 先计算敌方爬能抗伤害
                         let damage = ToughNum(enemy)
-                        if (damage > 3600) {
+                        // 计算塔的伤害
+                        let towerDamage = this.TowerDamage(enemy.pos)
+                        if (damage > towerDamage) {
                             // 伤害过高
                             this.memory.TowerAttack[enemy.id] = 999
                             this.memory.TowerAttackList.shift()
                         }
                         else {
                             // 塔的伤害大于敌方爬能抗伤害一直打
-                            if (this.TowerDamage(enemy.pos) > damage + 100) {
+                            if (towerDamage > damage + 100) {
                                 this.TowerAttack(enemy)
                                 if (this.memory.TowerAttack[enemy.id] > 200) {
                                     if (enemy.hits < this.memory.TowerAttackList[0][1]) {
@@ -199,6 +204,22 @@ export default class RoomFunctionTowerExtension extends Room {
                                 this.memory.TowerAttack[enemy.id]++
                                 return
                             }
+                        }
+                    }
+                } else {
+                    if (this.memory.TowerAttack.length > 0) {
+                        // 攻击第一个爬
+                        let enemy = Game.getObjectById(Object.keys(this.memory.TowerAttack)[0]) as Creep
+                        if (!enemy) {
+                            delete this.memory.TowerAttack[Object.keys(this.memory.TowerAttack)[0]]
+                            return
+                        }
+                        // 先计算敌方爬能抗伤害
+                        let damage = ToughNum(enemy)
+                        // 计算塔的伤害
+                        let towerDamage = this.TowerDamage(enemy.pos)
+                        if (damage < towerDamage) {
+                            this.TowerAttack(enemy)
                         }
                     }
                 }
