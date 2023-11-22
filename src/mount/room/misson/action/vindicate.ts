@@ -78,12 +78,15 @@ export default class RoomMissonVindicateExtension extends Room {
         else mission.Data.standed = true
         if (!this.Check_Lab(mission, 'transport', 'complex')) return
         if (Game.time % 40) return
-        if (terminal_.store.getUsedCapacity('energy') < 100000 && Game.market.credits >= 10000000) {
+        let terminalEnergy = terminal_.store.getUsedCapacity('energy')
+        if (terminalEnergy< 100000 && Game.market.credits >= 10000000) {
+            let maxPrice=20
+            if(terminalEnergy<20000) maxPrice=50
             /* 计算最高价格 */
             let history = Game.market.getAllOrders({ type: ORDER_BUY, resourceType: 'energy' });
             let avePrice = 0;
             for (let i = 0; i < history.length; i++) {
-                if (history[i].price > avePrice && history[i].price <= 20 && history[i].roomName != this.name) { avePrice = history[i].price + 0.001; }//符合条件
+                if (history[i].price > avePrice && history[i].price <= maxPrice && history[i].roomName != this.name) { avePrice = history[i].price + 0.001; }//符合条件
             }
 
             //* 清理过期订单 */

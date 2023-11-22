@@ -156,6 +156,17 @@ export default class CreepFunctionExtension extends Creep {
                 }
                 //return false
             }
+            else {
+                if (Game.time % 10 == 0) {
+                    // 检查是否boost成功
+                    for (var i of this.body) {
+                        if (i.type == body && i.boost != this.memory.boostData[body].type) {
+                            this.memory.boostData[body].boosted = false
+                            return false
+                        }
+                    }
+                }
+            }
         }
         return true
     }

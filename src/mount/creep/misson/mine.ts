@@ -120,6 +120,11 @@ export default class CreepMissonMineExtension extends Creep {
                 }
                 //修建
                 var source = Game.getObjectById(this.memory.bindpoint) as Source
+                if (!source) {
+                    let disPos = unzipPosition(this.memory.disPos)
+                    if (!this.pos.isNearTo(disPos)) this.goTo(disPos, 1)
+                    return
+                }
                 if (this.memory.containerID) var container = Game.getObjectById(this.memory.containerID) as StructureContainer
                 else {
                     Memory.outMineData[creepMisson.disRoom].car = false

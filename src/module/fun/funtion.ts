@@ -14,15 +14,15 @@ export function avePrice(res: ResourceConstant, day: number): number {
 }
 
 // 判断是否已经有相应order了s
-export function haveOrder(roomName: string, res: ResourceConstant, mtype: 'sell' | 'buy', nowPrice?: number, range?: number): boolean {
+export function haveOrder(roomName: string, res: ResourceConstant, mtype: 'sell' | 'buy', nowPrice?: number, range?: number) {
     if (!nowPrice)  //  不考虑价格
     {
         for (let i in Game.market.orders) {
             let order = Game.market.getOrderById(i);
             //console.log(order,Game.market.orders[i])
-            if (order.remainingAmount <= 0) { Game.market.cancelOrder(i); continue; }
+            //if (order.remainingAmount <= 0) { Game.market.cancelOrder(i); continue; }
             if (order.roomName == roomName && order.resourceType == res && order.type == mtype)
-                return true
+                return order
         }
         return false
     }
@@ -30,9 +30,9 @@ export function haveOrder(roomName: string, res: ResourceConstant, mtype: 'sell'
     {
         for (let i in Game.market.orders) {
             let order = Game.market.getOrderById(i);
-            if (order.remainingAmount <= 0) { Game.market.cancelOrder(i); continue; }
+            //if (order.remainingAmount <= 0) { Game.market.cancelOrder(i); continue; }
             if (order.roomName == roomName && order.resourceType == res && order.type == mtype && order.price >= (nowPrice + range))
-                return true
+                return order
         }
         return false
     }

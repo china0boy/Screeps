@@ -157,7 +157,8 @@ export default class RoomMissonPublish extends Room {
             name: '核弹填充',
             range: 'Structure',
             delayTick: 10000,
-            maxTime: 1
+            maxTime: 1,
+            processing: true,
         }
         return thisTask
     }

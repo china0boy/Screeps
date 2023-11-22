@@ -1,4 +1,5 @@
 import { computationalExpense, StatisticalResources, colorful } from "@/utils"
+import {showRoomRes}from "./showRoomRes/showRoomRes.js"
 export default {
     get(id: string) { return Game.getObjectById(id) },
     计算资源(type: CommodityConstant | 'energy', num: number) {
@@ -524,5 +525,5 @@ export default {
             return `[give] 未发现房间${roomName}[${rType}]全局资源传送任务!`
         }
     },
-
+    showRoomRes,
 }

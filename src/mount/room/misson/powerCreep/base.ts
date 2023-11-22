@@ -125,7 +125,7 @@ export default class PowerCreepMisson extends Room {
         if (!storage_ || storage_.store.getUsedCapacity('energy') < 20000) return
         let pc = Game.powerCreeps[`${this.name}/queen/${Game.shard.name}`]
         if (!pc || !pc.powers[PWR_OPERATE_EXTENSION] || pc.powers[PWR_OPERATE_EXTENSION].cooldown) return
-        if (this.energyAvailable < this.energyCapacityAvailable * 0.1 && this.MissionNum('PowerCreep', '扩展填充') <= 0) {
+        if (this.energyAvailable < this.energyCapacityAvailable * 0.2 && this.MissionNum('PowerCreep', '扩展填充') <= 0) {
             var thisTask: MissionModel = {
                 name: "扩展填充",
                 delayTick: 50,

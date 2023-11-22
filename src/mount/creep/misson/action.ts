@@ -829,7 +829,10 @@ export default class CreepMissonActionExtension extends Creep {
                                     this.handle_attack(Attack_creep)
                                     this.memory.standed = true
                                 }
-                                else { if (!this.fatigue && creep_.fatigue) { this.goTo(creep_.pos, 1); this.memory.standed = false } }
+                                else {
+                                    if (!this.fatigue && creep_.fatigue) { this.goTo(creep_.pos, 1); this.memory.standed = false }
+                                    this.attack(Attack_creep)
+                                }
                             }
                             else data.wall = this.handle_wall_rampart(Attack_creep, 1);
                         }

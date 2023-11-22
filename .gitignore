@@ -8,4 +8,4 @@ dist/
 
 .file
 
-.txt
+*.txt
