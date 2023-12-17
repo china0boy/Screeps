@@ -96,8 +96,8 @@ export default class PowerCreepMoveExtension extends PowerCreep {
 
         /* 路线查找 */
         const result = PathFinder.search(this.pos, { pos: target, range: range }, {
-            plainCost: 2,
-            swampCost: 5,
+            plainCost: 1,
+            swampCost: 1,
             maxOps: flee ? 1000 : ((key == 0 || key == 1) && target.roomName == this.room.name) ? 1000 : 8000,
             flee: flee,
             roomCallback: roomName => {

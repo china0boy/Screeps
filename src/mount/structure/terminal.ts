@@ -521,22 +521,23 @@ export default class terminalExtension extends StructureTerminal {
      * @param max 接受最大价格
      * @returns 
      */
-    public OrderEnergy(type: MarketResourceConstant, num: number, max: number, task?: MissionModel): string {
+    public OrderEnergy(type: ResourceConstant, num: number, max: number, task?: MissionModel): string {
         let maxPrice = 0;
-        if (type != "energy" || (type == "energy" && this.room.storage.store.getUsedCapacity("energy") + this.store.getUsedCapacity("energy") < 80000)) {
-            let history = Game.market.getAllOrders({ type: ORDER_BUY, resourceType: type });
-            let amount = 0
-            switch (type) {
-                case "energy": amount = 10000; break;
-                case "power": amount = 1000; break;
-                default: amount = 10000; break;
-            }
-            for (let i = 0; i < history.length; i++) {
-                if (history[i].price > maxPrice && history[i].price <= max && !(history[i].roomName in Memory.RoomControlData) && history[i].amount > amount) { maxPrice = history[i].price + 0.001; }//符合条件
-            }
-        } else {
-            // 计算能量均价
-            maxPrice = avePrice(type, 3);
+        let history = Game.market.getAllOrders({ type: ORDER_BUY, resourceType: type });
+        let amount = 0
+        switch (type) {
+            case "energy": amount = 10000; break;
+            case "power": amount = 1000; break;
+            case t3.includes(type) ? type : "": amount = 1000; break;
+            default: amount = 10000; break;
+        }
+        for (let i = 0; i < history.length; i++) {
+            if (history[i].price > maxPrice && history[i].price <= max && !(history[i].roomName in Memory.RoomControlData) && history[i].amount > amount) { maxPrice = history[i].price + 0.001; }//符合条件
+        }
+
+        if (type == 'energy' && this.room.storage.store.getUsedCapacity("energy") + this.store.getUsedCapacity("energy")> 80000) {
+            let Price = avePrice(type, 3);
+            maxPrice = maxPrice < Price ? maxPrice : Price;
         }
         /* 判断有无自己的订单 */
         let thisOrder = Game.market.orders;
@@ -570,11 +571,11 @@ export default class terminalExtension extends StructureTerminal {
             else { return `房间${this.room.name}:${type}不足,创建订单失败` }
         }
         else {
-            if (task && thisRoomOrder.remainingAmount <= 20000) {
+            if (thisRoomOrder.remainingAmount <= 20000) {
                 let addNum = 50000 - thisRoomOrder.remainingAmount
-                if (addNum > task.Data.num) addNum = task.Data.num
+                if (task && addNum > task.Data.num) addNum = task.Data.num
                 Game.market.extendOrder(thisRoomOrder.id, addNum);//添加容量
-                task.Data.num -= addNum
+                if (task) task.Data.num -= addNum
             }
             //更新价格
             Game.market.changeOrderPrice(thisRoomOrder.id, maxPrice)

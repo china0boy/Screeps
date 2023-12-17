@@ -181,6 +181,18 @@ export default class RoomMissonBehaviourExtension extends Room {
             // 原矿 资源调用
             if (storage_.store.getUsedCapacity(resource_) + terminal_.store.getUsedCapacity(resource_) < 10000 && isInArray(['H', 'O', 'K', 'L', 'X', 'U', 'Z'], resource_)) {
                 let num = StatisticalResources(resource_)
+                // 遍历所有房间有没有资源合成任务，排除掉resource_的情况
+                for(let i in Game.rooms){
+                    let room = Game.rooms[i]
+                    if(!room||!room.memory.Misson||!room.memory.Misson.Room) continue
+                    let misson = room.MissionName('Room','资源合成')
+                    if(misson){
+                        if(misson.Data.raw1 == resource_||misson.Data.raw2 == resource_){
+                            num -= room.storage.store.getUsedCapacity(resource_)
+                        }
+                    }
+                }
+
                 if (num >= 10000 || num >= misson.Data.num) {
                     if (checkDispatch(this.name, resource_)) continue  // 已经存在调用信息的情况
                     if (checkSend(this.name, resource_)) continue  // 已经存在其它房间的传送信息的情况
